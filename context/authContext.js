@@ -44,7 +44,7 @@ export const AuthContextProvider = ({children})=>{
         }
     }
 
-    const register = async(email,password,username,profileUrl)=>{
+    const register = async(email,password,name,surname)=>{
         try{
             const response = await createUserWithEmailAndPassword(auth,email,password);
 
