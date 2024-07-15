@@ -1,5 +1,5 @@
 import { createUserWithEmailAndPassword, onAuthStateChanged, signInWithEmailAndPassword, signOut } from "firebase/auth";
-import { doc, setDoc } from "firebase/firestore";
+import { doc, getDoc, setDoc } from "firebase/firestore";
 import { createContext, useContext, useEffect, useState } from "react";
 import { auth, db } from "../firebaseConfig";
 
@@ -20,7 +20,16 @@ export const AuthContextProvider = ({children})=>{
             }
         })
         return unsub;
-    },[])
+    },[]);
+
+    const updateUser = async  (userId)=>{
+        const docRef = doc(db,'users',userId)
+        const docSnap = await getDoc(docRef);
+        if(docSnap.exists()){
+            let data = docSnap.data()
+            setUser({...user,name:data.name,surname:data.surname,userId:data.userId})
+        }
+    }
 
     const login = async(email,password)=>{
         try{
