@@ -8,8 +8,7 @@ const StyledView = styled(View);
 const StyledText = styled(Text);
 import { Slot, useRouter, useSegments } from 'expo-router'
 import { AuthContextProvider, useAuth } from '../context/authContext';
-import { useRoute } from '@react-navigation/native';
-import HomeHeader from '../components/HomeHeader';
+
 
 const MainLayout=()=>{
     const {isAuthenticated} = useAuth()

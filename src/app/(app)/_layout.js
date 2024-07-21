@@ -1,19 +1,11 @@
-import React from "react";
-import { withExpoSnack } from "nativewind";
-import { View, Text } from "react-native";
+// app/(app)/_layout.js
+import { Stack } from 'expo-router';
 
-import { styled } from "nativewind";
-import { Stack } from "expo-router";
-import HomeHeader from "../../components/HomeHeader";
-
-const StyledView = styled(View);
-const StyledText = styled(Text);
-
-const _layout = () => {
+import Plantilla from '../../components/Plantilla';
+export default function Layout() {
   return (
-    <Stack>
+    <Stack >
+      <Stack.Screen name="home" options={{ title: 'Nombre del Header' }} />
     </Stack>
   );
-};
-
-export default withExpoSnack(_layout);
+}
