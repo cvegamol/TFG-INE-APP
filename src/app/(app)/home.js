@@ -138,7 +138,7 @@ const Home = () => {
       <ViewStyled className='bg-red flex-1'>
         <Text style={styles.h1}>Esta es una página de ejemplo</Text>
       </ViewStyled>
-      <ViewStyled className='flex-1 m-1 border-2 border-red-500 items-center'>
+      <ViewStyled className='flex-1 m-1  items-center'>
         {estadisticaContinua && (
           <TextStyled className="text-xl font-bold text-gray-700">
             Últimos Datos:  <TextStyled className='text-xl/4 text-gray-400'>

@@ -10,15 +10,15 @@ const MARGIN = 16; // Márgenes a los lados de la tabla
 const ViewStyled = styled(View);
 
 const ResponsiveTable = ({ headers, data }) => {
-  // Calcular el ancho total disponible (con márgenes)
-  const totalWidth = width - 2 * MARGIN;
+  // Calcular el ancho total disponible (75% del ancho de la pantalla menos márgenes)
+  const availableWidth = width *0.85 - 2 * MARGIN;
 
   // Calcular el número de columnas y el ancho máximo permitido por columna
   const numColumns = headers.length;
-  const columnWidth = totalWidth / numColumns;
+  const columnWidth = availableWidth / numColumns;
 
   return (
-    <ViewStyled className='bg-white' style={styles.container}>
+    <ViewStyled className='bg-white items-center' style={styles.container}>
       <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={styles.scrollView}>
         <Table borderStyle={{ borderWidth: 2, borderColor: '#c8e1ff' }}>
           {/* Renderizar el encabezado con el estilo de ancho de columna */}
