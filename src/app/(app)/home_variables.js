@@ -3,13 +3,14 @@ import { withExpoSnack } from 'nativewind';
 import { View, Text, Button, StyleSheet } from 'react-native';
 import { styled } from 'nativewind';
 import Plantilla from '../../components/Plantilla';
-import ResponsiveTable from '../../components/ResponsiveTable';  // Asegúrate de tener la ruta correcta
+import Table from '../../components/ResponsiveTable';
 
 const ViewStyled = styled(View);
 const TextStyled = styled(Text);
 const ButtonStyled = styled(Button);
 
 const Home = () => {
+  // Variables de estado
   const [estadisticaContinua, setEstadisticaContinua] = useState(null);
   const [chartDatosTotal, setChartDatosTotal] = useState([]);
   const [datosTotal, setDatosTotal] = useState(null);
@@ -42,9 +43,9 @@ const Home = () => {
         setChartDatosTotal(chartDatosTotal);
 
         const datos_total_varianza = await obtenerDatosSerie('ECP329329');
-        setDatosTotalVarianza(datos_total_varianza);
+        setDatosTotalVarianza(datos_total_varianza)
         const chartDatosTotalVarianza = getDatosForChart(datos_total_varianza);
-        setChartDatosTotalVarianza(chartDatosTotalVarianza);
+        setChartDatosTotalVarianza(chartDatosTotalVarianza)
 
         const datos_hombre = await obtenerDatosSerie('ECP4960');
         setDatosHombre(datos_hombre);
@@ -52,9 +53,9 @@ const Home = () => {
         setChartDatosHombre(chartDatosHombre);
 
         const datos_hombre_varianza = await obtenerDatosSerie('ECP329330');
-        setDatosHombreVarianza(datos_hombre_varianza);
+        setDatosHombreVarianza(datos_hombre_varianza)
         const chartDatosHombreVarianza = getDatosForChart(datos_hombre_varianza);
-        setChartDatosHombreVarianza(chartDatosHombreVarianza);
+        setChartDatosHombreVarianza(chartDatosHombreVarianza)
 
         const datos_mujer = await obtenerDatosSerie('ECP4959');
         setDatosMujer(datos_mujer);
@@ -62,9 +63,9 @@ const Home = () => {
         setChartDatosMujer(chartDatosMujer);
 
         const datos_mujer_varianza = await obtenerDatosSerie('ECP329331');
-        setDatosMujerVarianza(datos_mujer_varianza);
+        setDatosMujerVarianza(datos_mujer_varianza)
         const chartDatosMujerVarianza = getDatosForChart(datos_mujer_varianza);
-        setChartDatosMujerVarianza(chartDatosMujerVarianza);
+        setChartDatosMujerVarianza(chartDatosMujerVarianza)
 
         const datos_extranjero = await obtenerDatosSerie('ECP701');
         setDatosExtranjeros(datos_extranjero);
@@ -72,20 +73,33 @@ const Home = () => {
         setChartDatosExtranjeros(chartDatosExtranjero);
 
         const datos_extranjero_varianza = await obtenerDatosSerie('ECP329332');
-        setDatosExtranjerosVarianza(datos_extranjero_varianza);
-        const chartDatosExtranjerosVarianza = getDatosForChart(datos_extranjero_varianza);
-        setChartDatosExtranjerosVarianza(chartDatosExtranjerosVarianza);
+        setDatosExtranjerosVarianza(datos_extranjero_varianza)
+        const chartDatosExtranjeroVarianza = getDatosForChart(datos_extranjero_varianza);
+        setChartDatosExtranjerosVarianza(chartDatosExtranjeroVarianza)
 
-        // Transforming the data to an array of arrays format
-        const formattedTableData = [
-          ['Total', datos_total ? datos_total[datos_total.length - 1].Valor : 'N/A', datos_total_varianza ? datos_total_varianza[datos_total_varianza.length - 1].Valor : 'N/A'],
-          ['Hombre', datos_hombre ? datos_hombre[datos_hombre.length - 1].Valor : 'N/A', datos_hombre_varianza ? datos_hombre_varianza[datos_hombre_varianza.length - 1].Valor : 'N/A'],
-          ['Mujer', datos_mujer ? datos_mujer[datos_mujer.length - 1].Valor : 'N/A', datos_mujer_varianza ? datos_mujer_varianza[datos_mujer_varianza.length - 1].Valor : 'N/A'],
-          ['Extranjeros', datos_extranjero ? datos_extranjero[datos_extranjero.length - 1].Valor : 'N/A', datos_extranjero_varianza ? datos_extranjero_varianza[datos_extranjero_varianza.length - 1].Valor : 'N/A'],
-        ];
+        setTablaDatos([
+          {
+            nombre: 'Total',
+            valor: datos_total ? datos_total[datos_total.length - 1].Valor : 'N/A',
+            varianza: datos_total_varianza ? datos_total_varianza[datos_total_varianza.length - 1].Valor : 'N/A'
+          },
+          {
+            nombre: 'Hombre',
+            valor: datos_hombre ? datos_hombre[datos_hombre.length - 1].Valor : 'N/A',
+            varianza: datos_hombre_varianza ? datos_hombre_varianza[datos_hombre_varianza.length - 1].Valor : 'N/A'
+          },
+          {
+            nombre: 'Mujer',
+            valor: datos_mujer ? datos_mujer[datos_mujer.length - 1].Valor : 'N/A',
+            varianza: datos_mujer_varianza ? datos_mujer_varianza[datos_mujer_varianza.length - 1].Valor : 'N/A'
+          },
+          {
+            nombre: 'Extranjeros',
+            valor: datos_extranjero ? datos_extranjero[datos_extranjero.length - 1].Valor : 'N/A',
+            varianza: datos_extranjero_varianza ? datos_extranjero_varianza[datos_extranjero_varianza.length - 1].Valor : 'N/A'
+          }
+        ]);
 
-        console.log('Formatted Table Data:', formattedTableData); // Debugging log
-        setTablaDatos(formattedTableData);
       } catch (error) {
         console.error(error.message);
       }
@@ -148,8 +162,8 @@ const Home = () => {
           </TextStyled>
         )}
 
-        <ResponsiveTable
-          headers={['', 'Valor', 'Varianza']}
+        <Table
+          headers={[' we  ', 'Valor', 'Varianza']}
           data={tablaDatos}
         />
 

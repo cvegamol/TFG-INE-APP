@@ -25,7 +25,7 @@ export default function Plantilla({ children }) {
     })
   ).current;
 
-  console.log("Children received:", children);
+  
 
   return (
     <StyledView className="flex-1">
@@ -36,7 +36,7 @@ export default function Plantilla({ children }) {
             <Sidebar toggleSidebar={() => setIsSidebarOpen(false)} />
           </StyledView>
         )}
-        <StyledView className={`flex-1 bg-black p-4 border-2 border-red-500 ${isSidebarOpen ? 'ml-64' : ''}`}>
+        <StyledView className={`flex-1 p-4 ${isSidebarOpen ? 'ml-64' : ''}`}>
           {children }
         </StyledView>
       </StyledView>
