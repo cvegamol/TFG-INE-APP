@@ -112,12 +112,23 @@ const SignIn = () => {
                         secureTextEntry
                       />
                     </ViewStyled>
-                    <TextStyled
+                    <ViewStyled className="flex-row justify-end">
+                      <TextStyled
                       style={{ fontSize: hp(1.6) }}
                       className="font-semibold text-right bg-darkBlue"
                     >
                       ¿Olvidaste tu contraseña?
                     </TextStyled>
+                     <PressableStyled onPress={() => router.push("resetPassword")}>
+                      <TextStyled
+                        style={{ fontSize: hp(1.6) }}
+                        className="font-semibold text-violet-950 ml-2"
+                      >
+                        Recuperala
+                      </TextStyled>
+                    </PressableStyled>
+                    </ViewStyled>
+                    
                   </ViewStyled>
 
                   {/* Submit button Login */}
@@ -143,7 +154,7 @@ const SignIn = () => {
                   </ViewStyled>
 
                   {/* Sign up text */}
-                  <ViewStyled className="flex-row justify-center">
+                  <ViewStyled className="flex-row justify-end">
                     <TextStyled
                       style={{ fontSize: hp(1.6) }}
                       className="font-semibold bg-darkBlue"

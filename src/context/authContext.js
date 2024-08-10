@@ -2,9 +2,12 @@ import {
   createUserWithEmailAndPassword,
   onAuthStateChanged,
   signInWithEmailAndPassword,
+  sendPasswordResetEmail,
+
   signOut,
+  checkIfEmailExists,
 } from "firebase/auth";
-import { doc, getDoc, setDoc } from "firebase/firestore";
+import { collection, doc, getDoc, getDocs, query, setDoc, where } from "firebase/firestore";
 import { createContext, useContext, useEffect, useState } from "react";
 import { auth, db } from "../firebaseConfig";
 
@@ -40,6 +43,15 @@ export const AuthContextProvider = ({ children }) => {
       });
     }
   };
+
+  const forgotPassword = async (Email) => {
+    firebase.auth().sendPasswordResetEmail(Email)
+      .then(function (user) {
+        alert('Please check your email...')
+      }).catch(function (e) {
+        console.log(e)
+      })
+  }
 
   const login = async (email, password) => {
     try {
@@ -91,9 +103,39 @@ export const AuthContextProvider = ({ children }) => {
       return { success: false, msg: e.message };
     }
   };
+
+const resetPassword = async (email) => {
+    try {
+        if (email.trim() === "") {
+            return { success: false, msg: "Debe introducir un correo electrónico." };
+        }
+        console.log(email)
+        // Validar el formato del correo electrónico
+        const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+        if (!emailRegex.test(email)) {
+            return { success: false, msg: "El formato del correo electrónico no es válido." };
+        }
+
+        // Normalizar el correo electrónico (por si se usan mayúsculas)
+        const normalizedEmail = email.toLowerCase().trim();
+        console.log("Correo normalizado:", normalizedEmail);
+
+        await sendPasswordResetEmail(auth,email);
+       
+       
+        return { success: true, msg: "Se ha enviado un correo para restablecer tu contraseña." };
+    } catch (e) {
+        let msg = e.message;
+        if (msg.includes("(auth/invalid-email")) msg = "Correo electrónico inválido.";
+        return { success: false, msg: msg };
+    }
+};
+
+
+
   return (
     <AuthContext.Provider
-      value={{ user, isAuthenticated, login, logout, register }}
+      value={{ user, isAuthenticated, login, logout, register, resetPassword }}
     >
       {children}
     </AuthContext.Provider>

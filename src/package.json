@@ -51,6 +51,7 @@
     "react-native-svg": "15.2.0",
     "react-native-table-component": "^1.2.2",
     "react-native-web": "~0.19.10",
+    "react-router-dom": "^6.26.0",
     "recharts": "^2.12.7",
     "rimraf": "^6.0.1",
     "uuid": "^10.0.0"
