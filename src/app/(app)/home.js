@@ -1,13 +1,13 @@
 import React, { useEffect, useState } from 'react';
-import { withExpoSnack } from 'nativewind';
-import { View, Text, Button, StyleSheet } from 'react-native';
+import { View, Text, StyleSheet, ScrollView, Dimensions } from 'react-native';
 import { styled } from 'nativewind';
 import Plantilla from '../../components/Plantilla';
-import ResponsiveTable from '../../components/ResponsiveTable';  // Asegúrate de tener la ruta correcta
+import ResponsiveTable from '../../components/ResponsiveTable'; // Asegúrate de tener la ruta correcta
+import { LineChart } from 'react-native-chart-kit';
+
 
 const ViewStyled = styled(View);
 const TextStyled = styled(Text);
-const ButtonStyled = styled(Button);
 
 const Home = () => {
   const [estadisticaContinua, setEstadisticaContinua] = useState(null);
@@ -29,9 +29,14 @@ const Home = () => {
   const [datosExtranjerosVarianza, setDatosExtranjerosVarianza] = useState(null);
   const [tablaDatos, setTablaDatos] = useState([]);
 
+  // Define el ancho de la gráfica basado en las dimensiones del dispositivo
+  const screenWidth = Dimensions.get('window').width;
+  const chartWidth = screenWidth - 32; // Ajusta el ancho si es necesario
+
   useEffect(() => {
     const obtenerDatosInicio = async () => {
       try {
+        // Obtén la operación de Estadística Continua
         const estadisticaContinuaResponse = await fetch(`http://192.168.1.13:3000/operaciones/getOperationById/450`);
         const estadisticaContinua = await estadisticaContinuaResponse.json();
         setEstadisticaContinua(estadisticaContinua[0]);
@@ -76,7 +81,7 @@ const Home = () => {
         const chartDatosExtranjerosVarianza = getDatosForChart(datos_extranjero_varianza);
         setChartDatosExtranjerosVarianza(chartDatosExtranjerosVarianza);
 
-        // Transforming the data to an array of arrays format
+        // Transformar los datos a un formato de matriz de arrays
         const formattedTableData = [
           ['Total', datos_total ? datos_total[datos_total.length - 1].Valor : 'N/A', datos_total_varianza ? datos_total_varianza[datos_total_varianza.length - 1].Valor : 'N/A'],
           ['Hombre', datos_hombre ? datos_hombre[datos_hombre.length - 1].Valor : 'N/A', datos_hombre_varianza ? datos_hombre_varianza[datos_hombre_varianza.length - 1].Valor : 'N/A'],
@@ -93,7 +98,7 @@ const Home = () => {
 
     const obtenerDatosSerie = async (cod) => {
       try {
-        const fecha = 9; // Ajusta la fecha si es necesario
+        const fecha = 8; // Ajusta la fecha si es necesario
         const url = `https://servicios.ine.es/wstempus/js/ES/DATOS_SERIE/${cod}?nult=${fecha}`;
         const response = await fetch(url);
 
@@ -124,10 +129,16 @@ const Home = () => {
     };
 
     function getDatosForChart(datos) {
-      return datos.map(dato => ({
-        label: dato.fechaFormateada,
-        value: parseFloat(dato.Valor.toFixed(2)),
-      }));
+      return datos.map(dato => {
+        const fechaObjeto = new Date(dato.Fecha);
+        const opcionesFormato = { month: 'short', year: 'numeric' };
+        const fechaFormateada = fechaObjeto.toLocaleDateString('es-ES', opcionesFormato);
+
+        return {
+          label: fechaFormateada,
+          value: parseFloat(dato.Valor.toFixed(2)),
+        };
+      });
     }
 
     obtenerDatosInicio();
@@ -135,25 +146,67 @@ const Home = () => {
 
   return (
     <Plantilla>
-      <ViewStyled className='bg-red flex-1'>
-        <Text style={styles.h1}>Esta es una página de ejemplo</Text>
-      </ViewStyled>
-      <ViewStyled className='flex-1 m-1  items-center'>
-        {estadisticaContinua && (
-          <TextStyled className="text-xl font-bold text-gray-700">
-            Últimos Datos:  <TextStyled className='text-xl/4 text-gray-400'>
-              {estadisticaContinua.Nombre}:
-              {datosTotal && datosTotal.length > 0 && ` ${datosTotal[datosTotal.length - 1].fechaFormateada}`}
+      <ScrollView vertical>
+        <ViewStyled className='flex-1 m-1 items-center'>
+          {estadisticaContinua && (
+            <TextStyled className="text-xl font-bold text-gray-700">
+              Últimos Datos: <TextStyled className='text-xl/4 text-gray-400'>
+                {estadisticaContinua.Nombre}:
+                {datosTotal && datosTotal.length > 0 && ` ${datosTotal[datosTotal.length - 1].fechaFormateada}`}
+              </TextStyled>
             </TextStyled>
-          </TextStyled>
-        )}
+          )}
 
-        <ResponsiveTable
-          headers={['', 'Valor', 'Varianza']}
-          data={tablaDatos}
-        />
+          <ResponsiveTable
+            headers={['', 'Valor', 'Varianza']}
+            data={tablaDatos}
+          />
 
-      </ViewStyled>
+          <ScrollView horizontal>
+            {chartDatosTotal.length > 0 && (
+               <LineChart
+  data={{
+    labels: chartDatosTotal.map(dato => dato.label),
+    datasets: [
+      {
+        data: chartDatosTotal.map(dato => dato.value / 1000000), // Dividir por un millón
+      },
+    ],
+  }}
+  width={chartWidth}
+  height={300}
+  yAxisLabel=""
+  yAxisSuffix="M" // Sufijo de millones
+  yAxisInterval={1} // Opcional, por defecto es 1
+  chartConfig={{
+    backgroundColor: '#f0f0f0', // Color de fondo más discreto
+    backgroundGradientFrom: '#d3d3d3', // Gradiente de inicio más suave
+    backgroundGradientTo: '#a9a9a9', // Gradiente de fin más suave
+    decimalPlaces: 2, // Mostrar dos decimales
+    color: (opacity = 1) => `rgba(50, 50, 50, ${opacity})`, // Color de la línea y los puntos
+    labelColor: (opacity = 1) => `rgba(50, 50, 50, ${opacity})`, // Color de las etiquetas
+    style: {
+      borderRadius: 16,
+    },
+    propsForDots: {
+      r: '6',
+      strokeWidth: '2',
+      stroke: '#999', // Color del borde de los puntos
+    },
+  }}
+  style={{
+    marginVertical: 8,
+    borderRadius: 16,
+  }}
+  horizontalLabelRotation={0} // Rotación de etiquetas horizontales
+  verticalLabelRotation={28} // Rotación de etiquetas verticales
+   xLabelsOffset={30} 
+/>
+
+            )}
+          </ScrollView>
+        </ViewStyled>
+      </ScrollView>
     </Plantilla>
   );
 };
@@ -166,42 +219,15 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     padding: 16,
-    backgroundColor: '#f8f8f8',
   },
-  title: {
-    fontSize: 24,
-    fontWeight: 'bold',
-    marginBottom: 16,
-  },
-  table: {
-    borderWidth: 1,
-    borderColor: '#ddd',
-    borderRadius: 8,
-    overflow: 'hidden',
-  },
-  header: {
-    flexDirection: 'row',
-    backgroundColor: '#f1f1f1',
-    borderBottomWidth: 1,
-    borderBottomColor: '#ddd',
-    padding: 8,
-  },
-  row: {
-    flexDirection: 'row',
-    borderBottomWidth: 1,
-    borderBottomColor: '#ddd',
-    padding: 8,
-  },
-  cell: {
+  chartContainer: {
     flex: 1,
-    alignItems: 'center',
+    marginTop: 20,
   },
-  cellText: {
-    fontSize: 16,
-  },
-  headerText: {
-    fontWeight: 'bold',
+  chart: {
+    height: 300,
+    width: '100%',
   },
 });
 
-export default withExpoSnack(Home);
+export default Home;

@@ -24,7 +24,7 @@ const MainLayout=()=>{
             router.replace('home')
         }else{
             // redirect to sign IN
-            router.replace('signIn')
+            router.replace('./welcome')
         }
 
     },[isAuthenticated])
