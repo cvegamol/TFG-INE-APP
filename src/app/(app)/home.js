@@ -10,9 +10,9 @@ const TextStyled = styled(Text);
 
 const Home = () => {
   const [estadisticaContinua, setEstadisticaContinua] = useState(null);
-  const [chartData, setChartData] = useState([]); // Estado para los datos de la gráfica
+  const [chartData, setChartData] = useState([]);  
   const [tablaDatos, setTablaDatos] = useState([]);
-  const [selectedCell, setSelectedCell] = useState({ row: 0, col: 1 }); // Estado para la celda seleccionada
+  const [selectedCell, setSelectedCell] = useState({ row: 0, col: 1 }); 
 
   const screenWidth = Dimensions.get('window').width;
   const chartWidth = screenWidth - 32;
@@ -33,7 +33,7 @@ const Home = () => {
         const datos_extranjero = await obtenerDatosSerie('ECP701');
         const datos_extranjero_varianza = await obtenerDatosSerie('ECP329332');
 
-        // Crear los datos de la tabla con los valores y sus correspondientes datos de gráficos
+       
         const formattedTableData = [
           [
             { label: 'Total', value: 'Total' },
@@ -59,7 +59,7 @@ const Home = () => {
 
         setTablaDatos(formattedTableData);
 
-        // Inicializa el gráfico con los datos totales
+       
         setChartData(getDatosForChart(datos_total));
       } catch (error) {
         console.error(error.message);
@@ -68,7 +68,7 @@ const Home = () => {
 
     const obtenerDatosSerie = async (cod) => {
       try {
-        const fecha = 8; // Ajusta la fecha si es necesario
+        const fecha = 8; 
         const url = `https://servicios.ine.es/wstempus/js/ES/DATOS_SERIE/${cod}?nult=${fecha}`;
         const response = await fetch(url);
 
@@ -114,6 +114,17 @@ const Home = () => {
     obtenerDatosInicio();
   }, []);
 
+  
+  const formatYAxisValue = (value) => {
+    if (value >= 1000000) {
+      return `${(value / 1000000).toFixed(1)}M`;
+    } else if (value >= 1000) {
+      return `${(value / 1000).toFixed(1)}K`;
+    } else {
+      return value.toString();
+    }
+  };
+
   const handleCellPress = (rowIndex, colIndex, cellData) => {
     if (colIndex > 0 && cellData.chartData) {
       setSelectedCell({ row: rowIndex, col: colIndex });
@@ -137,8 +148,8 @@ const Home = () => {
           <ResponsiveTable
             headers={['', 'Valor', 'Varianza']}
             data={tablaDatos}
-            selectedCell={selectedCell} // Pasa la celda seleccionada
-            onCellPress={handleCellPress} // Añadir manejador de celdas
+            selectedCell={selectedCell} 
+            onCellPress={handleCellPress} 
           />
 
           <ScrollView horizontal>
@@ -148,15 +159,16 @@ const Home = () => {
                   labels: chartData.map(dato => dato.label),
                   datasets: [
                     {
-                      data: chartData.map(dato => dato.value / 1000000), // Dividir por un millón
+                      data: chartData.map(dato => dato.value), 
                     },
                   ],
                 }}
                 width={chartWidth}
                 height={300}
                 yAxisLabel=""
-                yAxisSuffix="M"
+                yAxisSuffix=""
                 yAxisInterval={1}
+                formatYLabel={formatYAxisValue} 
                 chartConfig={{
                   backgroundColor: '#f0f0f0',
                   backgroundGradientFrom: '#d3d3d3',
