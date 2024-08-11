@@ -1,19 +1,15 @@
 import React from 'react';
-import { View, Dimensions, StyleSheet, ScrollView } from 'react-native';
+import { View, Dimensions, StyleSheet, ScrollView, TouchableOpacity, Text } from 'react-native';
 import { Table, Row } from 'react-native-table-component';
 import { styled } from 'nativewind';
 
-// Obtener el ancho de la pantalla
 const { width } = Dimensions.get('window');
-const MARGIN = 16; // Márgenes a los lados de la tabla
+const MARGIN = 16;
 
 const ViewStyled = styled(View);
 
-const ResponsiveTable = ({ headers, data }) => {
-  // Calcular el ancho total disponible (75% del ancho de la pantalla menos márgenes)
-  const availableWidth = width *0.85 - 2 * MARGIN;
-
-  // Calcular el número de columnas y el ancho máximo permitido por columna
+const ResponsiveTable = ({ headers, data, selectedCell, onCellPress }) => {
+  const availableWidth = width * 0.85 - 2 * MARGIN;
   const numColumns = headers.length;
   const columnWidth = availableWidth / numColumns;
 
@@ -21,20 +17,38 @@ const ResponsiveTable = ({ headers, data }) => {
     <ViewStyled className='bg-white items-center' style={styles.container}>
       <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={styles.scrollView}>
         <Table borderStyle={{ borderWidth: 2, borderColor: '#c8e1ff' }}>
-          {/* Renderizar el encabezado con el estilo de ancho de columna */}
+          {/* Primera fila en negrita */}
           <Row
-            data={headers}
+            data={headers.map(header => (
+              <Text style={[styles.text, styles.boldText]}>{header}</Text>
+            ))}
             style={styles.head}
-            textStyle={styles.text}
             widthArr={headers.map(() => columnWidth)}
           />
-          {/* Renderizar las filas con el estilo de ancho de columna */}
-          {data.map((row, index) => (
+          {data.map((row, rowIndex) => (
             <Row
-              key={index}
-              data={row}
+              key={rowIndex}
+              data={row.map((cell, colIndex) => (
+                colIndex === 0 ? ( // Primera columna en negrita y no es clickeable
+                  <View key={colIndex} style={{ width: columnWidth, alignItems: 'center', justifyContent: 'center' }}>
+                    <Text style={[styles.text, styles.boldText]}>{cell.value}</Text>
+                  </View>
+                ) : (
+                  <TouchableOpacity
+                    key={colIndex}
+                    onPress={() => onCellPress(rowIndex, colIndex, cell)}
+                    style={[
+                      { flex: 1 },
+                      selectedCell.row === rowIndex && selectedCell.col === colIndex && styles.selectedCell
+                    ]}
+                  >
+                    <View style={{ flex: 1, alignItems: 'center', justifyContent: 'center' }}>
+                      <Text style={styles.text}>{cell.value}</Text>
+                    </View>
+                  </TouchableOpacity>
+                )
+              ))}
               style={styles.row}
-              textStyle={styles.text}
               widthArr={headers.map(() => columnWidth)}
             />
           ))}
@@ -64,6 +78,12 @@ const styles = StyleSheet.create({
   text: {
     margin: 6,
     textAlign: 'center',
+  },
+  boldText: {
+    fontWeight: 'bold',
+  },
+  selectedCell: {
+    backgroundColor: 'yellow',
   },
 });
 
