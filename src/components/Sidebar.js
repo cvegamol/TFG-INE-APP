@@ -36,6 +36,9 @@ const Sidebar = ({ toggleSidebar }) => {
       <TouchableOpacityStyled onPress={() => router.replace('home')}>
         <TextStyled className="text-lg my-2">Home</TextStyled>
       </TouchableOpacityStyled>
+      <TouchableOpacityStyled onPress={() => router.replace('padron')}>
+        <TextStyled className="text-lg my-2">Padron</TextStyled>
+      </TouchableOpacityStyled>
       <TouchableOpacityStyled onPress={handleLogOut}>
         <TextStyled className="text-lg my-2">SignOut</TextStyled>
       </TouchableOpacityStyled>
