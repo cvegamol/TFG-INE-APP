@@ -1,12 +1,12 @@
 import React, { useEffect, useState } from 'react';
-import { ScrollView ,View,Text} from 'react-native';
+import { ScrollView, View, Text } from 'react-native';
 import { styled } from 'nativewind';
 import Plantilla from '../../components/Plantilla';
 import { useLocalSearchParams, useRouter } from 'expo-router';
 import Loading from '../../components/Loading';
 import {
-  widthPercentageToDP as wp,
-  heightPercentageToDP as hp,
+    widthPercentageToDP as wp,
+    heightPercentageToDP as hp,
 } from "react-native-responsive-screen";
 const ViewStyled = styled(View);
 const TextStyled = styled(Text);
@@ -21,7 +21,7 @@ const SeriesTabla = () => {
     useEffect(() => {
         const obtenerDatos = async () => {
             try {
-               
+
                 const variablesJson = await fetch(`https://servicios.ine.es/wstempus/js/ES/GRUPOS_TABLA/${id}`);
                 if (!variablesJson.ok) {
                     throw new Error('Error al obtener las variables');
@@ -36,7 +36,7 @@ const SeriesTabla = () => {
 
                 const valoresPromises = variablesData.map(async (variable) => {
                     const idv = variable.Id;
-                    
+
                     const valoresJson = await fetch(`https://servicios.ine.es/wstempus/js/ES/VALORES_GRUPOSTABLA/${id}/${idv}`);
                     if (!valoresJson.ok) {
                         throw new Error(`Error al obtener los valores para la variable ${variable.COD}`);
@@ -48,7 +48,7 @@ const SeriesTabla = () => {
                     }
 
                     const valoresData = JSON.parse(valoresText);
-                    
+
                     return { [variable.Id]: valoresData };
                 });
 
@@ -58,7 +58,7 @@ const SeriesTabla = () => {
                 const valoresMap = valoresResult.reduce((acc, curr) => {
                     return { ...acc, ...curr };
                 }, {});
-               
+
                 setValoresVariables(valoresMap);
 
             } catch (error) {
@@ -72,7 +72,7 @@ const SeriesTabla = () => {
     }, [id]);
 
     return (
-       <Plantilla>
+        <Plantilla>
             <ScrollViewStyled contentContainerStyle={{ flexGrow: 1 }}>
                 <ViewStyled className="p-4">
                     <TextStyled className="text-2xl font-bold text-gray-800 mb-4">Detalle de la Operación</TextStyled>

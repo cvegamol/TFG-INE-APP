@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { SectionList, View,Text,TouchableOpacity } from 'react-native';
+import { SectionList, View, Text, TouchableOpacity } from 'react-native';
 import { styled } from 'nativewind';
 import Plantilla from '../../components/Plantilla';
 import { useRouter } from 'expo-router';
@@ -65,7 +65,7 @@ const Padron = () => {
       <TextStyled className="text-3xl font-bold text-center text-gray-800 my-4">
         Operaciones Estadísticas sobre el Padrón
       </TextStyled>
-      
+
       {isLoading ? (
         <ViewStyled className="flex-1 justify-center items-center">
           <Loading size={hp(6)} />
@@ -78,7 +78,7 @@ const Padron = () => {
             { title: 'Operaciones estadísticas elaboradas de forma periódica', data: dataPeriodica }
           ]}
           renderItem={({ item }) => (
-            <TouchableOpacityStyled 
+            <TouchableOpacityStyled
               className="p-4 bg-white rounded-md shadow-md my-2 mx-4"
               onPress={() => handlePress(item.Id, item.Nombre)}
             >

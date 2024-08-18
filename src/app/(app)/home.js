@@ -1,18 +1,24 @@
 import React, { useEffect, useState } from 'react';
-import { View, Text, StyleSheet, ScrollView, Dimensions } from 'react-native';
+import { View, Text, ScrollView, Dimensions } from 'react-native';
 import { styled } from 'nativewind';
 import Plantilla from '../../components/Plantilla';
 import ResponsiveTable from '../../components/ResponsiveTable';
 import { LineChart } from 'react-native-chart-kit';
+import Loading from '../../components/Loading';
+import {
+  widthPercentageToDP as wp,
+  heightPercentageToDP as hp,
+} from "react-native-responsive-screen";
 
 const ViewStyled = styled(View);
 const TextStyled = styled(Text);
 
 const Home = () => {
   const [estadisticaContinua, setEstadisticaContinua] = useState(null);
-  const [chartData, setChartData] = useState([]);  
+  const [chartData, setChartData] = useState([]);
   const [tablaDatos, setTablaDatos] = useState([]);
-  const [selectedCell, setSelectedCell] = useState({ row: 0, col: 1 }); 
+  const [selectedCell, setSelectedCell] = useState({ row: 0, col: 1 });
+  const [isLoading, setIsLoading] = useState(true); // Estado para manejar el loading
 
   const screenWidth = Dimensions.get('window').width;
   const chartWidth = screenWidth - 32;
@@ -20,55 +26,57 @@ const Home = () => {
   useEffect(() => {
     const obtenerDatosInicio = async () => {
       try {
+        // Coloca aquí todas las llamadas a APIs
         const estadisticaContinuaResponse = await fetch(`http://192.168.1.13:3000/operaciones/getOperationById/450`);
         const estadisticaContinua = await estadisticaContinuaResponse.json();
         setEstadisticaContinua(estadisticaContinua[0]);
 
-        const datos_total = await obtenerDatosSerie('ECP320');
-        const datos_total_varianza = await obtenerDatosSerie('ECP329329');
-        const datos_hombre = await obtenerDatosSerie('ECP4960');
-        const datos_hombre_varianza = await obtenerDatosSerie('ECP329330');
-        const datos_mujer = await obtenerDatosSerie('ECP4959');
-        const datos_mujer_varianza = await obtenerDatosSerie('ECP329331');
-        const datos_extranjero = await obtenerDatosSerie('ECP701');
-        const datos_extranjero_varianza = await obtenerDatosSerie('ECP329332');
+        const series = await Promise.all([
+          obtenerDatosSerie('ECP320'),
+          obtenerDatosSerie('ECP329329'),
+          obtenerDatosSerie('ECP4960'),
+          obtenerDatosSerie('ECP329330'),
+          obtenerDatosSerie('ECP4959'),
+          obtenerDatosSerie('ECP329331'),
+          obtenerDatosSerie('ECP701'),
+          obtenerDatosSerie('ECP329332'),
+        ]);
 
-       
         const formattedTableData = [
           [
             { label: 'Total', value: 'Total' },
-            { label: 'Valor Total', value: datos_total[datos_total.length - 1]?.Valor, chartData: getDatosForChart(datos_total) },
-            { label: 'Varianza Total', value: datos_total_varianza[datos_total_varianza.length - 1]?.Valor, chartData: getDatosForChart(datos_total_varianza) }
+            { label: 'Valor Total', value: series[0][series[0].length - 1]?.Valor, chartData: getDatosForChart(series[0]) },
+            { label: 'Varianza Total', value: series[1][series[1].length - 1]?.Valor, chartData: getDatosForChart(series[1]) }
           ],
           [
             { label: 'Hombre', value: 'Hombre' },
-            { label: 'Valor Hombre', value: datos_hombre[datos_hombre.length - 1]?.Valor, chartData: getDatosForChart(datos_hombre) },
-            { label: 'Varianza Hombre', value: datos_hombre_varianza[datos_hombre_varianza.length - 1]?.Valor, chartData: getDatosForChart(datos_hombre_varianza) }
+            { label: 'Valor Hombre', value: series[2][series[2].length - 1]?.Valor, chartData: getDatosForChart(series[2]) },
+            { label: 'Varianza Hombre', value: series[3][series[3].length - 1]?.Valor, chartData: getDatosForChart(series[3]) }
           ],
           [
             { label: 'Mujer', value: 'Mujer' },
-            { label: 'Valor Mujer', value: datos_mujer[datos_mujer.length - 1]?.Valor, chartData: getDatosForChart(datos_mujer) },
-            { label: 'Varianza Mujer', value: datos_mujer_varianza[datos_mujer_varianza.length - 1]?.Valor, chartData: getDatosForChart(datos_mujer_varianza) }
+            { label: 'Valor Mujer', value: series[4][series[4].length - 1]?.Valor, chartData: getDatosForChart(series[4]) },
+            { label: 'Varianza Mujer', value: series[5][series[5].length - 1]?.Valor, chartData: getDatosForChart(series[5]) }
           ],
           [
             { label: 'Extranjeros', value: 'Extranjeros' },
-            { label: 'Valor Extranjeros', value: datos_extranjero[datos_extranjero.length - 1]?.Valor, chartData: getDatosForChart(datos_extranjero) },
-            { label: 'Varianza Extranjeros', value: datos_extranjero_varianza[datos_extranjero_varianza.length - 1]?.Valor, chartData: getDatosForChart(datos_extranjero_varianza) }
+            { label: 'Valor Extranjeros', value: series[6][series[6].length - 1]?.Valor, chartData: getDatosForChart(series[6]) },
+            { label: 'Varianza Extranjeros', value: series[7][series[7].length - 1]?.Valor, chartData: getDatosForChart(series[7]) }
           ]
         ];
 
         setTablaDatos(formattedTableData);
-
-       
-        setChartData(getDatosForChart(datos_total));
+        setChartData(getDatosForChart(series[0]));
       } catch (error) {
         console.error(error.message);
+      } finally {
+        setIsLoading(false); // Desactiva el loading después de obtener los datos
       }
     };
 
     const obtenerDatosSerie = async (cod) => {
       try {
-        const fecha = 8; 
+        const fecha = 8;
         const url = `https://servicios.ine.es/wstempus/js/ES/DATOS_SERIE/${cod}?nult=${fecha}`;
         const response = await fetch(url);
 
@@ -114,7 +122,6 @@ const Home = () => {
     obtenerDatosInicio();
   }, []);
 
-  
   const formatYAxisValue = (value) => {
     if (value >= 1000000) {
       return `${(value / 1000000).toFixed(1)}M`;
@@ -136,65 +143,74 @@ const Home = () => {
     <Plantilla>
       <ScrollView vertical>
         <ViewStyled className='flex-1 m-1 items-center'>
-          {estadisticaContinua && (
-            <TextStyled className="text-xl font-bold text-gray-700">
-              Últimos Datos: <TextStyled className='text-xl/4 text-gray-400'>
-                {estadisticaContinua.Nombre}:
-                {chartData && chartData.length > 0 && ` ${chartData[chartData.length - 1].label}`}
-              </TextStyled>
-            </TextStyled>
-          )}
+          {isLoading ? (
+            <ViewStyled className="flex-1 justify-center items-center">
+              <Loading size={hp(6)} />
+              <TextStyled className="text-lg text-gray-500 mt-2">Cargando...</TextStyled>
+            </ViewStyled>
+          ) : (
+            <>
+              {estadisticaContinua && (
+                <TextStyled className="text-xl font-bold text-gray-700">
+                  Últimos Datos: <TextStyled className='text-xl/4 text-gray-400'>
+                    {estadisticaContinua.Nombre}:
+                    {chartData && chartData.length > 0 && ` ${chartData[chartData.length - 1].label}`}
+                  </TextStyled>
+                </TextStyled>
+              )}
 
-          <ResponsiveTable
-            headers={['', 'Valor', 'Varianza']}
-            data={tablaDatos}
-            selectedCell={selectedCell} 
-            onCellPress={handleCellPress} 
-          />
-
-          <ScrollView horizontal>
-            {chartData.length > 0 && (
-              <LineChart
-                data={{
-                  labels: chartData.map(dato => dato.label),
-                  datasets: [
-                    {
-                      data: chartData.map(dato => dato.value), 
-                    },
-                  ],
-                }}
-                width={chartWidth}
-                height={300}
-                yAxisLabel=""
-                yAxisSuffix=""
-                yAxisInterval={1}
-                formatYLabel={formatYAxisValue} 
-                chartConfig={{
-                  backgroundColor: '#f0f0f0',
-                  backgroundGradientFrom: '#d3d3d3',
-                  backgroundGradientTo: '#a9a9a9',
-                  decimalPlaces: 2,
-                  color: (opacity = 1) => `rgba(50, 50, 50, ${opacity})`,
-                  labelColor: (opacity = 1) => `rgba(50, 50, 50, ${opacity})`,
-                  style: {
-                    borderRadius: 16,
-                  },
-                  propsForDots: {
-                    r: '6',
-                    strokeWidth: '2',
-                    stroke: '#999',
-                  },
-                }}
-                style={{
-                  marginVertical: 8,
-                  borderRadius: 16,
-                }}
-                horizontalLabelRotation={0}
-                verticalLabelRotation={275}
-                xLabelsOffset={33}
+              <ResponsiveTable
+                headers={['', 'Valor', 'Varianza']}
+                data={tablaDatos}
+                selectedCell={selectedCell}
+                onCellPress={handleCellPress}
               />
-            )}
-          </ScrollView>
+
+              <ScrollView horizontal>
+                {chartData.length > 0 && (
+                  <LineChart
+                    data={{
+                      labels: chartData.map(dato => dato.label),
+                      datasets: [
+                        {
+                          data: chartData.map(dato => dato.value),
+                        },
+                      ],
+                    }}
+                    width={chartWidth}
+                    height={300}
+                    yAxisLabel=""
+                    yAxisSuffix=""
+                    yAxisInterval={1}
+                    formatYLabel={formatYAxisValue}
+                    chartConfig={{
+                      backgroundColor: '#f0f0f0',
+                      backgroundGradientFrom: '#d3d3d3',
+                      backgroundGradientTo: '#a9a9a9',
+                      decimalPlaces: 2,
+                      color: (opacity = 1) => `rgba(50, 50, 50, ${opacity})`,
+                      labelColor: (opacity = 1) => `rgba(50, 50, 50, ${opacity})`,
+                      style: {
+                        borderRadius: 16,
+                      },
+                      propsForDots: {
+                        r: '6',
+                        strokeWidth: '2',
+                        stroke: '#999',
+                      },
+                    }}
+                    style={{
+                      marginVertical: 8,
+                      borderRadius: 16,
+                    }}
+                    horizontalLabelRotation={0}
+                    verticalLabelRotation={275}
+                    xLabelsOffset={33}
+                  />
+                )}
+              </ScrollView>
+            </>
+          )}
         </ViewStyled>
       </ScrollView>
     </Plantilla>
