@@ -19,10 +19,11 @@ const OperacionesPadron = () => {
      const [tablas, setTablas] = useState([]);
      const [isLoading, setIsLoading] = useState(true);
 
-     const handlePress = (id, nombre) => {
+     const handlePress = (tabla) => {
+         
           router.push({
                pathname: 'seriesPadron',
-               params: { id, nombre },
+              params: { tabla: JSON.stringify(tabla) },
           });
      };
 
@@ -31,16 +32,16 @@ const OperacionesPadron = () => {
                try {
                     const seriesJson = await fetch(`http://192.168.1.13:3000/series/getSerieByFkOperation/${id}`);
                     const series = await seriesJson.json();
-                    console.log('Id', id);
+                   
                     const tablasJson = await fetch(`https://servicios.ine.es/wstempus/js/ES/TABLAS_OPERACION/${id}`);
                     const tablas = await tablasJson.json();
                     setTablas(tablas);
-
+                    
                     if (tablas && tablas.length > 0) {
                          const id_t = tablas[0].Id;
                          const variableTabla = await fetch(`https://servicios.ine.es/wstempus/js/ES/GRUPOS_TABLA/${id_t}`);
                          const variables = await variableTabla.json();
-                         console.log("Variables", variables);
+                         
                     } else {
                          console.log('No hay tablas disponibles.');
                     }
@@ -67,7 +68,7 @@ const OperacionesPadron = () => {
                          <TextStyled className="text-lg text-gray-600 mb-4">Nombre: {nombre}</TextStyled>
 
                          <TextStyled className="text-2xl font-semibold text-gray-800 mt-4 mb-2">
-                              Series:
+                              Tablas:
                          </TextStyled>
 
                          {isLoading ? (
@@ -77,14 +78,15 @@ const OperacionesPadron = () => {
                               </ViewStyled>
                          ) : (
                               tablas.length > 0 ? (
-                                   tablas.map((serie, index) => (
+                                   tablas.map((table, index) => (
                                         <TouchableOpacityStyled
                                              key={index}
                                              className="p-4 bg-white rounded-md shadow-md my-2"
-                                             onPress={() => handlePress(serie.Id, serie.Nombre)}
+                                             onPress={() => handlePress(table)}
                                         >
                                              <TextStyled className="text-lg text-gray-700">
-                                                  {serie.Nombre} - {serie.Id}
+                                                  
+                                                  {table.Nombre} - {table.Id} -{table.Anyo_Periodo_ini} -{table.FechaRef_fin}
                                              </TextStyled>
                                         </TouchableOpacityStyled>
                                    ))

@@ -20,7 +20,7 @@ export default function Layout() {
         name="seriesPadron"
         options={({ route }) => {
           return {
-            title: route.params?.nombre || '',
+            title: route.params?.tabla.Nombre || '',
           };
         }}
       />
