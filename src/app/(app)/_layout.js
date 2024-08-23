@@ -24,6 +24,10 @@ export default function Layout() {
           };
         }}
       />
+      <Stack.Screen
+        name="datosPadron"
+        options={{ title: 'Datos ' }}
+      />
     </Stack>
   );
 }

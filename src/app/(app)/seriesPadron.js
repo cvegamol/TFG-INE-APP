@@ -221,7 +221,15 @@ const SeriesTabla = () => {
         const seriesJson = await fetch(url_final);
         const series = await seriesJson.json();
         console.log(series.length);
-        console.log(seleccionesPeriodicidades)
+        console.log(seleccionesPeriodicidades);
+        
+
+        router.push({
+            pathname: 'datosPadron',
+            params: {  tabla: JSON.stringify(tabla),series: JSON.stringify(series), periodicidades: JSON.stringify(seleccionesPeriodicidades),valores:JSON.stringify(selecciones)},
+        });
+         
+         
     };
 
     return (
