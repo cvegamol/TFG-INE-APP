@@ -226,7 +226,7 @@ const SeriesTabla = () => {
 
         router.push({
             pathname: 'datosPadron',
-            params: {  tabla: JSON.stringify(tabla),series: JSON.stringify(series), periodicidades: JSON.stringify(seleccionesPeriodicidades),valores:JSON.stringify(selecciones)},
+            params: {  tabla: JSON.stringify(tablaObj),series: JSON.stringify(series), periodicidades: JSON.stringify(seleccionesPeriodicidades),valores:JSON.stringify(selecciones)},
         });
          
          
