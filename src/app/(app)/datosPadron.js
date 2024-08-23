@@ -12,6 +12,7 @@ import {
     widthPercentageToDP as wp,
     heightPercentageToDP as hp,
 } from "react-native-responsive-screen";
+import { Button } from 'react-native-elements';
 const { width } = Dimensions.get('window');
 
 const SeriesTabla = () => {
@@ -114,62 +115,65 @@ const SeriesTabla = () => {
                     {tablaObj.Nombre}
                 </TextStyled>
             </ViewStyled>
-            <ScrollViewStyled horizontal contentContainerStyle={{ width: Math.max(totalTableWidth, width) }}>
-                <ViewStyled style={{ padding: 10 }}>
-                    <ViewStyled style={{ flexDirection: 'row', marginBottom: 10 }}>
-                        <TextStyled style={{
-                            width: firstColumnWidth,
-                            fontWeight: 'bold',
-                            backgroundColor: '#4CAF50', // Color de fondo para el encabezado
-                            color: '#fff',
-                            borderWidth: 1,
-                            borderColor: '#ccc',
-                            padding: 10,  // Ajuste de padding
-                        }}>
-                            Serie
-                        </TextStyled>
-                        {Object.keys(periodicidadesObj).map((fechaKey, idx) => (
-                            <TextStyled key={idx} style={{
-                                width: otherColumnFixedWidth,
+            <ScrollViewStyled contentContainerStyle={{ flexGrow: 1 }}>
+                <ScrollViewStyled horizontal contentContainerStyle={{ width: Math.max(totalTableWidth, width) }}>
+                    <ViewStyled style={{ padding: 10 }}>
+                        <ViewStyled style={{ flexDirection: 'row', marginBottom: 10 }}>
+                            <TextStyled style={{
+                                width: firstColumnWidth,
                                 fontWeight: 'bold',
-                                textAlign: 'center',
                                 backgroundColor: '#4CAF50', // Color de fondo para el encabezado
                                 color: '#fff',
                                 borderWidth: 1,
                                 borderColor: '#ccc',
                                 padding: 10,  // Ajuste de padding
                             }}>
-                                {formatFecha(periodicidadesObj[fechaKey].ano, periodicidadesObj[fechaKey].mes, periodicidadesObj[fechaKey].dia)}
+                                Serie
                             </TextStyled>
-                        ))}
-                    </ViewStyled>
-
-                    {datosSeries.map((serieObj, index) => (
-                        <ViewStyled key={index} style={{ flexDirection: 'row', marginBottom: 10, backgroundColor: index % 2 === 0 ? '#f2f2f2' : '#ffffff' }}>
-                            <TextStyled style={{
-                                width: firstColumnWidth,
-                                fontWeight: 'bold',
-                                borderWidth: 1,
-                                borderColor: '#ccc',
-                                padding: 10,  // Ajuste de padding
-                            }}>
-                                {serieObj.serie}
-                            </TextStyled>
-                            {serieObj.datos.map((datoObj, idx) => (
+                            {Object.keys(periodicidadesObj).map((fechaKey, idx) => (
                                 <TextStyled key={idx} style={{
                                     width: otherColumnFixedWidth,
+                                    fontWeight: 'bold',
                                     textAlign: 'center',
+                                    backgroundColor: '#4CAF50', // Color de fondo para el encabezado
+                                    color: '#fff',
                                     borderWidth: 1,
                                     borderColor: '#ccc',
                                     padding: 10,  // Ajuste de padding
                                 }}>
-                                    {datoObj.valor !== 'N/A' ? formatNumero(datoObj.valor) : datoObj.valor}
+                                    {formatFecha(periodicidadesObj[fechaKey].ano, periodicidadesObj[fechaKey].mes, periodicidadesObj[fechaKey].dia)}
                                 </TextStyled>
                             ))}
                         </ViewStyled>
-                    ))}
-                </ViewStyled>
+
+                        {datosSeries.map((serieObj, index) => (
+                            <ViewStyled key={index} style={{ flexDirection: 'row', marginBottom: 10, backgroundColor: index % 2 === 0 ? '#f2f2f2' : '#ffffff' }}>
+                                <TextStyled style={{
+                                    width: firstColumnWidth,
+                                    fontWeight: 'bold',
+                                    borderWidth: 1,
+                                    borderColor: '#ccc',
+                                    padding: 10,  // Ajuste de padding
+                                }}>
+                                    {serieObj.serie}
+                                </TextStyled>
+                                {serieObj.datos.map((datoObj, idx) => (
+                                    <TextStyled key={idx} style={{
+                                        width: otherColumnFixedWidth,
+                                        textAlign: 'center',
+                                        borderWidth: 1,
+                                        borderColor: '#ccc',
+                                        padding: 10,  // Ajuste de padding
+                                    }}>
+                                        {datoObj.valor !== 'N/A' ? formatNumero(datoObj.valor) : datoObj.valor}
+                                    </TextStyled>
+                                ))}
+                            </ViewStyled>
+                        ))}
+                    </ViewStyled>
+                </ScrollViewStyled>
             </ScrollViewStyled>
+            <Button title="Descargar PDF" />
         </Plantilla>
     );
 };
