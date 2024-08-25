@@ -45,26 +45,60 @@ const SeriesTabla = () => {
         const num = parseFloat(numero);
         return num % 1 === 0 ? num.toLocaleString('es-ES') : num.toLocaleString('es-ES', { minimumFractionDigits: 1 });
     };
-     const firstColumnWidth = width * 0.5;
+    const firstColumnWidth = width * 0.5;
     const otherColumnFixedWidth = 150;
     const paddingEnd = 20;
 
     const totalTableWidth = firstColumnWidth + (Object.keys(periodicidadesObj).length * otherColumnFixedWidth) + paddingEnd;
 
-    const generateHtmlContentPaginated = (datos, maxColumnsPerPage = 2, maxRowsPerPage = 24) => {
-    const pages = [];
-    const numColumns = Object.keys(periodicidadesObj).length;
+    const generateHtmlContentPaginated = (datos, maxColumnsPerPage = 2, maxRowsPerPage = 16) => {
+        const pages = [];
+        const numColumns = Object.keys(periodicidadesObj).length;
 
-    for (let colStart = 0; colStart < numColumns; colStart += maxColumnsPerPage) {
-        const colEnd = Math.min(colStart + maxColumnsPerPage, numColumns);
+        for (let colStart = 0; colStart < numColumns; colStart += maxColumnsPerPage) {
+            const colEnd = Math.min(colStart + maxColumnsPerPage, numColumns);
 
-        let tableRows = '';
-        let currentPageContent = '';
+            let tableRows = '';
+            let currentPageContent = ''; // Variable para almacenar el contenido de la página actual
 
-        datos.forEach((serieObj, rowIndex) => {
-            if (rowIndex % maxRowsPerPage === 0 && rowIndex !== 0) {
+            datos.forEach((serieObj, rowIndex) => {
+                if (rowIndex % maxRowsPerPage === 0 && rowIndex !== 0) {
+                    // Nueva página cuando se supera el número máximo de filas
+                    currentPageContent += `
+                    <div class="content">
+                        <table style="margin-bottom: 20px; border: 1px solid #ddd;">
+                            <tr>
+                                <th style="padding: 8px; border: 1px solid #ddd; background-color: #4CAF50; color: white;">Serie</th>
+                                ${Object.keys(periodicidadesObj).slice(colStart, colEnd).map((fechaKey) => `
+                                    <th style="padding: 8px; border: 1px solid #ddd; background-color: #4CAF50; color: white;">
+                                        ${formatFecha(periodicidadesObj[fechaKey].ano, periodicidadesObj[fechaKey].mes, periodicidadesObj[fechaKey].dia)}
+                                    </th>
+                                `).join('')}
+                            </tr>
+                            ${tableRows}
+                        </table>
+                    </div>
+                    <div class="page-break"></div>
+                `;
+
+                    pages.push(currentPageContent); // Añadir el contenido de la página actual al array de páginas
+                    currentPageContent = ''; // Reiniciar el contenido de la página para la próxima
+                    tableRows = ''; // Reiniciar las filas de la tabla para la próxima página
+                }
+
+                let row = `<tr><td style="padding: 8px; border: 1px solid #ddd;">${serieObj.serie}</td>`;
+                serieObj.datos.slice(colStart, colEnd).forEach((datoObj) => {
+                    row += `<td style="padding: 8px; border: 1px solid #ddd; text-align: center;">${datoObj.valor !== 'N/A' ? formatNumero(datoObj.valor) : datoObj.valor}</td>`;
+                });
+                row += '</tr>';
+                tableRows += row;
+            });
+
+            // Añadir la última tabla de la página actual
+            if (tableRows) {
                 currentPageContent += `
-                    <table style="margin-bottom: 20px;">
+                <div class="content">
+                    <table style="margin-bottom: 20px; border: 1px solid #ddd;">
                         <tr>
                             <th style="padding: 8px; border: 1px solid #ddd; background-color: #4CAF50; color: white;">Serie</th>
                             ${Object.keys(periodicidadesObj).slice(colStart, colEnd).map((fechaKey) => `
@@ -75,41 +109,13 @@ const SeriesTabla = () => {
                         </tr>
                         ${tableRows}
                     </table>
-                `;
-                
-                pages.push(currentPageContent); 
-                currentPageContent = ''; 
-                tableRows = ''; 
-            }
-
-            let row = `<tr><td style="padding: 8px; border: 1px solid #ddd;">${serieObj.serie}</td>`;
-            serieObj.datos.slice(colStart, colEnd).forEach((datoObj) => {
-                row += `<td style="padding: 8px; border: 1px solid #ddd; text-align: center;">${datoObj.valor !== 'N/A' ? formatNumero(datoObj.valor) : datoObj.valor}</td>`;
-            });
-            row += '</tr>';
-            tableRows += row;
-        });
-
-       
-        if (tableRows) {
-            currentPageContent += `
-                <table style="margin-bottom: 20px;">
-                    <tr>
-                        <th style="padding: 8px; border: 1px solid #ddd; background-color: #4CAF50; color: white;">Serie</th>
-                        ${Object.keys(periodicidadesObj).slice(colStart, colEnd).map((fechaKey) => `
-                            <th style="padding: 8px; border: 1px solid #ddd; background-color: #4CAF50; color: white;">
-                                ${formatFecha(periodicidadesObj[fechaKey].ano, periodicidadesObj[fechaKey].mes, periodicidadesObj[fechaKey].dia)}
-                            </th>
-                        `).join('')}
-                    </tr>
-                    ${tableRows}
-                </table>
+                </div>
             `;
-            pages.push(currentPageContent); 
+                pages.push(currentPageContent); // Añadir el contenido final de la página
+            }
         }
-    }
 
-    setHtmlContent(`
+        setHtmlContent(`
         <html>
             <head>
                 <style>
@@ -118,9 +124,14 @@ const SeriesTabla = () => {
                         margin: 0;
                         padding: 0;
                     }
+                    .content {
+                        margin: 20px; /* Márgenes laterales y superior/inferior */
+                        padding: 10px; /* Relleno dentro del contenido */
+                    }
                     table {
                         width: 100%;
                         border-collapse: collapse;
+                        border: 1px solid #ddd; /* Borde de la tabla */
                     }
                     th, td {
                         padding: 8px;
@@ -133,66 +144,68 @@ const SeriesTabla = () => {
                 </style>
             </head>
             <body>
-                <h2 style="text-align: center;">${tablaObj.Nombre}</h2>
-                ${pages.join('<div class="page-break"></div>')}
+                ${pages.join('')}
             </body>
         </html>
     `);
-};
-
-
-useEffect(() => {
-    const obtenerDatos = async () => {
-        try {
-            const datos = await Promise.all(
-                seriesObj.map(async (serie) => {
-                    const datosSerie = await Promise.all(
-                        Object.keys(periodicidadesObj).map(async (fechaKey) => {
-                            const { ano, mes, dia } = periodicidadesObj[fechaKey];
-                            const formattedDate = `${ano}${mes.toString().padStart(2, '0')}${dia.toString().padStart(2, '0')}`;
-
-                            try {
-                                const response = await fetch(`https://servicios.ine.es/wstempus/js/ES/DATOS_SERIE/${serie.COD}?date=${formattedDate}`);
-
-                                if (!response.ok) {
-                                    console.error(`Error en la solicitud para la fecha ${fechaKey}: ${response.statusText}`);
-                                    return { fecha: fechaKey, valor: 'N/A' };
-                                }
-
-                                const textResponse = await response.text();
-
-                                if (!textResponse) {
-                                    console.warn(`Respuesta vacía para la fecha ${fechaKey}`);
-                                    return { fecha: fechaKey, valor: 'N/A' };
-                                }
-
-                                const data = JSON.parse(textResponse);
-
-                                if (data?.Data?.length > 0) {
-                                    return { fecha: fechaKey, valor: data.Data[0].Valor };
-                                } else {
-                                    return { fecha: fechaKey, valor: 'N/A' };
-                                }
-                            } catch (error) {
-                                console.error(`Error al obtener datos para la fecha ${fechaKey}:`, error.message);
-                                return { fecha: fechaKey, valor: 'N/A' };
-                            }
-                        })
-                    );
-                    return { serie: serie.Nombre, datos: datosSerie };
-                })
-            );
-            setDatosSeries(datos);
-            generateHtmlContentPaginated(datos);
-        } catch (error) {
-            console.error('Error al obtener las variables:', error.message);
-        } finally {
-            setIsLoading(false);
-        }
     };
 
-    obtenerDatos();
-}, [seriesObj, periodicidadesObj]);
+
+
+
+
+    useEffect(() => {
+        const obtenerDatos = async () => {
+            try {
+                const datos = await Promise.all(
+                    seriesObj.map(async (serie) => {
+                        const datosSerie = await Promise.all(
+                            Object.keys(periodicidadesObj).map(async (fechaKey) => {
+                                const { ano, mes, dia } = periodicidadesObj[fechaKey];
+                                const formattedDate = `${ano}${mes.toString().padStart(2, '0')}${dia.toString().padStart(2, '0')}`;
+
+                                try {
+                                    const response = await fetch(`https://servicios.ine.es/wstempus/js/ES/DATOS_SERIE/${serie.COD}?date=${formattedDate}`);
+
+                                    if (!response.ok) {
+                                        console.error(`Error en la solicitud para la fecha ${fechaKey}: ${response.statusText}`);
+                                        return { fecha: fechaKey, valor: 'N/A' };
+                                    }
+
+                                    const textResponse = await response.text();
+
+                                    if (!textResponse) {
+                                        console.warn(`Respuesta vacía para la fecha ${fechaKey}`);
+                                        return { fecha: fechaKey, valor: 'N/A' };
+                                    }
+
+                                    const data = JSON.parse(textResponse);
+
+                                    if (data?.Data?.length > 0) {
+                                        return { fecha: fechaKey, valor: data.Data[0].Valor };
+                                    } else {
+                                        return { fecha: fechaKey, valor: 'N/A' };
+                                    }
+                                } catch (error) {
+                                    console.error(`Error al obtener datos para la fecha ${fechaKey}:`, error.message);
+                                    return { fecha: fechaKey, valor: 'N/A' };
+                                }
+                            })
+                        );
+                        return { serie: serie.Nombre, datos: datosSerie };
+                    })
+                );
+                setDatosSeries(datos);
+                generateHtmlContentPaginated(datos);
+            } catch (error) {
+                console.error('Error al obtener las variables:', error.message);
+            } finally {
+                setIsLoading(false);
+            }
+        };
+
+        obtenerDatos();
+    }, [seriesObj, periodicidadesObj]);
 
 
 
@@ -229,7 +242,7 @@ useEffect(() => {
 
         const worksheet = XLSX.utils.aoa_to_sheet([headers, ...data]);
         const workbook = XLSX.utils.book_new();
-        const sheetName = tablaObj.Nombre.slice(0, 31);  
+        const sheetName = tablaObj.Nombre.slice(0, 31);
         XLSX.utils.book_append_sheet(workbook, worksheet, sheetName);
 
         const excelFileUri = `${FileSystem.documentDirectory}${tablaObj.Id}.${extension}`;
