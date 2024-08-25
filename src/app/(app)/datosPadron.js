@@ -33,18 +33,23 @@ const SeriesTabla = () => {
     const tablaObj = JSON.parse(tabla);
     const valoresObj = useMemo(() => JSON.parse(valores), [valores]);
 
-    const formatFecha = (ano, mes, dia) => {
-        const meses = [
-            'enero', 'febrero', 'marzo', 'abril', 'mayo', 'junio',
-            'julio', 'agosto', 'septiembre', 'octubre', 'noviembre', 'diciembre'
-        ];
-        return `${dia} de ${meses[mes - 1]} de ${ano}`;
+    const formatFecha = (ano, mes, dia, exportFormat = false) => {
+        if (exportFormat) {
+            return `${String(dia).padStart(2, '0')}/${String(mes).padStart(2, '0')}/${ano}`;
+        } else {
+            const meses = [
+                'enero', 'febrero', 'marzo', 'abril', 'mayo', 'junio',
+                'julio', 'agosto', 'septiembre', 'octubre', 'noviembre', 'diciembre'
+            ];
+            return `${dia} de ${meses[mes - 1]} de ${ano}`;
+        }
     };
 
     const formatNumero = (numero) => {
         const num = parseFloat(numero);
         return num % 1 === 0 ? num.toLocaleString('es-ES') : num.toLocaleString('es-ES', { minimumFractionDigits: 1 });
     };
+
     const firstColumnWidth = width * 0.5;
     const otherColumnFixedWidth = 150;
     const paddingEnd = 20;
@@ -150,10 +155,6 @@ const SeriesTabla = () => {
     `);
     };
 
-
-
-
-
     useEffect(() => {
         const obtenerDatos = async () => {
             try {
@@ -207,8 +208,6 @@ const SeriesTabla = () => {
         obtenerDatos();
     }, [seriesObj, periodicidadesObj]);
 
-
-
     const generatePDF = async () => {
         if (!htmlContent) {
             Alert.alert('Error', 'El contenido del PDF aún no está listo.');
@@ -231,7 +230,7 @@ const SeriesTabla = () => {
     };
 
     const generateExcel = async (extension = 'xlsx') => {
-        const headers = ['Serie', ...Object.keys(periodicidadesObj).map((fechaKey) => formatFecha(periodicidadesObj[fechaKey].ano, periodicidadesObj[fechaKey].mes, periodicidadesObj[fechaKey].dia))];
+        const headers = ['Serie', ...Object.keys(periodicidadesObj).map((fechaKey) => formatFecha(periodicidadesObj[fechaKey].ano, periodicidadesObj[fechaKey].mes, periodicidadesObj[fechaKey].dia, true))];
         const data = datosSeries.map((serieObj) => {
             const fila = [serieObj.serie];
             serieObj.datos.forEach((datoObj) => {
@@ -256,7 +255,7 @@ const SeriesTabla = () => {
     };
 
     const generateCSV = async (delimiter = ',') => {
-        const headers = ['Serie', ...Object.keys(periodicidadesObj).map((fechaKey) => formatFecha(periodicidadesObj[fechaKey].ano, periodicidadesObj[fechaKey].mes, periodicidadesObj[fechaKey].dia))];
+        const headers = ['Serie', ...Object.keys(periodicidadesObj).map((fechaKey) => formatFecha(periodicidadesObj[fechaKey].ano, periodicidadesObj[fechaKey].mes, periodicidadesObj[fechaKey].dia, true))];
         const csvContent = [
             headers.join(delimiter),
             ...datosSeries.map((serieObj) => {
@@ -274,7 +273,7 @@ const SeriesTabla = () => {
     };
 
     const generateJson = async () => {
-        const headers = ['Serie', ...Object.keys(periodicidadesObj).map((fechaKey) => formatFecha(periodicidadesObj[fechaKey].ano, periodicidadesObj[fechaKey].mes, periodicidadesObj[fechaKey].dia))];
+        const headers = ['Serie', ...Object.keys(periodicidadesObj).map((fechaKey) => formatFecha(periodicidadesObj[fechaKey].ano, periodicidadesObj[fechaKey].mes, periodicidadesObj[fechaKey].dia, true))];
         const jsonContent = JSON.stringify({
             headers,
             data: datosSeries.map((serieObj) => {
@@ -291,7 +290,7 @@ const SeriesTabla = () => {
     };
 
     const generatePlainText = async (delimiter = '\t') => {
-        const headers = ['Serie', ...Object.keys(periodicidadesObj).map((fechaKey) => formatFecha(periodicidadesObj[fechaKey].ano, periodicidadesObj[fechaKey].mes, periodicidadesObj[fechaKey].dia))];
+        const headers = ['Serie', ...Object.keys(periodicidadesObj).map((fechaKey) => formatFecha(periodicidadesObj[fechaKey].ano, periodicidadesObj[fechaKey].mes, periodicidadesObj[fechaKey].dia, true))];
         const plainTextContent = [
             headers.join(delimiter),
             ...datosSeries.map((serieObj) => {
