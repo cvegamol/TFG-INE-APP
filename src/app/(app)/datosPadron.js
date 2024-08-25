@@ -230,13 +230,13 @@ const SeriesTabla = () => {
     };
 
     const generateExcel = async (extension = 'xlsx') => {
-        const headers = ['Serie', ...Object.keys(periodicidadesObj).map((fechaKey) => formatFecha(periodicidadesObj[fechaKey].ano, periodicidadesObj[fechaKey].mes, periodicidadesObj[fechaKey].dia, true))];
-        const data = datosSeries.map((serieObj) => {
-            const fila = [serieObj.serie];
+        const headers = ['Serie', 'Periodo', 'Valor'];
+        const data = [];
+
+        datosSeries.forEach((serieObj) => {
             serieObj.datos.forEach((datoObj) => {
-                fila.push(datoObj.valor !== 'N/A' ? formatNumero(datoObj.valor) : datoObj.valor);
+                data.push([serieObj.serie, formatFecha(periodicidadesObj[datoObj.fecha].ano, periodicidadesObj[datoObj.fecha].mes, periodicidadesObj[datoObj.fecha].dia, true), datoObj.valor !== 'N/A' ? formatNumero(datoObj.valor) : datoObj.valor]);
             });
-            return fila;
         });
 
         const worksheet = XLSX.utils.aoa_to_sheet([headers, ...data]);
@@ -254,16 +254,19 @@ const SeriesTabla = () => {
         await shareAsync(excelFileUri);
     };
 
+
     const generateCSV = async (delimiter = ',') => {
-        const headers = ['Serie', ...Object.keys(periodicidadesObj).map((fechaKey) => formatFecha(periodicidadesObj[fechaKey].ano, periodicidadesObj[fechaKey].mes, periodicidadesObj[fechaKey].dia, true))];
+        const headers = ['Serie', 'Periodo', 'Valor'];
         const csvContent = [
             headers.join(delimiter),
-            ...datosSeries.map((serieObj) => {
-                const fila = [serieObj.serie];
-                serieObj.datos.forEach((datoObj) => {
-                    fila.push(datoObj.valor !== 'N/A' ? formatNumero(datoObj.valor) : datoObj.valor);
+            ...datosSeries.flatMap((serieObj) => {
+                return serieObj.datos.map((datoObj) => {
+                    return [
+                        serieObj.serie,
+                        formatFecha(periodicidadesObj[datoObj.fecha].ano, periodicidadesObj[datoObj.fecha].mes, periodicidadesObj[datoObj.fecha].dia, true),
+                        datoObj.valor !== 'N/A' ? formatNumero(datoObj.valor) : datoObj.valor
+                    ].join(delimiter);
                 });
-                return fila.join(delimiter);
             })
         ].join('\n');
 
@@ -272,33 +275,36 @@ const SeriesTabla = () => {
         await shareAsync(csvFileUri);
     };
 
+
     const generateJson = async () => {
-        const headers = ['Serie', ...Object.keys(periodicidadesObj).map((fechaKey) => formatFecha(periodicidadesObj[fechaKey].ano, periodicidadesObj[fechaKey].mes, periodicidadesObj[fechaKey].dia, true))];
-        const jsonContent = JSON.stringify({
-            headers,
-            data: datosSeries.map((serieObj) => {
+        const jsonContent = JSON.stringify(datosSeries.flatMap((serieObj) => {
+            return serieObj.datos.map((datoObj) => {
                 return {
                     Serie: serieObj.serie,
-                    Datos: serieObj.datos.map(datoObj => datoObj.valor !== 'N/A' ? formatNumero(datoObj.valor) : datoObj.valor)
+                    Periodo: formatFecha(periodicidadesObj[datoObj.fecha].ano, periodicidadesObj[datoObj.fecha].mes, periodicidadesObj[datoObj.fecha].dia, true),
+                    Valor: datoObj.valor !== 'N/A' ? formatNumero(datoObj.valor) : datoObj.valor
                 };
-            })
-        });
+            });
+        }), null, 2);
 
         const jsonFileUri = `${FileSystem.documentDirectory}${tablaObj.Id}.json`;
         await FileSystem.writeAsStringAsync(jsonFileUri, jsonContent);
         await shareAsync(jsonFileUri);
     };
 
+
     const generatePlainText = async (delimiter = '\t') => {
-        const headers = ['Serie', ...Object.keys(periodicidadesObj).map((fechaKey) => formatFecha(periodicidadesObj[fechaKey].ano, periodicidadesObj[fechaKey].mes, periodicidadesObj[fechaKey].dia, true))];
+        const headers = ['Serie', 'Periodo', 'Valor'];
         const plainTextContent = [
             headers.join(delimiter),
-            ...datosSeries.map((serieObj) => {
-                const fila = [serieObj.serie];
-                serieObj.datos.forEach((datoObj) => {
-                    fila.push(datoObj.valor !== 'N/A' ? formatNumero(datoObj.valor) : datoObj.valor);
+            ...datosSeries.flatMap((serieObj) => {
+                return serieObj.datos.map((datoObj) => {
+                    return [
+                        serieObj.serie,
+                        formatFecha(periodicidadesObj[datoObj.fecha].ano, periodicidadesObj[datoObj.fecha].mes, periodicidadesObj[datoObj.fecha].dia, true),
+                        datoObj.valor !== 'N/A' ? formatNumero(datoObj.valor) : datoObj.valor
+                    ].join(delimiter);
                 });
-                return fila.join(delimiter);
             })
         ].join('\n');
 
@@ -306,6 +312,7 @@ const SeriesTabla = () => {
         await FileSystem.writeAsStringAsync(plainTextFileUri, plainTextContent);
         await shareAsync(plainTextFileUri);
     };
+
 
     const onSharePress = () => {
         setModalVisible(true);
