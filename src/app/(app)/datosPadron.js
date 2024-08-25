@@ -51,45 +51,49 @@ const SeriesTabla = () => {
 
     const totalTableWidth = firstColumnWidth + (Object.keys(periodicidadesObj).length * otherColumnFixedWidth) + paddingEnd;
 
-    const generateHtmlContentPaginated = (datos, maxColumnsPerPage = 2, maxRowsPerPage = 10) => {
-        const pages = [];
-        const numColumns = Object.keys(periodicidadesObj).length;
+    const generateHtmlContentPaginated = (datos, maxColumnsPerPage = 2, maxRowsPerPage = 24) => {
+    const pages = [];
+    const numColumns = Object.keys(periodicidadesObj).length;
 
-        for (let colStart = 0; colStart < numColumns; colStart += maxColumnsPerPage) {
-            const colEnd = Math.min(colStart + maxColumnsPerPage, numColumns);
+    for (let colStart = 0; colStart < numColumns; colStart += maxColumnsPerPage) {
+        const colEnd = Math.min(colStart + maxColumnsPerPage, numColumns);
 
-            let tableRows = '';
+        let tableRows = '';
+        let currentPageContent = '';
 
-            datos.forEach((serieObj, rowIndex) => {
-                if (rowIndex % maxRowsPerPage === 0 && rowIndex !== 0) {
-                    // Nueva página cuando se supera el número máximo de filas
-                    pages.push(`
-                        <table>
-                            <tr>
-                                <th style="padding: 8px; border: 1px solid #ddd; background-color: #4CAF50; color: white;">Serie</th>
-                                ${Object.keys(periodicidadesObj).slice(colStart, colEnd).map((fechaKey) => `
-                                    <th style="padding: 8px; border: 1px solid #ddd; background-color: #4CAF50; color: white;">
-                                        ${formatFecha(periodicidadesObj[fechaKey].ano, periodicidadesObj[fechaKey].mes, periodicidadesObj[fechaKey].dia)}
-                                    </th>
-                                `).join('')}
-                            </tr>
-                            ${tableRows}
-                        </table>
-                        <div style="page-break-after: always;"></div>
-                    `);
-                    tableRows = '';
-                }
+        datos.forEach((serieObj, rowIndex) => {
+            if (rowIndex % maxRowsPerPage === 0 && rowIndex !== 0) {
+                currentPageContent += `
+                    <table style="margin-bottom: 20px;">
+                        <tr>
+                            <th style="padding: 8px; border: 1px solid #ddd; background-color: #4CAF50; color: white;">Serie</th>
+                            ${Object.keys(periodicidadesObj).slice(colStart, colEnd).map((fechaKey) => `
+                                <th style="padding: 8px; border: 1px solid #ddd; background-color: #4CAF50; color: white;">
+                                    ${formatFecha(periodicidadesObj[fechaKey].ano, periodicidadesObj[fechaKey].mes, periodicidadesObj[fechaKey].dia)}
+                                </th>
+                            `).join('')}
+                        </tr>
+                        ${tableRows}
+                    </table>
+                `;
+                
+                pages.push(currentPageContent); 
+                currentPageContent = ''; 
+                tableRows = ''; 
+            }
 
-                let row = `<tr><td style="padding: 8px; border: 1px solid #ddd;">${serieObj.serie}</td>`;
-                serieObj.datos.slice(colStart, colEnd).forEach((datoObj) => {
-                    row += `<td style="padding: 8px; border: 1px solid #ddd; text-align: center;">${datoObj.valor !== 'N/A' ? formatNumero(datoObj.valor) : datoObj.valor}</td>`;
-                });
-                row += '</tr>';
-                tableRows += row;
+            let row = `<tr><td style="padding: 8px; border: 1px solid #ddd;">${serieObj.serie}</td>`;
+            serieObj.datos.slice(colStart, colEnd).forEach((datoObj) => {
+                row += `<td style="padding: 8px; border: 1px solid #ddd; text-align: center;">${datoObj.valor !== 'N/A' ? formatNumero(datoObj.valor) : datoObj.valor}</td>`;
             });
+            row += '</tr>';
+            tableRows += row;
+        });
 
-            pages.push(`
-                <table>
+       
+        if (tableRows) {
+            currentPageContent += `
+                <table style="margin-bottom: 20px;">
                     <tr>
                         <th style="padding: 8px; border: 1px solid #ddd; background-color: #4CAF50; color: white;">Serie</th>
                         ${Object.keys(periodicidadesObj).slice(colStart, colEnd).map((fechaKey) => `
@@ -100,87 +104,97 @@ const SeriesTabla = () => {
                     </tr>
                     ${tableRows}
                 </table>
-            `);
+            `;
+            pages.push(currentPageContent); 
         }
+    }
 
-        setHtmlContent(`
-            <html>
-                <head>
-                    <style>
-                        table {
-                            width: 100%;
-                            border-collapse: collapse;
-                        }
-                        th, td {
-                            padding: 8px;
-                            border: 1px solid #ddd;
-                            text-align: left;
-                        }
-                        .page-break {
-                            page-break-after: always;
-                        }
-                    </style>
-                </head>
-                <body>
-                    <h2 style="text-align: center;">${tablaObj.Nombre}</h2>
-                    ${pages.join('<div class="page-break"></div>')}
-                </body>
-            </html>
-        `);
-    };
+    setHtmlContent(`
+        <html>
+            <head>
+                <style>
+                    body {
+                        font-family: Arial, sans-serif;
+                        margin: 0;
+                        padding: 0;
+                    }
+                    table {
+                        width: 100%;
+                        border-collapse: collapse;
+                    }
+                    th, td {
+                        padding: 8px;
+                        border: 1px solid #ddd;
+                        text-align: left;
+                    }
+                    .page-break {
+                        page-break-after: always;
+                    }
+                </style>
+            </head>
+            <body>
+                <h2 style="text-align: center;">${tablaObj.Nombre}</h2>
+                ${pages.join('<div class="page-break"></div>')}
+            </body>
+        </html>
+    `);
+};
 
-    useEffect(() => {
-        const obtenerDatos = async () => {
-            try {
-                const datos = await Promise.all(
-                    seriesObj.map(async (serie) => {
-                        const datosSerie = await Promise.all(
-                            Object.keys(periodicidadesObj).map(async (fechaKey) => {
-                                const { ano, mes, dia } = periodicidadesObj[fechaKey];
-                                const formattedDate = `${ano}${mes.toString().padStart(2, '0')}${dia.toString().padStart(2, '0')}`;
 
-                                try {
-                                    const response = await fetch(`https://servicios.ine.es/wstempus/js/ES/DATOS_SERIE/${serie.COD}?date=${formattedDate}`);
+useEffect(() => {
+    const obtenerDatos = async () => {
+        try {
+            const datos = await Promise.all(
+                seriesObj.map(async (serie) => {
+                    const datosSerie = await Promise.all(
+                        Object.keys(periodicidadesObj).map(async (fechaKey) => {
+                            const { ano, mes, dia } = periodicidadesObj[fechaKey];
+                            const formattedDate = `${ano}${mes.toString().padStart(2, '0')}${dia.toString().padStart(2, '0')}`;
 
-                                    if (!response.ok) {
-                                        console.error(`Error en la solicitud para la fecha ${fechaKey}: ${response.statusText}`);
-                                        return { fecha: fechaKey, valor: 'N/A' };
-                                    }
+                            try {
+                                const response = await fetch(`https://servicios.ine.es/wstempus/js/ES/DATOS_SERIE/${serie.COD}?date=${formattedDate}`);
 
-                                    const textResponse = await response.text();
-
-                                    if (!textResponse) {
-                                        console.warn(`Respuesta vacía para la fecha ${fechaKey}`);
-                                        return { fecha: fechaKey, valor: 'N/A' };
-                                    }
-
-                                    const data = JSON.parse(textResponse);
-
-                                    if (data?.Data?.length > 0) {
-                                        return { fecha: fechaKey, valor: data.Data[0].Valor };
-                                    } else {
-                                        return { fecha: fechaKey, valor: 'N/A' };
-                                    }
-                                } catch (error) {
-                                    console.error(`Error al obtener datos para la fecha ${fechaKey}:`, error.message);
+                                if (!response.ok) {
+                                    console.error(`Error en la solicitud para la fecha ${fechaKey}: ${response.statusText}`);
                                     return { fecha: fechaKey, valor: 'N/A' };
                                 }
-                            })
-                        );
-                        return { serie: serie.Nombre, datos: datosSerie };
-                    })
-                );
-                setDatosSeries(datos);
-                generateHtmlContentPaginated(datos);
-            } catch (error) {
-                console.error('Error al obtener las variables:', error.message);
-            } finally {
-                setIsLoading(false);
-            }
-        };
 
-        obtenerDatos();
-    }, [seriesObj, periodicidadesObj]);
+                                const textResponse = await response.text();
+
+                                if (!textResponse) {
+                                    console.warn(`Respuesta vacía para la fecha ${fechaKey}`);
+                                    return { fecha: fechaKey, valor: 'N/A' };
+                                }
+
+                                const data = JSON.parse(textResponse);
+
+                                if (data?.Data?.length > 0) {
+                                    return { fecha: fechaKey, valor: data.Data[0].Valor };
+                                } else {
+                                    return { fecha: fechaKey, valor: 'N/A' };
+                                }
+                            } catch (error) {
+                                console.error(`Error al obtener datos para la fecha ${fechaKey}:`, error.message);
+                                return { fecha: fechaKey, valor: 'N/A' };
+                            }
+                        })
+                    );
+                    return { serie: serie.Nombre, datos: datosSerie };
+                })
+            );
+            setDatosSeries(datos);
+            generateHtmlContentPaginated(datos);
+        } catch (error) {
+            console.error('Error al obtener las variables:', error.message);
+        } finally {
+            setIsLoading(false);
+        }
+    };
+
+    obtenerDatos();
+}, [seriesObj, periodicidadesObj]);
+
+
 
     const generatePDF = async () => {
         if (!htmlContent) {
@@ -215,7 +229,7 @@ const SeriesTabla = () => {
 
         const worksheet = XLSX.utils.aoa_to_sheet([headers, ...data]);
         const workbook = XLSX.utils.book_new();
-        const sheetName = tablaObj.Nombre.slice(0, 31);  // Truncar el nombre si excede 31 caracteres
+        const sheetName = tablaObj.Nombre.slice(0, 31);  
         XLSX.utils.book_append_sheet(workbook, worksheet, sheetName);
 
         const excelFileUri = `${FileSystem.documentDirectory}${tablaObj.Id}.${extension}`;
