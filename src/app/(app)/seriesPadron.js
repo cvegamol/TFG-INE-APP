@@ -2,6 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { ScrollView, View, Text, TouchableOpacity } from 'react-native';
 import { styled } from 'nativewind';
 import Plantilla from '../../components/Plantilla';
+
 import { useLocalSearchParams, useRouter } from 'expo-router';
 import Loading from '../../components/Loading';
 import { Button, CheckBox } from 'react-native-elements';
@@ -10,6 +11,8 @@ import {
     widthPercentageToDP as wp,
     heightPercentageToDP as hp,
 } from "react-native-responsive-screen";
+import VariableSelection from '../../components/VariableSelection';
+import PeriodicidadSelection from '../../components/PeriodicidadesSelection';
 
 const ViewStyled = styled(View);
 const TextStyled = styled(Text);
@@ -222,14 +225,14 @@ const SeriesTabla = () => {
         const series = await seriesJson.json();
         console.log(series.length);
         console.log(seleccionesPeriodicidades);
-        
+
 
         router.push({
             pathname: 'datosPadron',
-            params: {  tabla: JSON.stringify(tablaObj),series: JSON.stringify(series), periodicidades: JSON.stringify(seleccionesPeriodicidades),valores:JSON.stringify(selecciones)},
+            params: { tabla: JSON.stringify(tablaObj), series: JSON.stringify(series), periodicidades: JSON.stringify(seleccionesPeriodicidades), valores: JSON.stringify(selecciones) },
         });
-         
-         
+
+
     };
 
     return (
@@ -247,101 +250,26 @@ const SeriesTabla = () => {
                         </ViewStyled>
                     ) : (
                         <>
-                            {/* Sección de Variables */}
-                            {variables.map((variable) => {
-                                const totalValores = valoresVariables[variable.Id]?.length || 0;
-                                const seleccionados = selecciones[variable.Id]?.length || 0;
-                                const allSelected = seleccionados === totalValores && totalValores > 0;
+                            {variables.map((variable) => (
+                                <VariableSelection
+                                    key={variable.Id}
+                                    variable={variable}
+                                    valoresVariables={valoresVariables[variable.Id]}
+                                    selecciones={selecciones[variable.Id] || []}  // Valor por defecto []
+                                    handleSelectionChange={handleSelectionChange}
+                                    handleSelectAll={handleSelectAll}
+                                />
 
-                                return (
-                                    <ViewStyled
-                                        key={variable.Id}
-                                        className="mb-6 p-4 bg-white rounded-lg shadow-lg"
-                                        style={{ borderBottomWidth: 2, borderBottomColor: '#D1D5DB' }}
-                                    >
-                                        <ViewStyled className="flex-1">
-                                            <ViewStyled className="flex-row justify-between items-center mb-2">
-                                                <TextStyled className="text-lg font-semibold text-gray-700">
-                                                    {variable.Nombre}
-                                                </TextStyled>
-                                                <TouchableOpacity onPress={() => handleSelectAll(variable.Id)}>
-                                                    <Icon
-                                                        name={allSelected ? "checkbox-outline" : "square-outline"}
-                                                        size={24}
-                                                        color="gray"
-                                                    />
-                                                </TouchableOpacity>
-                                            </ViewStyled>
+                            ))}
 
-                                            <ScrollViewStyled
-                                                className="max-h-40"
-                                                nestedScrollEnabled={true}
-                                            >
-                                                {valoresVariables[variable.Id]?.map((valor) => (
-                                                    <ViewStyled key={valor.Id} className="flex-row items-center">
-                                                        <CheckBox
-                                                            checked={selecciones[variable.Id]?.includes(valor)}
-                                                            onPress={() => handleSelectionChange(variable.Id, valor)}
-                                                        />
-                                                        <TextStyled className="ml-2">{valor.Nombre}</TextStyled>
-                                                    </ViewStyled>
-                                                ))}
-                                            </ScrollViewStyled>
-                                            <ViewStyled className="flex-row justify-between mt-2">
-                                                <TextStyled className="text-sm text-gray-600">
-                                                    Seleccionados: {seleccionados}
-                                                </TextStyled>
-                                                <TextStyled className="text-sm text-gray-600">
-                                                    Total: {totalValores}
-                                                </TextStyled>
-                                            </ViewStyled>
-                                        </ViewStyled>
-
-                                    </ViewStyled>
-                                );
-                            })}
-
-                            {/* Sección de Periodicidades */}
                             {periodicidad.length > 0 && (
-                                <ViewStyled className="mb-6 p-4 bg-white rounded-lg shadow-lg"
-                                    style={{ borderBottomWidth: 2, borderBottomColor: '#D1D5DB' }}>
-                                    <ViewStyled className="flex-1">
-                                        <ViewStyled className="flex-row justify-between items-center mb-2">
-                                            <TextStyled className="text-lg font-semibold text-gray-700">
-                                                Periodicidades
-                                            </TextStyled>
-                                            <TouchableOpacity onPress={handleSelectAllPeriodicidades}>
-                                                <Icon
-                                                    name={Object.keys(seleccionesPeriodicidades).length === periodicidad.length ? "checkbox-outline" : "square-outline"}
-                                                    size={24}
-                                                    color="gray"
-                                                />
-                                            </TouchableOpacity>
-                                        </ViewStyled>
-                                        <ScrollViewStyled
-                                            className="max-h-40"
-                                            nestedScrollEnabled={true}
-                                        >
-                                            {periodicidad.map((p) => (
-                                                <ViewStyled key={`${p.dia}-${p.mes}-${p.ano}`} className="flex-row items-center">
-                                                    <CheckBox
-                                                        checked={!!seleccionesPeriodicidades[`${p.dia}-${p.mes}-${p.ano}`]}
-                                                        onPress={() => handleSelectionChangePeriodicidad(p)}
-                                                    />
-                                                    <TextStyled className="ml-2">{formatDate(p.dia, p.mes, p.ano)}</TextStyled>
-                                                </ViewStyled>
-                                            ))}
-                                        </ScrollViewStyled>
-                                        <ViewStyled className="flex-row justify-between mt-2">
-                                            <TextStyled className="text-sm text-gray-600">
-                                                Seleccionadas: {Object.keys(seleccionesPeriodicidades).length}
-                                            </TextStyled>
-                                            <TextStyled className="text-sm text-gray-600">
-                                                Total: {periodicidad.length}
-                                            </TextStyled>
-                                        </ViewStyled>
-                                    </ViewStyled>
-                                </ViewStyled>
+                                <PeriodicidadSelection
+                                    periodicidad={periodicidad}
+                                    seleccionesPeriodicidades={seleccionesPeriodicidades}
+                                    handleSelectionChangePeriodicidad={handleSelectionChangePeriodicidad}
+                                    handleSelectAllPeriodicidades={handleSelectAllPeriodicidades}
+                                    formatDate={formatDate}  // Pasar la función como prop
+                                />
                             )}
 
                             <Button

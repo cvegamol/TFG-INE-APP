@@ -24,7 +24,7 @@ import TableRow from '../../components/TableRow';
 
 const { width } = Dimensions.get('window');
 
-const SeriesTabla = () => {
+const DatosSeries = () => {
     const [isLoading, setIsLoading] = useState(true);
     const [datosSeries, setDatosSeries] = useState([]);
     const [htmlContent, setHtmlContent] = useState('');
@@ -390,4 +390,4 @@ const SeriesTabla = () => {
     );
 };
 
-export default SeriesTabla;
+export default DatosSeries;
