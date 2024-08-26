@@ -2,6 +2,7 @@ import React, { useEffect, useState, useMemo } from 'react';
 import { ScrollView, View, Text, Dimensions, Alert, Modal, TouchableOpacity } from 'react-native';
 import { styled } from 'nativewind';
 import Plantilla from '../../components/Plantilla';
+import ModalComponent from '../../components/ModalComponent';
 import { useLocalSearchParams } from 'expo-router';
 import Loading from '../../components/Loading';
 import { Button } from 'react-native-elements';
@@ -18,6 +19,8 @@ import {
     widthPercentageToDP as wp,
     heightPercentageToDP as hp,
 } from "react-native-responsive-screen";
+import TableHeader from '../../components/TableHeader';
+import TableRow from '../../components/TableRow';
 
 const { width } = Dimensions.get('window');
 
@@ -353,57 +356,21 @@ const SeriesTabla = () => {
             <ScrollViewStyled contentContainerStyle={{ flexGrow: 1 }}>
                 <ScrollViewStyled horizontal contentContainerStyle={{ width: Math.max(totalTableWidth, width) }}>
                     <ViewStyled style={{ padding: 10 }}>
-                        <ViewStyled style={{ flexDirection: 'row', marginBottom: 10 }}>
-                            <TextStyled style={{
-                                width: firstColumnWidth,
-                                fontWeight: 'bold',
-                                backgroundColor: '#4CAF50',
-                                color: '#fff',
-                                borderWidth: 1,
-                                borderColor: '#ccc',
-                                padding: 10,
-                            }}>
-                                Serie
-                            </TextStyled>
-                            {Object.keys(periodicidadesObj).map((fechaKey, idx) => (
-                                <TextStyled key={idx} style={{
-                                    width: otherColumnFixedWidth,
-                                    fontWeight: 'bold',
-                                    textAlign: 'center',
-                                    backgroundColor: '#4CAF50',
-                                    color: '#fff',
-                                    borderWidth: 1,
-                                    borderColor: '#ccc',
-                                    padding: 10,
-                                }}>
-                                    {formatFecha(periodicidadesObj[fechaKey].ano, periodicidadesObj[fechaKey].mes, periodicidadesObj[fechaKey].dia)}
-                                </TextStyled>
-                            ))}
-                        </ViewStyled>
-
+                        <TableHeader
+                            firstColumnWidth={firstColumnWidth}
+                            periodicidadesObj={periodicidadesObj}
+                            otherColumnFixedWidth={otherColumnFixedWidth}
+                            formatFecha={formatFecha}
+                        />
                         {datosSeries.map((serieObj, index) => (
-                            <ViewStyled key={index} style={{ flexDirection: 'row', marginBottom: 10, backgroundColor: index % 2 === 0 ? '#f2f2f2' : '#ffffff' }}>
-                                <TextStyled style={{
-                                    width: firstColumnWidth,
-                                    fontWeight: 'bold',
-                                    borderWidth: 1,
-                                    borderColor: '#ccc',
-                                    padding: 10,
-                                }}>
-                                    {serieObj.serie}
-                                </TextStyled>
-                                {serieObj.datos.map((datoObj, idx) => (
-                                    <TextStyled key={idx} style={{
-                                        width: otherColumnFixedWidth,
-                                        textAlign: 'center',
-                                        borderWidth: 1,
-                                        borderColor: '#ccc',
-                                        padding: 10,
-                                    }}>
-                                        {datoObj.valor !== 'N/A' ? formatNumero(datoObj.valor) : datoObj.valor}
-                                    </TextStyled>
-                                ))}
-                            </ViewStyled>
+                            <TableRow
+                                key={index}
+                                serieObj={serieObj}
+                                firstColumnWidth={firstColumnWidth}
+                                otherColumnFixedWidth={otherColumnFixedWidth}
+                                index={index}
+                                formatNumero={formatNumero}
+                            />
                         ))}
                     </ViewStyled>
                 </ScrollViewStyled>
@@ -414,30 +381,11 @@ const SeriesTabla = () => {
                 onPress={onSharePress}
                 buttonStyle={{ backgroundColor: '#4CAF50' }}
             />
-            <Modal
-                animationType="slide"
-                transparent={true}
-                visible={modalVisible}
-                onRequestClose={() => {
-                    setModalVisible(false);
-                }}
-            >
-                <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center', backgroundColor: 'rgba(0, 0, 0, 0.5)' }}>
-                    <View style={{ width: 300, backgroundColor: 'white', borderRadius: 10, padding: 20 }}>
-                        <TextStyled style={{ fontWeight: 'bold', fontSize: 18, marginBottom: 10, textAlign: 'center' }}>Seleccionar formato de exportación</TextStyled>
-                        <ScrollView style={{ maxHeight: 300 }}>
-                            {['PDF', 'Excel (XLS)', 'Excel (XLSX)', 'CSV (,)', 'CSV (Tab)', 'JSON', 'Texto Plano (,)', 'Texto Plano (Tab)', 'Texto Plano (;)'].map((format) => (
-                                <TouchableOpacity key={format} onPress={() => handleFormatSelection(format)}>
-                                    <TextStyled style={{ padding: 10, textAlign: 'center', borderBottomWidth: 1, borderBottomColor: '#ccc' }}>
-                                        {format}
-                                    </TextStyled>
-                                </TouchableOpacity>
-                            ))}
-                        </ScrollView>
-                        <Button title="Cancelar" onPress={() => setModalVisible(false)} buttonStyle={{ marginTop: 10 }} />
-                    </View>
-                </View>
-            </Modal>
+             <ModalComponent
+                modalVisible={modalVisible}
+                setModalVisible={setModalVisible}
+                handleFormatSelection={handleFormatSelection}
+            />
         </Plantilla>
     );
 };
