@@ -71,29 +71,29 @@ const DatosSeries = () => {
             const colEnd = Math.min(colStart + maxColumnsPerPage, numColumns);
 
             let tableRows = '';
-            let currentPageContent = ''; 
+            let currentPageContent = '';
 
             datos.forEach((serieObj, rowIndex) => {
                 if (rowIndex % maxRowsPerPage === 0 && rowIndex !== 0) {
-                    currentPageContent += 
-                    `<div class="content">
+                    currentPageContent +=
+                        `<div class="content">
                         <table style="margin-bottom: 20px; border: 1px solid #ddd;">
                             <tr>
                                 <th style="padding: 8px; border: 1px solid #ddd; background-color: #4CAF50; color: white;">Serie</th>
-                                ${Object.keys(periodicidadesObj).slice(colStart, colEnd).map((fechaKey) => 
-                                    `<th style="padding: 8px; border: 1px solid #ddd; background-color: #4CAF50; color: white;">
+                                ${Object.keys(periodicidadesObj).slice(colStart, colEnd).map((fechaKey) =>
+                            `<th style="padding: 8px; border: 1px solid #ddd; background-color: #4CAF50; color: white;">
                                         ${formatFecha(periodicidadesObj[fechaKey].ano, periodicidadesObj[fechaKey].mes, periodicidadesObj[fechaKey].dia)}
                                     </th>`
-                                ).join('')}
+                        ).join('')}
                             </tr>
                             ${tableRows}
                         </table>
                     </div>
                     <div class="page-break"></div>`;
 
-                    pages.push(currentPageContent); 
-                    currentPageContent = ''; 
-                    tableRows = ''; 
+                    pages.push(currentPageContent);
+                    currentPageContent = '';
+                    tableRows = '';
                 }
 
                 let row = `<tr><td style="padding: 8px; border: 1px solid #ddd;">${serieObj.serie}</td>`;
@@ -105,21 +105,21 @@ const DatosSeries = () => {
             });
 
             if (tableRows) {
-                currentPageContent += 
-                `<div class="content">
+                currentPageContent +=
+                    `<div class="content">
                     <table style="margin-bottom: 20px; border: 1px solid #ddd;">
                         <tr>
                             <th style="padding: 8px; border: 1px solid #ddd; background-color: #4CAF50; color: white;">Serie</th>
-                            ${Object.keys(periodicidadesObj).slice(colStart, colEnd).map((fechaKey) => 
-                                `<th style="padding: 8px; border: 1px solid #ddd; background-color: #4CAF50; color: white;">
+                            ${Object.keys(periodicidadesObj).slice(colStart, colEnd).map((fechaKey) =>
+                        `<th style="padding: 8px; border: 1px solid #ddd; background-color: #4CAF50; color: white;">
                                     ${formatFecha(periodicidadesObj[fechaKey].ano, periodicidadesObj[fechaKey].mes, periodicidadesObj[fechaKey].dia)}
                                 </th>`
-                            ).join('')}
+                    ).join('')}
                         </tr>
                         ${tableRows}
                     </table>
                 </div>`;
-                pages.push(currentPageContent); 
+                pages.push(currentPageContent);
             }
         }
 
@@ -215,13 +215,48 @@ const DatosSeries = () => {
         setViewMode(viewMode === 'table' ? 'chart' : 'table');
     };
 
-    const handleVariableSelection = (variableId) => {
-        const newSelectedVariables = { ...selectedVariables, [variableId]: !selectedVariables[variableId] };
-        const selectedVarCount = Object.keys(newSelectedVariables).filter((key) => newSelectedVariables[key]).length;
+    const handleVariableSelection = (valor) => {
+        const newSelectedVariables = { ...selectedVariables };
+
+        if (newSelectedVariables[valor.Id]) {
+            // Si ya está seleccionado, eliminar la selección
+            delete newSelectedVariables[valor.Id];
+        } else {
+            // Si no está seleccionado, agregar la selección completa
+            newSelectedVariables[valor.Id] = valor;
+        }
+
+        // Contar cuántas categorías tienen múltiples selecciones
+        let multiSelectCategoriesCount = 0;
+        const variableSelectionCounts = {};
+
+        // Contar valores seleccionados por cada variable
+        for (const selectedVal in newSelectedVariables) {
+            const selectedVariable = newSelectedVariables[selectedVal]?.Variable?.Id;
+            if (selectedVariable) {
+                if (!variableSelectionCounts[selectedVariable]) {
+                    variableSelectionCounts[selectedVariable] = 0;
+                }
+                variableSelectionCounts[selectedVariable]++;
+            }
+        }
+
+        // Contar cuántas variables tienen más de un valor seleccionado
+        for (const count in variableSelectionCounts) {
+            if (variableSelectionCounts[count] > 1) {
+                multiSelectCategoriesCount++;
+            }
+        }
+
+        // Contar las selecciones de periodicidades
         const selectedPeriodCount = Object.keys(selectedPeriods).filter((key) => selectedPeriods[key]).length;
-        console.log('a',selectedVarCount)
-        if ((selectedVarCount > 1 && selectedPeriodCount > 1) || (selectedVarCount > 1 && selectedPeriodCount > 0) || (selectedVarCount > 0 && selectedPeriodCount > 1)) {
-            Alert.alert('Restricción', 'Solo se puede seleccionar múltiples valores en una categoría (variables o periodicidades).');
+        if (selectedPeriodCount > 1) {
+            multiSelectCategoriesCount++;
+        }
+
+        // Aplicar la restricción de solo permitir múltiples selecciones en dos categorías
+        if (multiSelectCategoriesCount > 2) {
+            Alert.alert('Restricción', 'Solo se pueden seleccionar múltiples valores en dos categorías (variables o periodicidades).');
             return;
         }
 
@@ -229,81 +264,119 @@ const DatosSeries = () => {
     };
 
     const handlePeriodSelection = (periodKey) => {
-        const newSelectedPeriods = { ...selectedPeriods, [periodKey]: !selectedPeriods[periodKey] };
-        const selectedVarCount = Object.keys(selectedVariables).filter((key) => selectedVariables[key]).length;
-        const selectedPeriodCount = Object.keys(newSelectedPeriods).filter((key) => newSelectedPeriods[key]).length;
+    const periodObj = periodicidadesObj[periodKey];
+    if (!periodObj) {
+        console.warn(`Periodo no encontrado para la clave ${periodKey}`);
+        return;
+    }
 
-        if ((selectedVarCount > 1 && selectedPeriodCount > 1) || (selectedVarCount > 1 && selectedPeriodCount > 0) || (selectedVarCount > 0 && selectedPeriodCount > 1)) {
-            Alert.alert('Restricción', 'Solo se puede seleccionar múltiples valores en una categoría (variables o periodicidades).');
-            return;
-        }
+    // Verificar si el periodo ya está seleccionado
+    const isSelected = selectedPeriods[periodKey] !== undefined;
 
-        setSelectedPeriods(newSelectedPeriods);
+    const newSelectedPeriods = {
+        ...selectedPeriods,
+        [periodKey]: isSelected ? undefined : periodObj // Almacenar siempre el objeto periodObj o eliminarlo si está seleccionado
     };
+
+    // Filtra los valores undefined que podrían haberse generado
+    const filteredSelectedPeriods = Object.fromEntries(
+        Object.entries(newSelectedPeriods).filter(([key, value]) => value !== undefined)
+    );
+
+    // Contar cuántas categorías tienen múltiples selecciones
+    let multiSelectCategoriesCount = 0;
+    const variableSelectionCounts = {};
+
+    // Contar valores seleccionados por cada variable
+    for (const variableId in selectedVariables) {
+        const selectedValues = selectedVariables[variableId];
+        if (selectedValues.length > 1) {
+            multiSelectCategoriesCount++;
+        }
+    }
+
+    // Contar las selecciones de periodicidades
+    const selectedPeriodCount = Object.keys(filteredSelectedPeriods).length;
+    if (selectedPeriodCount > 1) {
+        multiSelectCategoriesCount++;
+    }
+
+    // Aplicar la restricción de solo permitir múltiples selecciones en dos categorías
+    if (multiSelectCategoriesCount > 2) {
+        Alert.alert('Restricción', 'Solo se pueden seleccionar múltiples valores en dos categorías (variables o periodicidades).');
+        return;
+    }
+    console.log(filteredSelectedPeriods)
+    // Si pasa la validación, actualizar el estado
+    setSelectedPeriods(filteredSelectedPeriods);
+};
+
+
+
+
+
 
     const generateChart = async () => {
-        const selectedVarIds = Object.keys(selectedVariables).filter((key) => selectedVariables[key]);
-        const selectedPeriodKeys = Object.keys(selectedPeriods).filter((key) => selectedPeriods[key]);
-        
-        if (selectedVarIds.length === 0 || selectedPeriodKeys.length === 0) {
-            Alert.alert('Error', 'Debe seleccionar al menos una variable y un periodo.');
-            return;
-        }
+    console.log(selectedPeriods);
 
-        try {
-            let chartLabels = [];
-            let chartDatasets = [];
+    // Construimos la URL para poder obtener las series de las variables-valores seleccionados
+    const url_base = `https://servicios.ine.es/wstempus/js/ES/SERIES_TABLA/${tablaObj.Id}?`;
+    const parametros_url = Object.entries(selectedVariables)
+        .flatMap(([variableId, objeto]) =>
+            `tv=${objeto.Variable.Id}:${objeto.Id}`
+        )
+        .join('&');
+    const url_final = url_base + parametros_url;
 
-            if (xAxis === 'Periodo' || xAxis === '') {
-                // Eje X es Periodo
-                chartLabels = selectedPeriodKeys.map((periodKey) =>
-                    `${periodicidadesObj[periodKey].dia}/${periodicidadesObj[periodKey].mes}/${periodicidadesObj[periodKey].ano}`
-                );
+    console.log('URL Final:', url_final);
+    // Obtenemos las series 
+    const seriesJson = await fetch(url_final);
+    const series_variables = await seriesJson.json();
+    // Por último tenemos que obtener los datos de las series
+    const datos = await Promise.all(
+    series_variables.map(async (serie) => {
+        const datosSerie = await Promise.all(
+            Object.entries(selectedPeriods).map(async ([fechaKey, dateObj]) => {
+                const { ano, mes, dia } = dateObj;
+                const formattedDate = `${ano}${mes.toString().padStart(2, '0')}${dia.toString().padStart(2, '0')}`;
+                console.log('Fecha:', formattedDate);
 
-                chartDatasets = await Promise.all(
-                    selectedVarIds.map(async (varId) => {
-                        const seriesName = valoresObj[varId][0]?.Variable?.Nombre || 'Variable desconocida';
-                        const seriesData = await Promise.all(
-                            selectedPeriodKeys.map(async (periodKey) => {
-                                const serie = datosSeries.find((serie) => serie.serie === seriesName);
-                                const dato = serie?.datos.find((dato) => dato.fecha === periodKey);
-                                return dato?.valor !== 'N/A' ? parseFloat(dato.valor) : 0;
-                            })
-                        );
-                        return {
-                            data: seriesData,
-                            label: seriesName,
-                        };
-                    })
-                );
-            } else {
-                // Eje X es una Variable
-                chartLabels = selectedVarIds.map(varId => valoresObj[varId][0]?.Variable?.Nombre || `Variable ${varId}`);
+                try {
+                    const response = await fetch(`https://servicios.ine.es/wstempus/js/ES/DATOS_SERIE/${serie.COD}?date=${formattedDate}`);
+                    console.log(`Url:https://servicios.ine.es/wstempus/js/ES/DATOS_SERIE/${serie.COD}?date=${formattedDate}`);
+                    
+                    if (!response.ok) {
+                        console.error(`Error en la solicitud para la fecha ${fechaKey}: ${response.statusText}`);
+                        return { fecha: fechaKey, valor: 'N/A' };
+                    }
 
-                chartDatasets = await Promise.all(
-                    selectedPeriodKeys.map(async (periodKey) => {
-                        const periodLabel = `${periodicidadesObj[periodKey].dia}/${periodicidadesObj[periodKey].mes}/${periodicidadesObj[periodKey].ano}`;
-                        const seriesData = await Promise.all(
-                            selectedVarIds.map(async (varId) => {
-                                const serie = datosSeries.find((serie) => serie.serie === valoresObj[varId][0]?.Variable?.Nombre);
-                                const dato = serie?.datos.find((dato) => dato.fecha === periodKey);
-                                return dato?.valor !== 'N/A' ? parseFloat(dato.valor) : 0;
-                            })
-                        );
-                        return {
-                            data: seriesData,
-                            label: periodLabel,
-                        };
-                    })
-                );
-            }
+                    const textResponse = await response.text();
 
-            setChartData({ labels: chartLabels, datasets: chartDatasets });
-        } catch (error) {
-            console.error('Error al generar el gráfico:', error.message);
-            Alert.alert('Error', 'Hubo un problema al generar el gráfico.');
-        }
-    };
+                    if (!textResponse) {
+                        console.warn(`Respuesta vacía para la fecha ${fechaKey}`);
+                        return { fecha: fechaKey, valor: 'N/A' };
+                    }
+
+                    const data = JSON.parse(textResponse);
+
+                    if (data?.Data?.length > 0) {
+                        return { fecha: fechaKey, valor: data.Data[0].Valor };
+                    } else {
+                        return { fecha: fechaKey, valor: 'N/A' };
+                    }
+                } catch (error) {
+                    console.error(`Error al obtener datos para la fecha ${fechaKey}:`, error.message);
+                    return { fecha: fechaKey, valor: 'N/A' };
+                }
+            })
+        );
+        return { serie: serie.Nombre, datos: datosSerie };
+    })
+);
+
+console.log(JSON.stringify(datos, null, 2));
+};
+
 
     const renderChart = () => {
         if (!chartData) {
@@ -349,25 +422,25 @@ const DatosSeries = () => {
                     <ScrollViewStyled horizontal contentContainerStyle={{ width: Math.max(totalTableWidth, width) }}>
                         <ScrollViewStyled contentContainerStyle={{ flexGrow: 1 }}>
                             <ViewStyled style={{ padding: 10 }}>
-                            <TableHeader
-                                firstColumnWidth={firstColumnWidth}
-                                periodicidadesObj={periodicidadesObj}
-                                otherColumnFixedWidth={otherColumnFixedWidth}
-                                formatFecha={formatFecha}
-                            />
-                            {datosSeries.map((serieObj, index) => (
-                                <TableRow
-                                    key={index}
-                                    serieObj={serieObj}
+                                <TableHeader
                                     firstColumnWidth={firstColumnWidth}
+                                    periodicidadesObj={periodicidadesObj}
                                     otherColumnFixedWidth={otherColumnFixedWidth}
-                                    index={index}
-                                    formatNumero={formatNumero}
+                                    formatFecha={formatFecha}
                                 />
-                            ))}
-                        </ViewStyled>
+                                {datosSeries.map((serieObj, index) => (
+                                    <TableRow
+                                        key={index}
+                                        serieObj={serieObj}
+                                        firstColumnWidth={firstColumnWidth}
+                                        otherColumnFixedWidth={otherColumnFixedWidth}
+                                        index={index}
+                                        formatNumero={formatNumero}
+                                    />
+                                ))}
+                            </ViewStyled>
                         </ScrollViewStyled>
-                        
+
                     </ScrollViewStyled>
                 </ViewStyled>
             );
@@ -385,7 +458,7 @@ const DatosSeries = () => {
                                             key={valor.Id}
                                             title={valor.Nombre}
                                             checked={selectedVariables[valor.Id] || false}
-                                            onPress={() => handleVariableSelection(valor.Id)}
+                                            onPress={() => handleVariableSelection(valor)}
                                         />
                                     ))}
                                 </ViewStyled>
