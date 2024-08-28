@@ -1,7 +1,7 @@
 import React, { useEffect, useState, useMemo } from 'react';
-import { ScrollView, View, Text, Dimensions, Alert } from 'react-native';
+import { ScrollView, View, Text, Dimensions, Alert, Modal, TouchableOpacity } from 'react-native';
 import { styled } from 'nativewind';
-import { LineChart, BarChart } from 'react-native-chart-kit';
+import { BarChart, LineChart, StackedBarChart, PieChart } from 'react-native-chart-kit';
 import { CheckBox, Button } from 'react-native-elements';
 import { Picker } from '@react-native-picker/picker';
 import { useLocalSearchParams } from 'expo-router';
@@ -27,12 +27,13 @@ const DatosSeries = () => {
     const [selectedVariables, setSelectedVariables] = useState({});
     const [selectedPeriods, setSelectedPeriods] = useState({});
     const [chartType, setChartType] = useState('bar'); // 'bar', 'line'
-    const [xAxis, setXAxis] = useState(''); // Eje X dinámico
+    const [xAxis, setXAxis] = useState('Periodo'); // Eje X dinámico, por defecto es Periodo
     const [isLoading, setIsLoading] = useState(true);
     const [datosSeries, setDatosSeries] = useState([]);
     const [htmlContent, setHtmlContent] = useState('');
     const [modalVisible, setModalVisible] = useState(false);
     const [chartData, setChartData] = useState(null); // Para almacenar los datos del gráfico
+    const [isChartModalVisible, setIsChartModalVisible] = useState(false); // Para controlar la visibilidad del modal de gráficos
     const { tabla, series, periodicidades, valores } = useLocalSearchParams();
 
     const seriesObj = useMemo(() => JSON.parse(series), [series]);
@@ -306,78 +307,134 @@ const DatosSeries = () => {
             Alert.alert('Restricción', 'Solo se pueden seleccionar múltiples valores en dos categorías (variables o periodicidades).');
             return;
         }
-        console.log(filteredSelectedPeriods)
-        // Si pasa la validación, actualizar el estado
+
         setSelectedPeriods(filteredSelectedPeriods);
     };
-
-
-
-
-
-
+    const chartConfig = {
+        backgroundGradientFrom: '#fff',
+        backgroundGradientTo: '#fff',
+        decimalPlaces: 2,
+        color: (opacity = 1) => `rgba(0, 123, 255, ${opacity})`,
+        labelColor: (opacity = 1) => `rgba(0, 0, 0, ${opacity})`,
+        style: {
+            borderRadius: 16,
+        },
+        fromZero: true, // Esto asegura que el eje Y comienza desde cero
+    };
     const generateChart = async () => {
-        console.log(selectedPeriods);
+        try {
+            // Construimos la URL para poder obtener las series de las variables-valores seleccionados
+            const url_base = `https://servicios.ine.es/wstempus/js/ES/SERIES_TABLA/${tablaObj.Id}?`;
+            const parametros_url = Object.entries(selectedVariables)
+                .flatMap(([variableId, objeto]) =>
+                    `tv=${objeto.Variable.Id}:${objeto.Id}`
+                )
+                .join('&');
+            const url_final = url_base + parametros_url;
 
-        // Construimos la URL para poder obtener las series de las variables-valores seleccionados
-        const url_base = `https://servicios.ine.es/wstempus/js/ES/SERIES_TABLA/${tablaObj.Id}?`;
-        const parametros_url = Object.entries(selectedVariables)
-            .flatMap(([variableId, objeto]) =>
-                `tv=${objeto.Variable.Id}:${objeto.Id}`
-            )
-            .join('&');
-        const url_final = url_base + parametros_url;
+            console.log('URL Final:', url_final);
+            // Obtenemos las series 
+            const seriesJson = await fetch(url_final);
+            const series_variables = await seriesJson.json();
+            // Por último tenemos que obtener los datos de las series
+            const datos = await Promise.all(
+                series_variables.map(async (serie) => {
+                    const datosSerie = await Promise.all(
+                        Object.entries(selectedPeriods).map(async ([fechaKey, dateObj]) => {
+                            const { ano, mes, dia } = dateObj;
+                            const formattedDate = `${ano}${mes.toString().padStart(2, '0')}${dia.toString().padStart(2, '0')}`;
+                            console.log('Fecha:', formattedDate);
 
-        console.log('URL Final:', url_final);
-        // Obtenemos las series 
-        const seriesJson = await fetch(url_final);
-        const series_variables = await seriesJson.json();
-        // Por último tenemos que obtener los datos de las series
-        const datos = await Promise.all(
-            series_variables.map(async (serie) => {
-                const datosSerie = await Promise.all(
-                    Object.entries(selectedPeriods).map(async ([fechaKey, dateObj]) => {
-                        const { ano, mes, dia } = dateObj;
-                        const formattedDate = `${ano}${mes.toString().padStart(2, '0')}${dia.toString().padStart(2, '0')}`;
-                        console.log('Fecha:', formattedDate);
+                            try {
+                                const response = await fetch(`https://servicios.ine.es/wstempus/js/ES/DATOS_SERIE/${serie.COD}?date=${formattedDate}`);
+                                console.log(`Url:https://servicios.ine.es/wstempus/js/ES/DATOS_SERIE/${serie.COD}?date=${formattedDate}`);
 
-                        try {
-                            const response = await fetch(`https://servicios.ine.es/wstempus/js/ES/DATOS_SERIE/${serie.COD}?date=${formattedDate}&tip=M`);
-                            console.log(`Url: https://servicios.ine.es/wstempus/js/ES/DATOS_SERIE/${serie.COD}?date=${formattedDate}`);
+                                if (!response.ok) {
+                                    console.error(`Error en la solicitud para la fecha ${fechaKey}: ${response.statusText}`);
+                                    return { fecha: fechaKey, valor: 'N/A' };
+                                }
 
-                            if (!response.ok) {
-                                console.error(`Error en la solicitud para la fecha ${fechaKey}: ${response.statusText}`);
-                                return { fecha: fechaKey, valor: 'N/A', metadata: null };
+                                const textResponse = await response.text();
+
+                                if (!textResponse) {
+                                    console.warn(`Respuesta vacía para la fecha ${fechaKey}`);
+                                    return { fecha: fechaKey, valor: 'N/A' };
+                                }
+
+                                const data = JSON.parse(textResponse);
+
+                                if (data?.Data?.length > 0) {
+                                    return { fecha: fechaKey, valor: data.Data[0].Valor };
+                                } else {
+                                    return { fecha: fechaKey, valor: 'N/A' };
+                                }
+                            } catch (error) {
+                                console.error(`Error al obtener datos para la fecha ${fechaKey}:`, error.message);
+                                return { fecha: fechaKey, valor: 'N/A' };
                             }
+                        })
+                    );
+                    return { serie: serie.Nombre, datos: datosSerie };
+                })
+            );
+            console.log(JSON.stringify(datos, null, 2));
+            let labels = [];
+            let datasets = [];
 
-                            const textResponse = await response.text();
+            if (xAxis === 'Periodo') {
+                // Si el eje X es el periodo, las etiquetas serán las fechas seleccionadas
+                labels = Object.keys(selectedPeriods).map((key) => {
+                    const { ano, mes, dia } = selectedPeriods[key];
+                    return `${dia}/${mes}/${ano}`;
+                });
 
-                            if (!textResponse) {
-                                console.warn(`Respuesta vacía para la fecha ${fechaKey}`);
-                                return { fecha: fechaKey, valor: 'N/A', metadata: null };
-                            }
+                datasets = datos.map((serieObj, index) => {
+                    const matchedVariable = Object.values(selectedVariables).find(variable => serieObj.serie.includes(variable.Nombre));
+                    if (matchedVariable) {
+                        return {
+                            label: serieObj.serie,
+                            data: serieObj.datos.map(datoObj => datoObj.valor),
+                            color: () => `rgba(${index * 50}, ${100 + index * 50}, ${200 - index * 50}, 1)`,
+                        };
+                    }
+                    return null;
+                }).filter(dataset => dataset !== null);
+                console.log("Labels:", labels);
+                console.log("Datasets:", datasets.map(dataset => dataset.data));
+            } else {
+                // Si el eje X es otra variable (como Sexo, Edad, etc.)
+                labels = valoresObj[xAxis].filter(valor => selectedVariables[valor.Id]).map((valor) => valor.Nombre);
 
-                            const data = JSON.parse(textResponse);
+                datasets = datos.map((serieObj, index) => {
+                    const matchedVariable = Object.values(selectedVariables).find(variable => serieObj.serie.includes(variable.Nombre));
+                    if (matchedVariable) {
+                        return {
+                            label: matchedVariable.Nombre,
+                            data: labels.map(label => {
+                                const datoObj = serieObj.datos.find(dato => dato.valor && serieObj.serie.includes(label));
+                                return datoObj ? datoObj.valor : 0;
+                            }),
+                            color: () => `rgba(${index * 50}, ${100 + index * 50}, ${200 - index * 50}, 1)`,
+                        };
+                    }
+                    return null;
+                }).filter(dataset => dataset !== null);
+            }
 
-                            if (data?.Data?.length > 0) {
-                                // Extraer y almacenar la metadata junto con los datos de la serie
-                                const metadata = data.MetaData ? data.MetaData : null;
-                                return { fecha: fechaKey, valor: data.Data[0].Valor, metadata: metadata };
-                            } else {
-                                return { fecha: fechaKey, valor: 'N/A', metadata: null };
-                            }
-                        } catch (error) {
-                            console.error(`Error al obtener datos para la fecha ${fechaKey}:`, error.message);
-                            return { fecha: fechaKey, valor: 'N/A', metadata: null };
-                        }
-                    })
-                );
-                return { serie: serie.Nombre, datos: datosSerie };
-            })
-        );
-
-
-        console.log(JSON.stringify(datos, null, 2));
+            const chartData = {
+                labels: labels,
+                datasets: datasets.map(dataset => ({
+                    data: dataset.data,
+                    color: dataset.color,
+                })),
+            };
+            console.log("Labels:", labels);
+            console.log("Datasets:", datasets.map(dataset => dataset.data));
+            setChartData(chartData);
+            setIsChartModalVisible(true);
+        } catch (error) {
+            console.error('Error generando el gráfico:', error);
+        }
     };
 
 
@@ -386,36 +443,74 @@ const DatosSeries = () => {
             return <TextStyled className="text-center mt-4">Seleccione variables y periodos para generar el gráfico.</TextStyled>;
         }
 
-        const chartConfig = {
-            backgroundGradientFrom: '#fff',
-            backgroundGradientTo: '#fff',
-            decimalPlaces: 2,
-            color: (opacity = 1) => `rgba(0, 123, 255, ${opacity})`,
-            labelColor: (opacity = 1) => `rgba(0, 0, 0, ${opacity})`,
-            style: {
-                borderRadius: 16,
-            },
-        };
-
-        return chartType === 'bar' ? (
-            <BarChart
-                data={chartData}
-                width={width - 32}
-                height={220}
-                yAxisLabel=""
-                chartConfig={chartConfig}
-                verticalLabelRotation={30}
-            />
-        ) : (
-            <LineChart
-                data={chartData}
-                width={width - 32}
-                height={220}
-                yAxisLabel=""
-                chartConfig={chartConfig}
-                verticalLabelRotation={30}
-            />
-        );
+        switch (chartType) {
+            case 'bar':
+                return (
+                    <BarChart
+                        data={chartData}
+                        width={width - 32}
+                        height={220}
+                        yAxisLabel=""
+                        chartConfig={chartConfig}
+                        verticalLabelRotation={30}
+                        fromZero={true}
+                    />
+                );
+            case 'horizontalBar':
+                return (
+                    <BarChart
+                        data={chartData}
+                        width={width - 32}
+                        height={220}
+                        yAxisLabel=""
+                        chartConfig={chartConfig}
+                        verticalLabelRotation={30}
+                        fromZero={true}
+                        horizontal={true}
+                    />
+                );
+            case 'stackedBar':
+                return (
+                    <StackedBarChart
+                        data={chartData}
+                        width={width - 32}
+                        height={220}
+                        yAxisLabel=""
+                        chartConfig={chartConfig}
+                        verticalLabelRotation={30}
+                        fromZero={true}
+                    />
+                );
+            case 'pie':
+                return (
+                    <PieChart
+                        data={chartData.datasets.map((dataset, index) => ({
+                            name: dataset.label,
+                            population: dataset.data.reduce((a, b) => a + b, 0),
+                            color: dataset.color(1),
+                            legendFontColor: "#7F7F7F",
+                            legendFontSize: 15
+                        }))}
+                        width={width - 32}
+                        height={220}
+                        chartConfig={chartConfig}
+                        accessor="population"
+                        backgroundColor="transparent"
+                    />
+                );
+            default:
+                return (
+                    <LineChart
+                        data={chartData}
+                        width={width - 32}
+                        height={220}
+                        yAxisLabel=""
+                        chartConfig={chartConfig}
+                        verticalLabelRotation={30}
+                        fromZero={true}
+                    />
+                );
+        }
     };
 
     const renderView = () => {
@@ -443,7 +538,6 @@ const DatosSeries = () => {
                                 ))}
                             </ViewStyled>
                         </ScrollViewStyled>
-
                     </ScrollViewStyled>
                 </ViewStyled>
             );
@@ -501,15 +595,15 @@ const DatosSeries = () => {
                                 onValueChange={(itemValue) => setChartType(itemValue)}
                             >
                                 <Picker.Item label="Líneas" value="line" />
-                                <Picker.Item label="Barras" value="bar" />
+                                <Picker.Item label="Barras verticales" value="bar" />
+                                <Picker.Item label="Barras horizontales" value="horizontalBar" />
+                                <Picker.Item label="Barras Apiladas" value="stackedBar" />
+                                <Picker.Item label="Barras Horizontales Apiladas" value="stackedHorizontalBar" />
+                                <Picker.Item label="Circular" value="pie" />
                             </Picker>
 
                             <Button title="Generar Gráfico" onPress={generateChart} />
                         </ViewStyled>
-                    </ViewStyled>
-
-                    <ViewStyled className="mt-4">
-                        {renderChart()}
                     </ViewStyled>
                 </ScrollViewStyled>
             );
@@ -670,6 +764,23 @@ const DatosSeries = () => {
                 setModalVisible={setModalVisible}
                 handleFormatSelection={handleFormatSelection}
             />
+
+            {/* Modal para mostrar la gráfica */}
+            <Modal
+                animationType="slide"
+                transparent={true}
+                visible={isChartModalVisible}
+                onRequestClose={() => setIsChartModalVisible(false)}
+            >
+                <ViewStyled className="flex-1 justify-center items-center bg-black bg-opacity-50">
+                    <ViewStyled className="bg-white p-4 rounded-lg shadow-md w-11/12">
+                        <TouchableOpacity onPress={() => setIsChartModalVisible(false)}>
+                            <TextStyled className="text-right text-blue-500">Cerrar</TextStyled>
+                        </TouchableOpacity>
+                        {renderChart()}
+                    </ViewStyled>
+                </ViewStyled>
+            </Modal>
         </Plantilla>
     );
 };
