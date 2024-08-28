@@ -169,7 +169,7 @@ const DatosSeries = () => {
                                 const formattedDate = `${ano}${mes.toString().padStart(2, '0')}${dia.toString().padStart(2, '0')}`;
 
                                 try {
-                                    const response = await fetch(`https://servicios.ine.es/wstempus/js/ES/DATOS_SERIE/${serie.COD}?date=${formattedDate}`);
+                                    const response = await fetch(`https://servicios.ine.es/wstempus/js/ES/DATOS_SERIE/${serie.COD}?date=${formattedDate}&tip=M`);
 
                                     if (!response.ok) {
                                         console.error(`Error en la solicitud para la fecha ${fechaKey}: ${response.statusText}`);
@@ -264,52 +264,52 @@ const DatosSeries = () => {
     };
 
     const handlePeriodSelection = (periodKey) => {
-    const periodObj = periodicidadesObj[periodKey];
-    if (!periodObj) {
-        console.warn(`Periodo no encontrado para la clave ${periodKey}`);
-        return;
-    }
+        const periodObj = periodicidadesObj[periodKey];
+        if (!periodObj) {
+            console.warn(`Periodo no encontrado para la clave ${periodKey}`);
+            return;
+        }
 
-    // Verificar si el periodo ya está seleccionado
-    const isSelected = selectedPeriods[periodKey] !== undefined;
+        // Verificar si el periodo ya está seleccionado
+        const isSelected = selectedPeriods[periodKey] !== undefined;
 
-    const newSelectedPeriods = {
-        ...selectedPeriods,
-        [periodKey]: isSelected ? undefined : periodObj // Almacenar siempre el objeto periodObj o eliminarlo si está seleccionado
-    };
+        const newSelectedPeriods = {
+            ...selectedPeriods,
+            [periodKey]: isSelected ? undefined : periodObj // Almacenar siempre el objeto periodObj o eliminarlo si está seleccionado
+        };
 
-    // Filtra los valores undefined que podrían haberse generado
-    const filteredSelectedPeriods = Object.fromEntries(
-        Object.entries(newSelectedPeriods).filter(([key, value]) => value !== undefined)
-    );
+        // Filtra los valores undefined que podrían haberse generado
+        const filteredSelectedPeriods = Object.fromEntries(
+            Object.entries(newSelectedPeriods).filter(([key, value]) => value !== undefined)
+        );
 
-    // Contar cuántas categorías tienen múltiples selecciones
-    let multiSelectCategoriesCount = 0;
-    const variableSelectionCounts = {};
+        // Contar cuántas categorías tienen múltiples selecciones
+        let multiSelectCategoriesCount = 0;
+        const variableSelectionCounts = {};
 
-    // Contar valores seleccionados por cada variable
-    for (const variableId in selectedVariables) {
-        const selectedValues = selectedVariables[variableId];
-        if (selectedValues.length > 1) {
+        // Contar valores seleccionados por cada variable
+        for (const variableId in selectedVariables) {
+            const selectedValues = selectedVariables[variableId];
+            if (selectedValues.length > 1) {
+                multiSelectCategoriesCount++;
+            }
+        }
+
+        // Contar las selecciones de periodicidades
+        const selectedPeriodCount = Object.keys(filteredSelectedPeriods).length;
+        if (selectedPeriodCount > 1) {
             multiSelectCategoriesCount++;
         }
-    }
 
-    // Contar las selecciones de periodicidades
-    const selectedPeriodCount = Object.keys(filteredSelectedPeriods).length;
-    if (selectedPeriodCount > 1) {
-        multiSelectCategoriesCount++;
-    }
-
-    // Aplicar la restricción de solo permitir múltiples selecciones en dos categorías
-    if (multiSelectCategoriesCount > 2) {
-        Alert.alert('Restricción', 'Solo se pueden seleccionar múltiples valores en dos categorías (variables o periodicidades).');
-        return;
-    }
-    console.log(filteredSelectedPeriods)
-    // Si pasa la validación, actualizar el estado
-    setSelectedPeriods(filteredSelectedPeriods);
-};
+        // Aplicar la restricción de solo permitir múltiples selecciones en dos categorías
+        if (multiSelectCategoriesCount > 2) {
+            Alert.alert('Restricción', 'Solo se pueden seleccionar múltiples valores en dos categorías (variables o periodicidades).');
+            return;
+        }
+        console.log(filteredSelectedPeriods)
+        // Si pasa la validación, actualizar el estado
+        setSelectedPeriods(filteredSelectedPeriods);
+    };
 
 
 
@@ -317,65 +317,68 @@ const DatosSeries = () => {
 
 
     const generateChart = async () => {
-    console.log(selectedPeriods);
+        console.log(selectedPeriods);
 
-    // Construimos la URL para poder obtener las series de las variables-valores seleccionados
-    const url_base = `https://servicios.ine.es/wstempus/js/ES/SERIES_TABLA/${tablaObj.Id}?`;
-    const parametros_url = Object.entries(selectedVariables)
-        .flatMap(([variableId, objeto]) =>
-            `tv=${objeto.Variable.Id}:${objeto.Id}`
-        )
-        .join('&');
-    const url_final = url_base + parametros_url;
+        // Construimos la URL para poder obtener las series de las variables-valores seleccionados
+        const url_base = `https://servicios.ine.es/wstempus/js/ES/SERIES_TABLA/${tablaObj.Id}?`;
+        const parametros_url = Object.entries(selectedVariables)
+            .flatMap(([variableId, objeto]) =>
+                `tv=${objeto.Variable.Id}:${objeto.Id}`
+            )
+            .join('&');
+        const url_final = url_base + parametros_url;
 
-    console.log('URL Final:', url_final);
-    // Obtenemos las series 
-    const seriesJson = await fetch(url_final);
-    const series_variables = await seriesJson.json();
-    // Por último tenemos que obtener los datos de las series
-    const datos = await Promise.all(
-    series_variables.map(async (serie) => {
-        const datosSerie = await Promise.all(
-            Object.entries(selectedPeriods).map(async ([fechaKey, dateObj]) => {
-                const { ano, mes, dia } = dateObj;
-                const formattedDate = `${ano}${mes.toString().padStart(2, '0')}${dia.toString().padStart(2, '0')}`;
-                console.log('Fecha:', formattedDate);
+        console.log('URL Final:', url_final);
+        // Obtenemos las series 
+        const seriesJson = await fetch(url_final);
+        const series_variables = await seriesJson.json();
+        // Por último tenemos que obtener los datos de las series
+        const datos = await Promise.all(
+            series_variables.map(async (serie) => {
+                const datosSerie = await Promise.all(
+                    Object.entries(selectedPeriods).map(async ([fechaKey, dateObj]) => {
+                        const { ano, mes, dia } = dateObj;
+                        const formattedDate = `${ano}${mes.toString().padStart(2, '0')}${dia.toString().padStart(2, '0')}`;
+                        console.log('Fecha:', formattedDate);
 
-                try {
-                    const response = await fetch(`https://servicios.ine.es/wstempus/js/ES/DATOS_SERIE/${serie.COD}?date=${formattedDate}`);
-                    console.log(`Url:https://servicios.ine.es/wstempus/js/ES/DATOS_SERIE/${serie.COD}?date=${formattedDate}`);
-                    
-                    if (!response.ok) {
-                        console.error(`Error en la solicitud para la fecha ${fechaKey}: ${response.statusText}`);
-                        return { fecha: fechaKey, valor: 'N/A' };
-                    }
+                        try {
+                            const response = await fetch(`https://servicios.ine.es/wstempus/js/ES/DATOS_SERIE/${serie.COD}?date=${formattedDate}&tip=M`);
+                            console.log(`Url: https://servicios.ine.es/wstempus/js/ES/DATOS_SERIE/${serie.COD}?date=${formattedDate}`);
 
-                    const textResponse = await response.text();
+                            if (!response.ok) {
+                                console.error(`Error en la solicitud para la fecha ${fechaKey}: ${response.statusText}`);
+                                return { fecha: fechaKey, valor: 'N/A', metadata: null };
+                            }
 
-                    if (!textResponse) {
-                        console.warn(`Respuesta vacía para la fecha ${fechaKey}`);
-                        return { fecha: fechaKey, valor: 'N/A' };
-                    }
+                            const textResponse = await response.text();
 
-                    const data = JSON.parse(textResponse);
+                            if (!textResponse) {
+                                console.warn(`Respuesta vacía para la fecha ${fechaKey}`);
+                                return { fecha: fechaKey, valor: 'N/A', metadata: null };
+                            }
 
-                    if (data?.Data?.length > 0) {
-                        return { fecha: fechaKey, valor: data.Data[0].Valor };
-                    } else {
-                        return { fecha: fechaKey, valor: 'N/A' };
-                    }
-                } catch (error) {
-                    console.error(`Error al obtener datos para la fecha ${fechaKey}:`, error.message);
-                    return { fecha: fechaKey, valor: 'N/A' };
-                }
+                            const data = JSON.parse(textResponse);
+
+                            if (data?.Data?.length > 0) {
+                                // Extraer y almacenar la metadata junto con los datos de la serie
+                                const metadata = data.MetaData ? data.MetaData : null;
+                                return { fecha: fechaKey, valor: data.Data[0].Valor, metadata: metadata };
+                            } else {
+                                return { fecha: fechaKey, valor: 'N/A', metadata: null };
+                            }
+                        } catch (error) {
+                            console.error(`Error al obtener datos para la fecha ${fechaKey}:`, error.message);
+                            return { fecha: fechaKey, valor: 'N/A', metadata: null };
+                        }
+                    })
+                );
+                return { serie: serie.Nombre, datos: datosSerie };
             })
         );
-        return { serie: serie.Nombre, datos: datosSerie };
-    })
-);
 
-console.log(JSON.stringify(datos, null, 2));
-};
+
+        console.log(JSON.stringify(datos, null, 2));
+    };
 
 
     const renderChart = () => {
