@@ -265,62 +265,62 @@ const DatosSeries = () => {
     };
 
     const handlePeriodSelection = (periodKey) => {
-    const periodObj = periodicidadesObj[periodKey];
-    if (!periodObj) {
-        console.warn(`Periodo no encontrado para la clave ${periodKey}`);
-        return;
-    }
-
-    // Verificar si el periodo ya está seleccionado
-    const isSelected = selectedPeriods[periodKey] !== undefined;
-
-    // Crear un nuevo objeto con las periodicidades seleccionadas
-    const newSelectedPeriods = {
-        ...selectedPeriods,
-        [periodKey]: isSelected ? undefined : periodObj // Almacenar siempre el objeto periodObj o eliminarlo si está seleccionado
-    };
-
-    // Filtrar los valores undefined que podrían haberse generado
-    const filteredSelectedPeriods = Object.fromEntries(
-        Object.entries(newSelectedPeriods).filter(([key, value]) => value !== undefined)
-    );
-
-    // Contar cuántas categorías tienen múltiples selecciones
-    let multiSelectCategoriesCount = 0;
-
-    // Contar valores seleccionados por cada variable
-    const variableSelectionCounts = {};
-    for (const selectedVal in selectedVariables) {
-        const selectedVariable = selectedVariables[selectedVal]?.Variable?.Id;
-        if (selectedVariable) {
-            if (!variableSelectionCounts[selectedVariable]) {
-                variableSelectionCounts[selectedVariable] = 0;
-            }
-            variableSelectionCounts[selectedVariable]++;
+        const periodObj = periodicidadesObj[periodKey];
+        if (!periodObj) {
+            console.warn(`Periodo no encontrado para la clave ${periodKey}`);
+            return;
         }
-    }
 
-    // Contar cuántas variables tienen más de un valor seleccionado
-    for (const count in variableSelectionCounts) {
-        if (variableSelectionCounts[count] > 1) {
+        // Verificar si el periodo ya está seleccionado
+        const isSelected = selectedPeriods[periodKey] !== undefined;
+
+        // Crear un nuevo objeto con las periodicidades seleccionadas
+        const newSelectedPeriods = {
+            ...selectedPeriods,
+            [periodKey]: isSelected ? undefined : periodObj // Almacenar siempre el objeto periodObj o eliminarlo si está seleccionado
+        };
+
+        // Filtrar los valores undefined que podrían haberse generado
+        const filteredSelectedPeriods = Object.fromEntries(
+            Object.entries(newSelectedPeriods).filter(([key, value]) => value !== undefined)
+        );
+
+        // Contar cuántas categorías tienen múltiples selecciones
+        let multiSelectCategoriesCount = 0;
+
+        // Contar valores seleccionados por cada variable
+        const variableSelectionCounts = {};
+        for (const selectedVal in selectedVariables) {
+            const selectedVariable = selectedVariables[selectedVal]?.Variable?.Id;
+            if (selectedVariable) {
+                if (!variableSelectionCounts[selectedVariable]) {
+                    variableSelectionCounts[selectedVariable] = 0;
+                }
+                variableSelectionCounts[selectedVariable]++;
+            }
+        }
+
+        // Contar cuántas variables tienen más de un valor seleccionado
+        for (const count in variableSelectionCounts) {
+            if (variableSelectionCounts[count] > 1) {
+                multiSelectCategoriesCount++;
+            }
+        }
+
+        // Contar las selecciones de periodicidades
+        const selectedPeriodCount = Object.keys(filteredSelectedPeriods).length;
+        if (selectedPeriodCount > 1) {
             multiSelectCategoriesCount++;
         }
-    }
 
-    // Contar las selecciones de periodicidades
-    const selectedPeriodCount = Object.keys(filteredSelectedPeriods).length;
-    if (selectedPeriodCount > 1) {
-        multiSelectCategoriesCount++;
-    }
+        // Aplicar la restricción de solo permitir múltiples selecciones en dos categorías
+        if (multiSelectCategoriesCount > 2) {
+            Alert.alert('Restricción', 'Solo se pueden seleccionar múltiples valores en dos categorías (variables o periodicidades).');
+            return;
+        }
 
-    // Aplicar la restricción de solo permitir múltiples selecciones en dos categorías
-    if (multiSelectCategoriesCount > 2) {
-        Alert.alert('Restricción', 'Solo se pueden seleccionar múltiples valores en dos categorías (variables o periodicidades).');
-        return;
-    }
-
-    setSelectedPeriods(filteredSelectedPeriods);
-};
+        setSelectedPeriods(filteredSelectedPeriods);
+    };
 
     const chartConfig = {
         backgroundGradientFrom: '#fff',
