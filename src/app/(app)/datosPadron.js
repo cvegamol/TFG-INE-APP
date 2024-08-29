@@ -319,7 +319,14 @@ const DatosSeries = () => {
         style: {
             borderRadius: 16,
         },
-        fromZero: true, // Esto asegura que el eje Y comienza desde cero
+        fromZero: true,
+    };
+    const sortDataset = (dataset) => {
+        return dataset.sort((a, b) => {
+            if (a < b) return -1;
+            if (a > b) return 1;
+            return 0;
+        });
     };
     const generateChart = async () => {
         try {
@@ -391,6 +398,7 @@ const DatosSeries = () => {
                 datasets = datos.map((serieObj, index) => {
                     const matchedVariable = Object.values(selectedVariables).find(variable => serieObj.serie.includes(variable.Nombre));
                     if (matchedVariable) {
+                        console.log('AA', serieObj.datos.map(datoObj => datoObj.valor))
                         return {
                             label: serieObj.serie,
                             data: serieObj.datos.map(datoObj => datoObj.valor),
@@ -403,28 +411,45 @@ const DatosSeries = () => {
                 console.log("Datasets:", datasets.map(dataset => dataset.data));
             } else {
                 // Si el eje X es otra variable (como Sexo, Edad, etc.)
+
                 labels = valoresObj[xAxis].filter(valor => selectedVariables[valor.Id]).map((valor) => valor.Nombre);
 
                 datasets = datos.map((serieObj, index) => {
-                    const matchedVariable = Object.values(selectedVariables).find(variable => serieObj.serie.includes(variable.Nombre));
-                    if (matchedVariable) {
+                    console.log(index, '----', serieObj);
+
+                    // Crear un dataset donde los datos coinciden con las etiquetas de manera exacta
+                    const dataset = labels.map(label => {
+                        // Aquí verificamos si la serie actual contiene el nombre de la etiqueta completa
+                        if (serieObj.serie.includes(label)) {
+                            // Buscamos los valores correspondientes a la etiqueta en la serie actual
+                            const valores = serieObj.datos.map(dato => dato.valor);
+                            console.log('dentro Valores', valores);
+                            return valores;
+                        }
+                        return []; // Retorna un array vacío si la condición no se cumple, para evitar undefined
+                    }).flat();
+                    console.log('dataset', dataset)
+                    // Verificamos que todos los valores sean válidos y no null
+                    if (dataset.every(value => value !== null)) {
                         return {
-                            label: matchedVariable.Nombre,
-                            data: labels.map(label => {
-                                const datoObj = serieObj.datos.find(dato => dato.valor && serieObj.serie.includes(label));
-                                return datoObj ? datoObj.valor : 0;
-                            }),
+                            label: serieObj.serie,
+                            data: dataset,
                             color: () => `rgba(${index * 50}, ${100 + index * 50}, ${200 - index * 50}, 1)`,
                         };
+                    } else {
+                        console.error(`Dataset inválido para la serie: ${serieObj.serie} con labels: ${labels}`, dataset);
+                        return null;
                     }
-                    return null;
                 }).filter(dataset => dataset !== null);
+
+                console.log("Labels:", labels);
+                console.log("Datasets:", datasets);
             }
 
             const chartData = {
                 labels: labels,
                 datasets: datasets.map(dataset => ({
-                    data: dataset.data,
+                    data: sortDataset(dataset.data),
                     color: dataset.color,
                 })),
             };
