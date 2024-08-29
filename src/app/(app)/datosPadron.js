@@ -389,55 +389,78 @@ const DatosSeries = () => {
             let datasets = [];
 
             if (xAxis === 'Periodo') {
-                // Si el eje X es el periodo, las etiquetas serán las fechas seleccionadas
+                // Generar etiquetas basadas en los periodos seleccionados
                 labels = Object.keys(selectedPeriods).map((key) => {
                     const { ano, mes, dia } = selectedPeriods[key];
                     return `${dia}/${mes}/${ano}`;
                 });
 
+                // Crear los datasets iniciales
                 datasets = datos.map((serieObj, index) => {
                     const matchedVariable = Object.values(selectedVariables).find(variable => serieObj.serie.includes(variable.Nombre));
                     if (matchedVariable) {
-                        console.log('AA', serieObj.datos.map(datoObj => datoObj.valor))
                         return {
                             label: serieObj.serie,
                             data: serieObj.datos.map(datoObj => datoObj.valor),
-                            color: () => `rgba(${index * 50}, ${100 + index * 50}, ${200 - index * 50}, 1)`,
+                            color: `rgba(${index * 50}, ${100 + index * 50}, ${200 - index * 50}, 1)`,
                         };
                     }
                     return null;
                 }).filter(dataset => dataset !== null);
+
+                // Reorganizar los datasets para agrupar por serie
+                let reorganizedDatasets = [];
+
+                // Suponiendo que cada 'data' dentro de datasets tiene la misma longitud
+                for (let i = 0; i < datasets[0].data.length; i++) {
+                    let newDataArray = datasets.map(dataset => dataset.data[i]);
+                    reorganizedDatasets.push(newDataArray);
+                }
+
+                // Ahora, reemplazamos los datasets originales con los reorganizados
+                datasets = reorganizedDatasets.map((data, index) => {
+                    return {
+                        label: `Serie ${index + 1}`, // Aquí puedes reemplazar por un nombre más específico si lo deseas
+                        data: data,
+                        backgroundColor: `rgba(${index * 50}, ${100 + index * 50}, ${200 - index * 50}, 1)`,
+                    };
+                });
+
                 console.log("Labels:", labels);
-                console.log("Datasets:", datasets.map(dataset => dataset.data));
+                console.log("Reorganized Datasets:", datasets.map(dataset => dataset.data));
+
             } else {
                 // Si el eje X es otra variable (como Sexo, Edad, etc.)
 
-                labels = valoresObj[xAxis].filter(valor => selectedVariables[valor.Id]).map((valor) => valor.Nombre);
+                labels = valoresObj[xAxis]
+                    .filter(valor => selectedVariables[valor.Id])
+                    .map((valor) => valor.Nombre);
 
-                datasets = datos.map((serieObj, index) => {
-                    console.log(index, '----', serieObj);
-
-                    // Crear un dataset donde los datos coinciden con las etiquetas de manera exacta
-                    const dataset = labels.map(label => {
-                        // Aquí verificamos si la serie actual contiene el nombre de la etiqueta completa
+                datasets = labels.map((label) => {
+                    // Filtra los datos para obtener solo aquellos que coinciden con el label actual
+                    const dataset = datos.map(serieObj => {
+                        // Verificamos si la serie actual contiene el nombre de la etiqueta completa
                         if (serieObj.serie.includes(label)) {
                             // Buscamos los valores correspondientes a la etiqueta en la serie actual
                             const valores = serieObj.datos.map(dato => dato.valor);
-                            console.log('dentro Valores', valores);
-                            return valores;
+                            console.log(`Valores para ${label}:`, valores);
+                            return valores; // Retornamos los valores correspondientes
                         }
-                        return []; // Retorna un array vacío si la condición no se cumple, para evitar undefined
-                    }).flat();
-                    console.log('dataset', dataset)
+                        return null; // Retorna null si la condición no se cumple
+                    }).filter(data => data !== null); // Filtra los valores nulos
+
+                    // Aplanamos el array para tener una estructura plana si es necesario
+                    const flatDataset = dataset.flat();
+
                     // Verificamos que todos los valores sean válidos y no null
-                    if (dataset.every(value => value !== null)) {
+                    if (flatDataset.every(value => value !== null && value !== undefined)) {
                         return {
-                            label: serieObj.serie,
-                            data: dataset,
+                            label: label,
+                            data: flatDataset,
                             color: () => `rgba(${index * 50}, ${100 + index * 50}, ${200 - index * 50}, 1)`,
                         };
                     } else {
-                        console.error(`Dataset inválido para la serie: ${serieObj.serie} con labels: ${labels}`, dataset);
+                        console.error(`Dataset inválido para la serie: ${label} con labels: ${labels}`, flatDataset);
                         return null;
                     }
                 }).filter(dataset => dataset !== null);
