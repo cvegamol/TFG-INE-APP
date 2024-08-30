@@ -325,13 +325,26 @@ const DatosSeries = () => {
     const chartConfig = {
         backgroundGradientFrom: '#fff',
         backgroundGradientTo: '#fff',
-        decimalPlaces: 2,
-        color: (opacity = 1) => `rgba(0, 123, 255, ${opacity})`,
+
+        color: (opacity = 1, index) => {
+            const colors = [
+                `rgba(255, 99, 132, ${opacity})`, // Rojo
+                `rgba(54, 162, 235, ${opacity})`, // Azul
+                `rgba(75, 192, 192, ${opacity})`, // Verde
+                `rgba(153, 102, 255, ${opacity})`, // Morado
+                `rgba(255, 159, 64, ${opacity})`, // Naranja
+                `rgba(255, 205, 86, ${opacity})`, // Amarillo
+            ];
+            return colors[index % colors.length];
+        },
+
         labelColor: (opacity = 1) => `rgba(0, 0, 0, ${opacity})`,
         style: {
             borderRadius: 16,
         },
-        fromZero: true,
+
+        decimalPlaces: 0,
+
     };
     const sortDataset = (dataset) => {
         return dataset.sort((a, b) => {
@@ -400,6 +413,16 @@ const DatosSeries = () => {
             let labels = [];
             let datasets = [];
 
+            const colors = [
+                'rgba(255, 99, 132, 0.8)', // Rojo
+                'rgba(54, 162, 235, 0.8)', // Azul
+                'rgba(75, 192, 192, 0.8)', // Verde
+                'rgba(153, 102, 255, 0.8)', // Morado
+                'rgba(255, 159, 64, 0.8)', // Naranja
+                'rgba(255, 205, 86, 0.8)', // Amarillo
+            ];
+
+
             if (xAxis === 'Periodo') {
                 // Generar etiquetas basadas en los periodos seleccionados
                 labels = Object.keys(selectedPeriods).map((key) => {
@@ -413,8 +436,9 @@ const DatosSeries = () => {
                     if (matchedVariable) {
                         return {
                             label: serieObj.serie,
+                            color: colors[index % colors.length],
                             data: serieObj.datos.map(datoObj => datoObj.valor),
-                            color: `rgba(${index * 50}, ${100 + index * 50}, ${200 - index * 50}, 1)`,
+
                         };
                     }
                     return null;
@@ -430,11 +454,11 @@ const DatosSeries = () => {
                 }
 
                 // Ahora, reemplazamos los datasets originales con los reorganizados
-                datasets = reorganizedDatasets.map((data, index) => {
+                datasets = reorganizedDatasets.map((data, color, index) => {
                     return {
                         label: `Serie ${index + 1}`, // Aquí puedes reemplazar por un nombre más específico si lo deseas
                         data: data,
-                        backgroundColor: `rgba(${index * 50}, ${100 + index * 50}, ${200 - index * 50}, 1)`,
+                        color: color,
                     };
                 });
 
@@ -448,7 +472,7 @@ const DatosSeries = () => {
                     .filter(valor => selectedVariables[valor.Id])
                     .map((valor) => valor.Nombre);
 
-                datasets = labels.map((label) => {
+                datasets = labels.map((label, index) => {
                     // Filtra los datos para obtener solo aquellos que coinciden con el label actual
                     const dataset = datos.map(serieObj => {
                         // Verificamos si la serie actual contiene el nombre de la etiqueta completa
@@ -469,7 +493,7 @@ const DatosSeries = () => {
                         return {
                             label: label,
                             data: flatDataset,
-                            color: () => `rgba(${index * 50}, ${100 + index * 50}, ${200 - index * 50}, 1)`,
+                            color: colors[index % colors.length],
                         };
                     } else {
                         console.error(`Dataset inválido para la serie: ${label} con labels: ${labels}`, flatDataset);
@@ -480,18 +504,39 @@ const DatosSeries = () => {
                 console.log("Labels:", labels);
                 console.log("Datasets:", datasets);
             }
+            if (chartType === 'line') {
+                // Reestructuración de datasets para el formato correcto
+                let reorganizedDatasets = [];
+                if (datasets.length > 0) {
+                    // Determinamos la longitud de los datos de la primera serie (suponiendo que todas tienen la misma longitud)
+                    const dataLength = datasets[0].data.length;
 
-            const chartData = {
-                labels: labels,
-                datasets: datasets.map(dataset => ({
-                    data: sortDataset(dataset.data),
-                    color: dataset.color,
-                })),
-            };
-            console.log("Labels:", labels);
-            console.log("Datasets:", datasets.map(dataset => dataset.data));
-            setChartData(chartData);
-            setIsChartModalVisible(true);
+                    for (let i = 0; i < dataLength; i++) {
+                        let newDataArray = datasets.map(dataset => dataset.data[i]);
+
+                        // Ordenamos los valores de newDataArray para que el eje Y esté correctamente ordenado
+                        newDataArray.sort((a, b) => a - b);
+
+                        reorganizedDatasets.push({
+                            data: newDataArray,
+                            color: (opacity = 1) => datasets[i % datasets.length].color, // Aplicar el color correspondiente
+                        });
+                    }
+                }
+
+                // Configuramos el chartData con los datasets reorganizados y ordenados
+                const chartData = {
+                    labels: labels,
+                    datasets: reorganizedDatasets,
+                };
+
+                console.log("Labels:", labels);
+                console.log("Reorganized Datasets:", reorganizedDatasets.map(dataset => dataset.data));
+                setChartData(chartData);
+                setIsChartModalVisible(true);
+            }
+
+
         } catch (error) {
             console.error('Error generando el gráfico:', error);
         }
@@ -504,70 +549,24 @@ const DatosSeries = () => {
         }
 
         switch (chartType) {
-            case 'bar':
-                return (
-                    <BarChart
-                        data={chartData}
-                        width={width - 32}
-                        height={220}
-                        yAxisLabel=""
-                        chartConfig={chartConfig}
-                        verticalLabelRotation={30}
-                        fromZero={true}
-                    />
-                );
-            case 'horizontalBar':
-                return (
-                    <BarChart
-                        data={chartData}
-                        width={width - 32}
-                        height={220}
-                        yAxisLabel=""
-                        chartConfig={chartConfig}
-                        verticalLabelRotation={30}
-                        fromZero={true}
-                        horizontal={true}
-                    />
-                );
-            case 'stackedBar':
-                return (
-                    <StackedBarChart
-                        data={chartData}
-                        width={width - 32}
-                        height={220}
-                        yAxisLabel=""
-                        chartConfig={chartConfig}
-                        verticalLabelRotation={30}
-                        fromZero={true}
-                    />
-                );
-            case 'pie':
-                return (
-                    <PieChart
-                        data={chartData.datasets.map((dataset, index) => ({
-                            name: dataset.label,
-                            population: dataset.data.reduce((a, b) => a + b, 0),
-                            color: dataset.color(1),
-                            legendFontColor: "#7F7F7F",
-                            legendFontSize: 15
-                        }))}
-                        width={width - 32}
-                        height={220}
-                        chartConfig={chartConfig}
-                        accessor="population"
-                        backgroundColor="transparent"
-                    />
-                );
-            default:
+
+            case 'line':
                 return (
                     <LineChart
                         data={chartData}
-                        width={width - 32}
+                        width={Dimensions.get("window").width}
                         height={220}
-                        yAxisLabel=""
+
+
                         chartConfig={chartConfig}
-                        verticalLabelRotation={30}
+                        bezier
                         fromZero={true}
+
+                        style={{
+                            marginVertical: 8,
+                            borderRadius: 16
+                        }}
+
                     />
                 );
         }
