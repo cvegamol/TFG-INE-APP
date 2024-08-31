@@ -387,12 +387,12 @@ const DatosSeries = () => {
                             console.log('Fecha:', formattedDate);
 
                             try {
-                                const response = await fetch(`https://servicios.ine.es/wstempus/js/ES/DATOS_SERIE/${serie.COD}?date=${formattedDate}`);
-                                console.log(`Url:https://servicios.ine.es/wstempus/js/ES/DATOS_SERIE/${serie.COD}?date=${formattedDate}`);
+                                const response = await fetch(`https://servicios.ine.es/wstempus/js/ES/DATOS_SERIE/${serie.COD}?date=${formattedDate}&tip=M`);
+                                console.log(`Url:https://servicios.ine.es/wstempus/js/ES/DATOS_SERIE/${serie.COD}?date=${formattedDate}&tip=M`);
 
                                 if (!response.ok) {
                                     console.error(`Error en la solicitud para la fecha ${fechaKey}: ${response.statusText}`);
-                                    return { fecha: formattedDate, valor: 'N/A' };
+                                    return { fecha: formattedDate, valor: 'N/A', variables: [] };
                                 }
 
                                 const textResponse = await response.text();
@@ -403,15 +403,15 @@ const DatosSeries = () => {
                                 }
 
                                 const data = JSON.parse(textResponse);
-
+                                console.log('asadasda', data)
                                 if (data?.Data?.length > 0) {
-                                    return { fecha: formattedDate, valor: data.Data[0].Valor };
+                                    return { fecha: formattedDate, valor: data.Data[0].Valor, variables: data.MetaData };
                                 } else {
-                                    return { fecha: formattedDate, valor: 'N/A' };
+                                    return { fecha: formattedDate, valor: 'N/A', variables: [] };
                                 }
                             } catch (error) {
                                 console.error(`Error al obtener datos para la fecha ${fechaKey}:`, error.message);
-                                return { fecha: formattedDate, valor: 'N/A' };
+                                return { fecha: formattedDate, valor: 'N/A', variables: [] };
                             }
                         })
                     );
@@ -419,11 +419,9 @@ const DatosSeries = () => {
                 })
             );
 
-            console.log(JSON.stringify(datos, null, 2));
+            console.log('Datos finales:', JSON.stringify(datos, null, 2));
             let labels = [];
             let datasets = [];
-
-
 
             if (xAxis === 'Periodo') {
                 // Generar etiquetas basadas en los periodos seleccionados
@@ -432,59 +430,64 @@ const DatosSeries = () => {
                     return `${dia}/${mes}/${ano}`;
                 });
 
-                // Crear los datasets iniciales
-                datasets = datos.map((serieObj, index) => {
-                    const matchedVariable = Object.values(selectedVariables).find(variable => serieObj.serie.includes(variable.Nombre));
-                    if (matchedVariable) {
-                        return {
-                            label: serieObj.serie,
+                // Crear un objeto para almacenar los datasets agrupados por fecha
+                let groupedDatasets = {};
 
-                            data: serieObj.datos.map(datoObj => ({
-                                value: datoObj.valor, // Guardar el valor del dato
-                                fecha: datoObj.fecha, // Guardar la fecha formateada
-                                serie: serieObj.serie // Guardar el nombre de la serie
-                            })),
-                        };
-                    }
-                    return null;
-                }).filter(dataset => dataset !== null);
+                datos.forEach((serieObj) => {
+                    serieObj.datos.forEach((datoObj) => {
+                        // Convertir la fecha del dato al formato "dd/mm/yyyy"
+                        const [year, month, day] = datoObj.fecha.split(/[-T]/);
+                        const formattedDate = `${day}/${month}/${year}`;
 
-                console.log("Labels:", labels);
+                        if (!groupedDatasets[formattedDate]) {
+                            groupedDatasets[formattedDate] = {
+                                label: formattedDate,
+                                data: [],
+                            };
+                        }
+
+                        groupedDatasets[formattedDate].data.push({
+                            value: datoObj.valor,
+                            fecha: datoObj.fecha,
+                            serie: serieObj.serie,
+                            color: seriesColors[Object.keys(groupedDatasets).length % seriesColors.length],
+                        });
+                    });
+                });
+
+                // Convertir el objeto a un array de datasets
+                datasets = Object.values(groupedDatasets);
+
+                console.log("Labels:", Object.keys(groupedDatasets));
                 console.log("Datasets:", datasets);
 
             } else {
                 // Si el eje X es otra variable (como Sexo, Edad, etc.)
-
                 labels = valoresObj[xAxis]
                     .filter(valor => selectedVariables[valor.Id])
                     .map((valor) => valor.Nombre);
 
-                datasets = labels.map((label, index) => {
-                    // Filtra los datos para obtener solo aquellos que coinciden con el label actual
+                datasets = labels.map((label) => {
                     const dataset = datos.map(serieObj => {
-                        // Verificamos si la serie actual contiene el nombre de la etiqueta completa
-                        if (serieObj.serie.includes(label)) {
-                            // Buscamos los valores y fechas correspondientes a la etiqueta en la serie actual
+                        if (serieObj.datos.some(dato =>
+                            dato.variables.slice(0, -2).some(variable => variable.Nombre.includes(label))
+                        )) {
                             const valoresConFecha = serieObj.datos.map(dato => ({
-                                value: dato.valor, // Guardar el valor del dato
-                                fecha: dato.fecha, // Guardar la fecha formateada
-                                serie: serieObj.serie // Guardar el nombre de la serie
+                                value: dato.valor,
+                                fecha: dato.fecha,
+                                serie: serieObj.serie
                             }));
-                            console.log(`Valores para ${label}:`, valoresConFecha);
-                            return valoresConFecha; // Retornamos los valores y fechas correspondientes
+                            return valoresConFecha;
                         }
-                        return null; // Retorna null si la condición no se cumple
-                    }).filter(data => data !== null); // Filtra los valores nulos
+                        return null;
+                    }).filter(data => data !== null);
 
-                    // Aplanamos el array para tener una estructura plana si es necesario
                     const flatDataset = dataset.flat();
 
-                    // Verificamos que todos los valores sean válidos y no null
                     if (flatDataset.every(item => item.value !== null && item.value !== undefined)) {
                         return {
                             label: label,
                             data: flatDataset,
-
                         };
                     } else {
                         console.error(`Dataset inválido para la serie: ${label} con labels: ${labels}`, flatDataset);
@@ -495,6 +498,10 @@ const DatosSeries = () => {
                 console.log("Labels:", labels);
                 console.log("Datasets:", datasets);
             }
+
+
+
+            console.log("Final Dataset:", { labels, datasets });
 
             if (chartType === 'line') {
                 // Reestructuración de datasets para el formato correcto
