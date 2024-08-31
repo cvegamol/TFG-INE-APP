@@ -35,7 +35,7 @@ const DatosSeries = () => {
     const [chartData, setChartData] = useState(null); // Para almacenar los datos del gráfico
     const [isChartModalVisible, setIsChartModalVisible] = useState(false); // Para controlar la visibilidad del modal de gráficos
     const { tabla, series, periodicidades, valores } = useLocalSearchParams();
-
+    const [scale, setScale] = useState(1)
     const seriesObj = useMemo(() => JSON.parse(series), [series]);
     const periodicidadesObj = useMemo(() => JSON.parse(periodicidades), [periodicidades]);
     const tablaObj = JSON.parse(tabla);
@@ -323,9 +323,20 @@ const DatosSeries = () => {
     };
 
     const chartConfig = {
-        backgroundGradientFrom: '#fff',
-        backgroundGradientTo: '#fff',
-
+        strokeWidth: 2,
+        backgroundGradientFrom: '#f7f7f7',
+        backgroundGradientTo: '#f7f7f7',
+        propsForBackgroundLines: {
+            stroke: '#000',
+            strokeWidth: 1,
+        },
+        propsForHorizontalLabels: {
+            fontSize: 10,
+            fill: '#000',
+        },
+        propsForLabels: {
+            fill: '#000',
+        },
         color: (opacity = 1, index) => {
             const colors = [
                 `rgba(255, 99, 132, ${opacity})`, // Rojo
@@ -346,6 +357,8 @@ const DatosSeries = () => {
         decimalPlaces: 0,
 
     };
+
+
     const sortDataset = (dataset) => {
         return dataset.sort((a, b) => {
             if (a < b) return -1;
@@ -530,6 +543,8 @@ const DatosSeries = () => {
                 console.log("Reorganized Datasets:", reorganizedDatasets);
                 setChartData(chartData);
                 console.log(chartData);
+                const scale = determineScale(chartData.datasets.flatMap(dataset => dataset.data));
+                setScale(scale);
                 setIsChartModalVisible(true);
             }
 
@@ -539,27 +554,63 @@ const DatosSeries = () => {
         }
     };
 
+    const truncateLabel = (label, maxLength = 8) => {
+        return label.length > maxLength ? `${label.slice(0, maxLength)}...` : label;
+    };
+    const determineScale = (data) => {
+        const maxValue = Math.max(...data.map(d => Math.abs(d)));
+        if (maxValue >= 1.0e9) {
+            return 1.0e9; // Escala en miles de millones (Billions)
+        } else if (maxValue >= 1.0e6) {
+            return 1.0e6; // Escala en millones (Millions)
+        } else if (maxValue >= 1.0e3) {
+            return 1.0e3; // Escala en miles (Thousands)
+        } else {
+            return 1; // Sin escala (valores pequeños)
+        }
+    };
 
-
+    const formatYLabel = (value, scale) => {
+        switch (scale) {
+            case 1.0e9:
+                return `${(value / 1.0e9).toFixed(1)}B`;
+            case 1.0e6:
+                return `${(value / 1.0e6).toFixed(1)}M`;
+            case 1.0e3:
+                return `${(value / 1.0e3).toFixed(1)}k`;
+            default:
+                return value.toString();
+        }
+    };
     const renderChart = () => {
         if (!chartData) {
             return <TextStyled className="text-center mt-4">Seleccione variables y periodos para generar el gráfico.</TextStyled>;
         }
+
 
         switch (chartType) {
             case 'line':
                 return (
                     <LineChart
                         data={chartData}
-                        width={Dimensions.get("window").width}
-                        height={220}
+                        width={Dimensions.get("window").width * 0.83} // Ajustar al 85% del ancho de la pantalla
+                        height={320}
+                        yLabelsOffset={5}
                         chartConfig={chartConfig}
                         bezier
                         fromZero={true}
+                        horizontalLabelRotation={0}
+                        verticalLabelRotation={270}
+                        xLabelsOffset={30}
+                        formatXLabel={(label) => truncateLabel(label)}
                         style={{
                             marginVertical: 8,
-                            borderRadius: 16
+                            borderRadius: 10,
+                            paddingRight: 40,
+
+
                         }}
+                        formatYLabel={(value) => formatYLabel(value, scale)}
                         onDataPointClick={(data) => {
                             console.log('Data Point Clicked:', data);
 
@@ -864,6 +915,7 @@ const DatosSeries = () => {
                         <TouchableOpacity onPress={() => setIsChartModalVisible(false)}>
                             <TextStyled className="text-right text-blue-500">Cerrar</TextStyled>
                         </TouchableOpacity>
+
                         {renderChart()}
                     </ViewStyled>
                 </ViewStyled>
