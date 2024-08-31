@@ -40,7 +40,14 @@ const DatosSeries = () => {
     const periodicidadesObj = useMemo(() => JSON.parse(periodicidades), [periodicidades]);
     const tablaObj = JSON.parse(tabla);
     const valoresObj = useMemo(() => JSON.parse(valores), [valores]);
-
+    const seriesColors = [
+        'rgba(255, 99, 132, 0.8)',  // Rojo
+        'rgba(54, 162, 235, 0.8)',  // Azul
+        'rgba(75, 192, 192, 0.8)',  // Verde
+        'rgba(153, 102, 255, 0.8)', // Morado
+        'rgba(255, 159, 64, 0.8)',  // Naranja
+        'rgba(255, 205, 86, 0.8)',  // Amarillo
+    ];
     const formatFecha = (ano, mes, dia, exportFormat = false) => {
         if (exportFormat) {
             return `${String(dia).padStart(2, '0')}/${String(mes).padStart(2, '0')}/${ano}`;
@@ -337,17 +344,7 @@ const DatosSeries = () => {
         propsForLabels: {
             fill: '#000',
         },
-        color: (opacity = 1, index) => {
-            const colors = [
-                `rgba(255, 99, 132, ${opacity})`, // Rojo
-                `rgba(54, 162, 235, ${opacity})`, // Azul
-                `rgba(75, 192, 192, ${opacity})`, // Verde
-                `rgba(153, 102, 255, ${opacity})`, // Morado
-                `rgba(255, 159, 64, ${opacity})`, // Naranja
-                `rgba(255, 205, 86, ${opacity})`, // Amarillo
-            ];
-            return colors[index % colors.length];
-        },
+        color: (opacity = 1, index) => seriesColors[index % seriesColors.length],
 
         labelColor: (opacity = 1) => `rgba(0, 0, 0, ${opacity})`,
         style: {
@@ -426,14 +423,7 @@ const DatosSeries = () => {
             let labels = [];
             let datasets = [];
 
-            const colors = [
-                'rgba(255, 99, 132, 0.8)', // Rojo
-                'rgba(54, 162, 235, 0.8)', // Azul
-                'rgba(75, 192, 192, 0.8)', // Verde
-                'rgba(153, 102, 255, 0.8)', // Morado
-                'rgba(255, 159, 64, 0.8)', // Naranja
-                'rgba(255, 205, 86, 0.8)', // Amarillo
-            ];
+
 
             if (xAxis === 'Periodo') {
                 // Generar etiquetas basadas en los periodos seleccionados
@@ -448,7 +438,7 @@ const DatosSeries = () => {
                     if (matchedVariable) {
                         return {
                             label: serieObj.serie,
-                            color: colors[index % colors.length],
+
                             data: serieObj.datos.map(datoObj => ({
                                 value: datoObj.valor, // Guardar el valor del dato
                                 fecha: datoObj.fecha, // Guardar la fecha formateada
@@ -494,7 +484,7 @@ const DatosSeries = () => {
                         return {
                             label: label,
                             data: flatDataset,
-                            color: colors[index % colors.length],
+
                         };
                     } else {
                         console.error(`Dataset inválido para la serie: ${label} con labels: ${labels}`, flatDataset);
@@ -515,16 +505,15 @@ const DatosSeries = () => {
                     const dataLength = datasets[0].data.length;
 
                     for (let i = 0; i < dataLength; i++) {
-                        let newDataArray = datasets.map(dataset => ({
+                        let newDataArray = datasets.map((dataset, datasetIndex) => ({
                             value: dataset.data[i].value, // Extraer el valor
                             fecha: dataset.data[i].fecha, // Mantener la fecha formateada
                             serie: dataset.data[i].serie, // Mantener el nombre de la serie
-                            color: dataset.color // Mantener el color
+                            color: seriesColors[datasetIndex % seriesColors.length], // Asignar color basado en el índice
                         }));
 
                         reorganizedDatasets.push({
                             data: newDataArray, // Guardar el array completo con objetos
-                            color: (opacity = 1) => newDataArray[0].color, // Aplicar el color correspondiente
                         });
                     }
                 }
@@ -532,10 +521,13 @@ const DatosSeries = () => {
                 // Configuramos el chartData con los datasets reorganizados
                 const chartData = {
                     labels: labels,
-                    datasets: reorganizedDatasets.map(dataset => ({
+                    datasets: reorganizedDatasets.map((dataset, datasetIndex) => ({
                         data: dataset.data.map(item => item.value), // Extraer solo los valores para el gráfico
-                        color: dataset.color,
-                        originalData: dataset.data // Guardar los objetos completos para acceder a ellos en el click
+                        originalData: dataset.data, // Guardar los objetos completos para acceder a ellos en el click
+                        color: (opacity = 1, index) => {
+                            const color = dataset.data[index] && dataset.data[index].color;
+                            return color ? color : seriesColors[datasetIndex % seriesColors.length]; // Usar el color del dataset o un color por defecto
+                        },
                     })),
                 };
 
@@ -547,6 +539,7 @@ const DatosSeries = () => {
                 setScale(scale);
                 setIsChartModalVisible(true);
             }
+
 
 
         } catch (error) {
