@@ -223,7 +223,7 @@ const DatosSeries = () => {
         setViewMode(viewMode === 'table' ? 'chart' : 'table');
     };
 
-    const handleVariableSelection = (valor) => {
+    const handleVariableSelection = (valor, variableId) => {
         const newSelectedVariables = { ...selectedVariables };
 
         if (newSelectedVariables[valor.Id]) {
@@ -231,21 +231,24 @@ const DatosSeries = () => {
             delete newSelectedVariables[valor.Id];
         } else {
             // Si no está seleccionado, agregar la selección completa
-            newSelectedVariables[valor.Id] = valor;
+            newSelectedVariables[valor.Id] = {
+                ...valor,
+                variableId, // También almacenamos variableId para uso futuro si es necesario
+            };
         }
 
         // Contar cuántas categorías tienen múltiples selecciones
         let multiSelectCategoriesCount = 0;
         const variableSelectionCounts = {};
 
-        // Contar valores seleccionados por cada variable
+        // Contar valores seleccionados por cada variable usando variableId
         for (const selectedVal in newSelectedVariables) {
-            const selectedVariable = newSelectedVariables[selectedVal]?.Variable?.Id;
-            if (selectedVariable) {
-                if (!variableSelectionCounts[selectedVariable]) {
-                    variableSelectionCounts[selectedVariable] = 0;
+            const selectedVariableId = newSelectedVariables[selectedVal]?.variableId;
+            if (selectedVariableId) {
+                if (!variableSelectionCounts[selectedVariableId]) {
+                    variableSelectionCounts[selectedVariableId] = 0;
                 }
-                variableSelectionCounts[selectedVariable]++;
+                variableSelectionCounts[selectedVariableId]++;
             }
         }
 
@@ -267,7 +270,7 @@ const DatosSeries = () => {
             Alert.alert('Restricción', 'Solo se pueden seleccionar múltiples valores en dos categorías (variables o periodicidades).');
             return;
         }
-
+        console.log(newSelectedVariables);
         setSelectedVariables(newSelectedVariables);
     };
 
@@ -295,15 +298,15 @@ const DatosSeries = () => {
         // Contar cuántas categorías tienen múltiples selecciones
         let multiSelectCategoriesCount = 0;
 
-        // Contar valores seleccionados por cada variable
+        // Contar valores seleccionados por cada variable usando variableId
         const variableSelectionCounts = {};
         for (const selectedVal in selectedVariables) {
-            const selectedVariable = selectedVariables[selectedVal]?.Variable?.Id;
-            if (selectedVariable) {
-                if (!variableSelectionCounts[selectedVariable]) {
-                    variableSelectionCounts[selectedVariable] = 0;
+            const selectedVariableId = selectedVariables[selectedVal]?.variableId;
+            if (selectedVariableId) {
+                if (!variableSelectionCounts[selectedVariableId]) {
+                    variableSelectionCounts[selectedVariableId] = 0;
                 }
-                variableSelectionCounts[selectedVariable]++;
+                variableSelectionCounts[selectedVariableId]++;
             }
         }
 
@@ -328,6 +331,7 @@ const DatosSeries = () => {
 
         setSelectedPeriods(filteredSelectedPeriods);
     };
+
 
     const chartConfig = {
         strokeWidth: 2,
@@ -692,13 +696,14 @@ const DatosSeries = () => {
                                         <CheckBox
                                             key={valor.Id}
                                             title={valor.Nombre}
-                                            checked={selectedVariables[valor.Id] || false}
-                                            onPress={() => handleVariableSelection(valor)}
+                                            checked={Boolean(selectedVariables[valor.Id])}  // Comprobamos si el valor está en selectedVariables
+                                            onPress={() => handleVariableSelection(valor, variableId)}  // Pasamos variableId y valor
                                         />
                                     ))}
                                 </ViewStyled>
                             ))}
                         </ViewStyled>
+
 
                         <ViewStyled className="mb-4">
                             <TextStyled className="font-bold mb-2">Seleccione los periodos:</TextStyled>
