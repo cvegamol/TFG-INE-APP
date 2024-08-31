@@ -355,7 +355,6 @@ const DatosSeries = () => {
     };
     const generateChart = async () => {
         try {
-            // Construimos la URL para poder obtener las series de las variables-valores seleccionados
             const url_base = `https://servicios.ine.es/wstempus/js/ES/SERIES_TABLA/${tablaObj.Id}?`;
             const parametros_url = Object.entries(selectedVariables)
                 .flatMap(([variableId, objeto]) =>
@@ -365,10 +364,10 @@ const DatosSeries = () => {
             const url_final = url_base + parametros_url;
 
             console.log('URL Final:', url_final);
-            // Obtenemos las series 
+
             const seriesJson = await fetch(url_final);
             const series_variables = await seriesJson.json();
-            // Por último tenemos que obtener los datos de las series
+
             const datos = await Promise.all(
                 series_variables.map(async (serie) => {
                     const datosSerie = await Promise.all(
@@ -383,32 +382,33 @@ const DatosSeries = () => {
 
                                 if (!response.ok) {
                                     console.error(`Error en la solicitud para la fecha ${fechaKey}: ${response.statusText}`);
-                                    return { fecha: fechaKey, valor: 'N/A' };
+                                    return { fecha: formattedDate, valor: 'N/A' };
                                 }
 
                                 const textResponse = await response.text();
 
                                 if (!textResponse) {
                                     console.warn(`Respuesta vacía para la fecha ${fechaKey}`);
-                                    return { fecha: fechaKey, valor: 'N/A' };
+                                    return { fecha: formattedDate, valor: 'N/A' };
                                 }
 
                                 const data = JSON.parse(textResponse);
 
                                 if (data?.Data?.length > 0) {
-                                    return { fecha: fechaKey, valor: data.Data[0].Valor };
+                                    return { fecha: formattedDate, valor: data.Data[0].Valor };
                                 } else {
-                                    return { fecha: fechaKey, valor: 'N/A' };
+                                    return { fecha: formattedDate, valor: 'N/A' };
                                 }
                             } catch (error) {
                                 console.error(`Error al obtener datos para la fecha ${fechaKey}:`, error.message);
-                                return { fecha: fechaKey, valor: 'N/A' };
+                                return { fecha: formattedDate, valor: 'N/A' };
                             }
                         })
                     );
                     return { serie: serie.Nombre, datos: datosSerie };
                 })
             );
+
             console.log(JSON.stringify(datos, null, 2));
             let labels = [];
             let datasets = [];
@@ -421,7 +421,6 @@ const DatosSeries = () => {
                 'rgba(255, 159, 64, 0.8)', // Naranja
                 'rgba(255, 205, 86, 0.8)', // Amarillo
             ];
-
 
             if (xAxis === 'Periodo') {
                 // Generar etiquetas basadas en los periodos seleccionados
@@ -437,33 +436,18 @@ const DatosSeries = () => {
                         return {
                             label: serieObj.serie,
                             color: colors[index % colors.length],
-                            data: serieObj.datos.map(datoObj => datoObj.valor),
-
+                            data: serieObj.datos.map(datoObj => ({
+                                value: datoObj.valor, // Guardar el valor del dato
+                                fecha: datoObj.fecha, // Guardar la fecha formateada
+                                serie: serieObj.serie // Guardar el nombre de la serie
+                            })),
                         };
                     }
                     return null;
                 }).filter(dataset => dataset !== null);
 
-                // Reorganizar los datasets para agrupar por serie
-                let reorganizedDatasets = [];
-
-                // Suponiendo que cada 'data' dentro de datasets tiene la misma longitud
-                for (let i = 0; i < datasets[0].data.length; i++) {
-                    let newDataArray = datasets.map(dataset => dataset.data[i]);
-                    reorganizedDatasets.push(newDataArray);
-                }
-
-                // Ahora, reemplazamos los datasets originales con los reorganizados
-                datasets = reorganizedDatasets.map((data, color, index) => {
-                    return {
-                        label: `Serie ${index + 1}`, // Aquí puedes reemplazar por un nombre más específico si lo deseas
-                        data: data,
-                        color: color,
-                    };
-                });
-
                 console.log("Labels:", labels);
-                console.log("Reorganized Datasets:", datasets.map(dataset => dataset.data));
+                console.log("Datasets:", datasets);
 
             } else {
                 // Si el eje X es otra variable (como Sexo, Edad, etc.)
@@ -477,10 +461,14 @@ const DatosSeries = () => {
                     const dataset = datos.map(serieObj => {
                         // Verificamos si la serie actual contiene el nombre de la etiqueta completa
                         if (serieObj.serie.includes(label)) {
-                            // Buscamos los valores correspondientes a la etiqueta en la serie actual
-                            const valores = serieObj.datos.map(dato => dato.valor);
-                            console.log(`Valores para ${label}:`, valores);
-                            return valores; // Retornamos los valores correspondientes
+                            // Buscamos los valores y fechas correspondientes a la etiqueta en la serie actual
+                            const valoresConFecha = serieObj.datos.map(dato => ({
+                                value: dato.valor, // Guardar el valor del dato
+                                fecha: dato.fecha, // Guardar la fecha formateada
+                                serie: serieObj.serie // Guardar el nombre de la serie
+                            }));
+                            console.log(`Valores para ${label}:`, valoresConFecha);
+                            return valoresConFecha; // Retornamos los valores y fechas correspondientes
                         }
                         return null; // Retorna null si la condición no se cumple
                     }).filter(data => data !== null); // Filtra los valores nulos
@@ -489,7 +477,7 @@ const DatosSeries = () => {
                     const flatDataset = dataset.flat();
 
                     // Verificamos que todos los valores sean válidos y no null
-                    if (flatDataset.every(value => value !== null && value !== undefined)) {
+                    if (flatDataset.every(item => item.value !== null && item.value !== undefined)) {
                         return {
                             label: label,
                             data: flatDataset,
@@ -504,35 +492,44 @@ const DatosSeries = () => {
                 console.log("Labels:", labels);
                 console.log("Datasets:", datasets);
             }
+
             if (chartType === 'line') {
                 // Reestructuración de datasets para el formato correcto
                 let reorganizedDatasets = [];
+
                 if (datasets.length > 0) {
-                    // Determinamos la longitud de los datos de la primera serie (suponiendo que todas tienen la misma longitud)
+                    // Determinamos la longitud de los datos de la primera serie
                     const dataLength = datasets[0].data.length;
 
                     for (let i = 0; i < dataLength; i++) {
-                        let newDataArray = datasets.map(dataset => dataset.data[i]);
-
-                        // Ordenamos los valores de newDataArray para que el eje Y esté correctamente ordenado
-                        newDataArray.sort((a, b) => a - b);
+                        let newDataArray = datasets.map(dataset => ({
+                            value: dataset.data[i].value, // Extraer el valor
+                            fecha: dataset.data[i].fecha, // Mantener la fecha formateada
+                            serie: dataset.data[i].serie, // Mantener el nombre de la serie
+                            color: dataset.color // Mantener el color
+                        }));
 
                         reorganizedDatasets.push({
-                            data: newDataArray,
-                            color: (opacity = 1) => datasets[i % datasets.length].color, // Aplicar el color correspondiente
+                            data: newDataArray, // Guardar el array completo con objetos
+                            color: (opacity = 1) => newDataArray[0].color, // Aplicar el color correspondiente
                         });
                     }
                 }
 
-                // Configuramos el chartData con los datasets reorganizados y ordenados
+                // Configuramos el chartData con los datasets reorganizados
                 const chartData = {
                     labels: labels,
-                    datasets: reorganizedDatasets,
+                    datasets: reorganizedDatasets.map(dataset => ({
+                        data: dataset.data.map(item => item.value), // Extraer solo los valores para el gráfico
+                        color: dataset.color,
+                        originalData: dataset.data // Guardar los objetos completos para acceder a ellos en el click
+                    })),
                 };
 
                 console.log("Labels:", labels);
-                console.log("Reorganized Datasets:", reorganizedDatasets.map(dataset => dataset.data));
+                console.log("Reorganized Datasets:", reorganizedDatasets);
                 setChartData(chartData);
+                console.log(chartData);
                 setIsChartModalVisible(true);
             }
 
@@ -543,34 +540,65 @@ const DatosSeries = () => {
     };
 
 
+
     const renderChart = () => {
         if (!chartData) {
             return <TextStyled className="text-center mt-4">Seleccione variables y periodos para generar el gráfico.</TextStyled>;
         }
 
         switch (chartType) {
-
             case 'line':
                 return (
                     <LineChart
                         data={chartData}
                         width={Dimensions.get("window").width}
                         height={220}
-
-
                         chartConfig={chartConfig}
                         bezier
                         fromZero={true}
-
                         style={{
                             marginVertical: 8,
                             borderRadius: 16
                         }}
+                        onDataPointClick={(data) => {
+                            console.log('Data Point Clicked:', data);
 
+                            const { dataset, index } = data;
+
+                            if (!dataset || index === undefined) {
+                                console.error('Dataset o index no encontrado');
+                                return;
+                            }
+
+                            const clickedData = dataset.originalData[index]; // Acceder a los datos originales
+
+                            if (!clickedData) {
+                                console.error('No se encontraron datos originales para el punto clicado.');
+                                return;
+                            }
+
+                            const serieName = clickedData.serie;
+                            const formattedDate = `${clickedData.fecha.slice(6, 8)}/${clickedData.fecha.slice(4, 6)}/${clickedData.fecha.slice(0, 4)}`;
+
+                            const formattedValue = new Intl.NumberFormat('es-ES').format(clickedData.value);
+
+
+                            Alert.alert(
+                                'Información del punto',
+                                `Serie: ${serieName}\nFecha: ${formattedDate}\nValor: ${formattedValue}`,
+                                [{ text: 'OK' }]
+                            );
+                        }}
                     />
                 );
         }
     };
+
+
+
+
+
+
 
     const renderView = () => {
         if (viewMode === 'table') {
