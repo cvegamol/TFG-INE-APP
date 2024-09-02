@@ -16,6 +16,7 @@ import { shareAsync } from 'expo-sharing';
 import * as XLSX from 'xlsx';
 import { AntDesign } from '@expo/vector-icons';
 
+
 const ViewStyled = styled(View);
 const TextStyled = styled(Text);
 const ScrollViewStyled = styled(ScrollView);
@@ -48,6 +49,7 @@ const DatosSeries = () => {
         'rgba(255, 159, 64, 0.8)',  // Naranja
         'rgba(255, 205, 86, 0.8)',  // Amarillo
     ];
+
     const formatFecha = (ano, mes, dia, exportFormat = false) => {
         if (exportFormat) {
             return `${String(dia).padStart(2, '0')}/${String(mes).padStart(2, '0')}/${ano}`;
@@ -360,6 +362,8 @@ const DatosSeries = () => {
     };
 
 
+
+
     const sortDataset = (dataset) => {
         return dataset.sort((a, b) => {
             if (a < b) return -1;
@@ -367,6 +371,9 @@ const DatosSeries = () => {
             return 0;
         });
     };
+
+
+
     const generateChart = async () => {
         try {
             const url_base = `https://servicios.ine.es/wstempus/js/ES/SERIES_TABLA/${tablaObj.Id}?`;
@@ -549,8 +556,36 @@ const DatosSeries = () => {
                 const scale = determineScale(chartData.datasets.flatMap(dataset => dataset.data));
                 setScale(scale);
                 setIsChartModalVisible(true);
-            }
 
+            } else if (chartType === 'stackedBar') {
+                const chartData = {
+                    labels: labels,  // Ejemplo: ["Mujeres", "Hombres"]
+                    datasets: datasets.map(dataset => ({
+                        label: dataset.label,  // Ejemplo: "Mujeres", "Hombres"
+                        data: dataset.data.map(d => d.value),  // Extrae los valores para cada grupo
+                        color: (opacity = 1) => seriesColors[datasets.indexOf(dataset) % seriesColors.length]  // Asigna un color a cada serie
+                    }))
+                };
+
+                console.log('Datos', chartData);
+                console.log('Datasets:', JSON.stringify(datasets, null, 2));
+
+                setChartData(chartData);
+
+                // Paso 1: Sumar los valores de cada dataset
+                const datasetSums = chartData.datasets.map(dataset =>
+                    dataset.data.reduce((sum, value) => sum + value, 0)
+                );
+
+                // Paso 2: Determinar la escala con base en las sumas
+                const scale = determineScale(datasetSums);
+
+                console.log('Suma de los datos por dataset:', datasetSums);
+                console.log('Escala', scale);
+
+                setScale(scale);
+                setIsChartModalVisible(true);
+            }
 
 
         } catch (error) {
@@ -574,6 +609,7 @@ const DatosSeries = () => {
         }
     };
 
+
     const formatYLabel = (value, scale) => {
         switch (scale) {
             case 1.0e9:
@@ -586,6 +622,15 @@ const DatosSeries = () => {
                 return value.toString();
         }
     };
+    const handleBarPress = (datum, seriesName) => {
+        const formattedValue = new Intl.NumberFormat('es-ES').format(datum.y);
+        Alert.alert(
+            'Información del segmento',
+            `Serie: ${seriesName}\nFecha: ${datum.x}\nValor: ${formattedValue}`,
+            [{ text: 'OK' }]
+        );
+    };
+
     const renderChart = () => {
         if (!chartData) {
             return <TextStyled className="text-center mt-4">Seleccione variables y periodos para generar el gráfico.</TextStyled>;
@@ -645,6 +690,38 @@ const DatosSeries = () => {
                             );
                         }}
                     />
+                );
+            case 'stackedBar':
+                return (
+                    <StackedBarChart
+                        style={{
+                            marginVertical: 8,
+                            borderRadius: 10,
+                        }}
+                        data={{
+                            labels: chartData.labels,
+                            //legend: chartData.datasets.map(dataset => dataset.label),
+                            data: chartData.datasets.map(dataset => dataset.data),
+                            barColors: seriesColors
+                        }}
+                        xLabelsOffset={30}
+                        formatXLabel={(label) => truncateLabel(label)}
+                        formatYLabel={(value) => formatYLabel(value, scale)}
+                        width={Dimensions.get("window").width * 0.83}
+                        height={320}
+                        chartConfig={{
+                            backgroundColor: '#1cc910',
+                            backgroundGradientFrom: '#eff3ff',
+                            backgroundGradientTo: '#efefef',
+                            decimalPlaces: 0,
+                            color: (opacity = 1) => `rgba(0, 0, 0, ${opacity})`,
+                            style: {
+                                borderRadius: 16,
+                            },
+                        }}
+
+                    />
+
                 );
         }
     };
