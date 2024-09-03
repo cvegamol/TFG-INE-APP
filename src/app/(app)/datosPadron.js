@@ -32,6 +32,7 @@ const DatosSeries = () => {
     const [xAxis, setXAxis] = useState('Periodo'); // Eje X dinámico, por defecto es Periodo
     const [isLoading, setIsLoading] = useState(true);
     const [datosSeries, setDatosSeries] = useState([]);
+    const [leyenda, setLeyenda] = useState([]);
     const [htmlContent, setHtmlContent] = useState('');
     const [modalVisible, setModalVisible] = useState(false);
     const [chartData, setChartData] = useState(null); // Para almacenar los datos del gráfico
@@ -432,6 +433,8 @@ const DatosSeries = () => {
             );
 
             console.log('Datos finales:', JSON.stringify(datos, null, 2));
+
+
             let labels = [];
             let datasets = [];
 
@@ -512,7 +515,35 @@ const DatosSeries = () => {
                 console.log("Labels:", labels);
                 console.log("Datasets:", datasets);
             }
+            let leyendaArray = [];  // Inicializar como un array vacío
+            const variablesNoEje = Object.entries(selectedVariables).filter(([key]) => key !== xAxis);
+            const periodosNoEje = Object.entries(selectedPeriods).filter(([key]) => key !== xAxis);
 
+            const variableConMasDeUnaSeleccion = variablesNoEje.find(([, valor]) => valor.length > 1);
+            const periodoConMasDeUnaSeleccion = periodosNoEje.length > 1;
+
+            if (!periodoConMasDeUnaSeleccion && variableConMasDeUnaSeleccion) {
+                // Filtrar valores que ya están en las etiquetas (labels)
+                leyendaArray = variablesNoEje
+                    .map(([_, valor]) => valor.Nombre)
+                    .filter(nombre => !labels.includes(nombre));
+            } else if (periodoConMasDeUnaSeleccion) {
+                leyendaArray = periodosNoEje
+                    .map(([key, _]) => {
+                        const { ano, mes, dia } = selectedPeriods[key];
+                        const nombrePeriodo = `${dia}/${mes}/${ano}`;
+                        return nombrePeriodo;
+                    })
+                    .filter(nombre => !labels.includes(nombre)); // Filtrar los nombres que ya están en las etiquetas
+            } else {
+                leyendaArray = variablesNoEje
+                    .map(([_, valor]) => valor.Nombre)
+                    .filter(nombre => !labels.includes(nombre)); // Filtrar los nombres que ya están en las etiquetas
+            }
+
+            setLeyenda(leyendaArray);
+
+            console.log(leyenda)
 
 
             console.log("Final Dataset:", { labels, datasets });
@@ -679,7 +710,7 @@ const DatosSeries = () => {
                 }}
                 data={{
                     labels: chartData.labels,
-                    legend: chartData.datasets.map(dataset => dataset.label),
+                    legend: leyenda,
                     data: chartData.datasets.map(dataset => dataset.data.map(d => d.value)),
                     barColors: seriesColors,
                 }}
@@ -700,7 +731,7 @@ const DatosSeries = () => {
                     // Rotación de las etiquetas del eje X a 270 grados
                 }}
                 xLabelsOffset={30}
-                hideLegend={true}
+
                 onDataPointClick={(datum) => {
                     const { datasetIndex, index } = datum;
                     const clickedData = chartData.datasets[index].originalData[datasetIndex];
