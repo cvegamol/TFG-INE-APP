@@ -717,6 +717,7 @@ const DatosSeries = () => {
                 width={Dimensions.get("window").width * 0.83}
                 height={320}
                 formatYLabel={(value) => formatYLabel(value, scale)}
+                formatXLabel={(label) => truncateLabel(label)}
                 chartConfig={{
                     backgroundColor: '#1cc910',
                     backgroundGradientFrom: '#eff3ff',
@@ -731,7 +732,7 @@ const DatosSeries = () => {
                     // Rotación de las etiquetas del eje X a 270 grados
                 }}
                 xLabelsOffset={30}
-
+                hideLegend={true}
                 onDataPointClick={(datum) => {
                     const { datasetIndex, index } = datum;
                     const clickedData = chartData.datasets[index].originalData[datasetIndex];

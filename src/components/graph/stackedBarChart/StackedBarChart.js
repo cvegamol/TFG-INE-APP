@@ -7,6 +7,7 @@ import AbstractChart from "../AbstractChart";
 class StackedBarChart extends AbstractChart {
   static defaultProps = {
     onDataPointClick: () => { }, // Añade un valor predeterminado para onDataPointClick
+    formatXLabel: (xLabel) => xLabel
   };
 
   getBarPercentage = () => {
@@ -147,6 +148,7 @@ class StackedBarChart extends AbstractChart {
       formatYLabel = (yLabel) => {
         return yLabel;
       },
+      formatXLabel = (xLabel) => xLabel,
       hideLegend = false
     } = this.props;
 
@@ -221,7 +223,8 @@ class StackedBarChart extends AbstractChart {
                 paddingTop,
                 horizontalOffset: barWidth,
                 verticalLabelRotation: 270,  // Rotación de 270 grados
-                verticalLabelsHeightPercentage
+                verticalLabelsHeightPercentage,
+                formatXLabel
               })
               : null}
           </G>
