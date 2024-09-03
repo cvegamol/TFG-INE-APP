@@ -1,7 +1,8 @@
 import React, { useEffect, useState, useMemo } from 'react';
 import { ScrollView, View, Text, Dimensions, Alert, Modal, TouchableOpacity } from 'react-native';
 import { styled } from 'nativewind';
-import { BarChart, LineChart, StackedBarChart, PieChart } from 'react-native-chart-kit';
+import { BarChart, LineChart, PieChart } from 'react-native-chart-kit';
+import StackedBarChart from '../../components/graph/stackedBarChart/StackedBarChart';
 import { CheckBox, Button } from 'react-native-elements';
 import { Picker } from '@react-native-picker/picker';
 import { useLocalSearchParams } from 'expo-router';
@@ -462,6 +463,7 @@ const DatosSeries = () => {
                             fecha: datoObj.fecha,
                             serie: serieObj.serie,
                             color: seriesColors[Object.keys(groupedDatasets).length % seriesColors.length],
+                            variables: datoObj.variables
                         });
                     });
                 });
@@ -486,7 +488,8 @@ const DatosSeries = () => {
                             const valoresConFecha = serieObj.datos.map(dato => ({
                                 value: dato.valor,
                                 fecha: dato.fecha,
-                                serie: serieObj.serie
+                                serie: serieObj.serie,
+                                variables: dato.variables
                             }));
                             return valoresConFecha;
                         }
@@ -558,35 +561,67 @@ const DatosSeries = () => {
                 setIsChartModalVisible(true);
 
             } else if (chartType === 'stackedBar') {
+                // Para stackedBar no reestructuramos, simplemente agregamos la información necesaria
                 const chartData = {
-                    labels: labels,  // Ejemplo: ["Mujeres", "Hombres"]
-                    datasets: datasets.map(dataset => ({
-                        label: dataset.label,  // Ejemplo: "Mujeres", "Hombres"
-                        data: dataset.data.map(d => d.value),  // Extrae los valores para cada grupo
-                        color: (opacity = 1) => seriesColors[datasets.indexOf(dataset) % seriesColors.length]  // Asigna un color a cada serie
-                    }))
-                };
+                    labels: labels,
+                    datasets: datasets.map((dataset, datasetIndex) => {
+                        console.log(`Procesando dataset ${dataset.label} (Índice: ${datasetIndex})`); // Log para cada dataset
 
-                console.log('Datos', chartData);
-                console.log('Datasets:', JSON.stringify(datasets, null, 2));
+                        const processedData = dataset.data.map((d, dataIndex) => {
+                            console.log(`  - Procesando dato ${dataIndex + 1}:`, {
+                                value: d.value,
+                                fecha: d.fecha,
+                                serie: d.serie
+                            }); // Log para cada dato en el dataset
+
+                            // Identificar la variable que no está en el label exterior
+                            const variablesNotInLabel = d.variables.filter(variable => !labels.includes(variable.Nombre));
+                            const additionalLabel = variablesNotInLabel.map(variable => variable.Nombre).join(", ");
+
+                            return {
+                                value: d.value,
+                                fecha: d.fecha,  // Agregando la fecha
+                                serie: d.serie,   // Agregando el nombre de la serie
+                                label: `${dataset.label} (${additionalLabel})` // Combinar el label exterior con la variable adicional
+                            };
+                        });
+
+                        return {
+                            label: dataset.label,
+                            data: processedData,
+                            originalData: dataset.data,  // Mantener los datos originales para acceder a la fecha y la serie
+                            color: (opacity = 1) => seriesColors[datasetIndex % seriesColors.length]  // Asigna un color a cada serie
+                        };
+                    })
+                };
 
                 setChartData(chartData);
 
-                // Paso 1: Sumar los valores de cada dataset
                 const datasetSums = chartData.datasets.map(dataset =>
-                    dataset.data.reduce((sum, value) => sum + value, 0)
+                    dataset.data.reduce((sum, datum) => {
+                        const value = parseFloat(datum.value);
+                        if (isNaN(value)) {
+                            console.warn(`Valor inválido encontrado: ${datum.value} en serie ${datum.serie} y fecha ${datum.fecha}`);
+                            return sum;  // Ignorar valores no numéricos
+                        }
+                        return sum + value;
+                    }, 0)
                 );
 
-                // Paso 2: Determinar la escala con base en las sumas
-                const scale = determineScale(datasetSums);
+                console.log('Suma de los datasets:', datasetSums);
 
-                console.log('Suma de los datos por dataset:', datasetSums);
-                console.log('Escala', scale);
+                // Ahora toma el valor más grande para determinar la escala
+                const maxSum = Math.max(...datasetSums);
 
+                console.log('Valor máximo entre los datasets:', maxSum);
+
+                const scale = determineScale([maxSum]);
+
+                console.log('Escala determinada:', scale);
+                console.log(scale)
                 setScale(scale);
                 setIsChartModalVisible(true);
             }
-
 
         } catch (error) {
             console.error('Error generando el gráfico:', error);
@@ -622,14 +657,64 @@ const DatosSeries = () => {
                 return value.toString();
         }
     };
-    const handleBarPress = (datum, seriesName) => {
-        const formattedValue = new Intl.NumberFormat('es-ES').format(datum.y);
+    const handleBarPress = (datum) => {
+        const formattedValue = new Intl.NumberFormat('es-ES').format(datum.value);
+        const formattedDate = `${datum.fecha.slice(6, 8)}/${datum.fecha.slice(4, 6)}/${datum.fecha.slice(0, 4)}`;
+
+
+
         Alert.alert(
             'Información del segmento',
-            `Serie: ${seriesName}\nFecha: ${datum.x}\nValor: ${formattedValue}`,
+            `Serie: ${datum.serie}\nFecha: ${formattedDate}\nValor: ${formattedValue}`,
             [{ text: 'OK' }]
         );
     };
+
+    const renderStackedBarChart = () => {
+        return (
+            <StackedBarChart
+                style={{
+                    marginVertical: 8,
+                    borderRadius: 10,
+                }}
+                data={{
+                    labels: chartData.labels,
+                    legend: chartData.datasets.map(dataset => dataset.label),
+                    data: chartData.datasets.map(dataset => dataset.data.map(d => d.value)),
+                    barColors: seriesColors,
+                }}
+                width={Dimensions.get("window").width * 0.83}
+                height={320}
+                formatYLabel={(value) => formatYLabel(value, scale)}
+                chartConfig={{
+                    backgroundColor: '#1cc910',
+                    backgroundGradientFrom: '#eff3ff',
+                    backgroundGradientTo: '#efefef',
+                    decimalPlaces: 0,
+                    color: (opacity = 1) => `rgba(0, 0, 0, ${opacity})`,
+                    style: {
+                        borderRadius: 16,
+                    },
+                    showValuesOnTopOfBars: false, // Asegúrate de que no se muestren los valores sobre las barras
+                    verticalLabelRotation: 270,
+                    // Rotación de las etiquetas del eje X a 270 grados
+                }}
+                xLabelsOffset={30}
+                hideLegend={true}
+                onDataPointClick={(datum) => {
+                    const { datasetIndex, index } = datum;
+                    const clickedData = chartData.datasets[index].originalData[datasetIndex];
+
+                    if (clickedData) {
+                        handleBarPress(clickedData);
+                    } else {
+                        console.error('No se encontraron datos originales para el punto clicado.');
+                    }
+                }}
+            />
+        );
+    };
+
 
     const renderChart = () => {
         if (!chartData) {
@@ -692,37 +777,7 @@ const DatosSeries = () => {
                     />
                 );
             case 'stackedBar':
-                return (
-                    <StackedBarChart
-                        style={{
-                            marginVertical: 8,
-                            borderRadius: 10,
-                        }}
-                        data={{
-                            labels: chartData.labels,
-                            //legend: chartData.datasets.map(dataset => dataset.label),
-                            data: chartData.datasets.map(dataset => dataset.data),
-                            barColors: seriesColors
-                        }}
-                        xLabelsOffset={30}
-                        formatXLabel={(label) => truncateLabel(label)}
-                        formatYLabel={(value) => formatYLabel(value, scale)}
-                        width={Dimensions.get("window").width * 0.83}
-                        height={320}
-                        chartConfig={{
-                            backgroundColor: '#1cc910',
-                            backgroundGradientFrom: '#eff3ff',
-                            backgroundGradientTo: '#efefef',
-                            decimalPlaces: 0,
-                            color: (opacity = 1) => `rgba(0, 0, 0, ${opacity})`,
-                            style: {
-                                borderRadius: 16,
-                            },
-                        }}
-
-                    />
-
-                );
+                return renderStackedBarChart();
         }
     };
 
