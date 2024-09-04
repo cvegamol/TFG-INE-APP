@@ -480,7 +480,7 @@ const DatosSeries = () => {
 
             if (xAxis === 'Periodo') {
                 // Generar etiquetas basadas en los periodos seleccionados
-                labels = Object.keys(selectedPeriods).map((key) => {
+                const labels = Object.keys(selectedPeriods).map((key) => {
                     const { ano, mes, dia } = selectedPeriods[key];
                     return `${dia}/${mes}/${ano}`;
                 });
@@ -494,6 +494,9 @@ const DatosSeries = () => {
                         const [year, month, day] = datoObj.fecha.split(/[-T]/);
                         const formattedDate = `${day}/${month}/${year}`;
 
+                        // Buscar la etiqueta correspondiente en el array de labels basado en la fecha formateada
+                        const label = labels.find((lbl) => lbl === formattedDate) || formattedDate;
+
                         if (!groupedDatasets[formattedDate]) {
                             groupedDatasets[formattedDate] = {
                                 label: formattedDate,
@@ -506,7 +509,8 @@ const DatosSeries = () => {
                             fecha: datoObj.fecha,
                             serie: serieObj.serie,
                             color: seriesColors[Object.keys(groupedDatasets).length % seriesColors.length],
-                            variables: datoObj.variables
+                            variables: datoObj.variables,
+                            label: label // Asignar la etiqueta correspondiente al dato
                         });
                     });
                 });
@@ -516,8 +520,8 @@ const DatosSeries = () => {
 
                 console.log("Labels:", Object.keys(groupedDatasets));
                 console.log("Datasets:", datasets);
-
-            } else {
+            }
+            else {
                 // Si el eje X es otra variable (como Sexo, Edad, etc.)
                 labels = valoresObj[xAxis]
                     .filter(valor => selectedVariables[valor.Id])
@@ -532,7 +536,8 @@ const DatosSeries = () => {
                                 value: dato.valor,
                                 fecha: dato.fecha,
                                 serie: serieObj.serie,
-                                variables: dato.variables
+                                variables: dato.variables,
+                                label: label
                             }));
                             return valoresConFecha;
                         }
@@ -692,6 +697,29 @@ const DatosSeries = () => {
                 console.log(scale)
                 setScale(scale);
                 setIsChartModalVisible(true);
+            } else if (chartType === 'pie') {
+                console.log("Labels/Pie:", labels);
+                console.log("Datasets/Pie:", datasets);
+                // Reorganizar datos para el gráfico de pie
+                const pieData = datos.map((serieObj, index) => {
+                    return serieObj.datos.map((datoObj) => {
+                        console.log(serieObj)
+                        return {
+                            name: datasets[index].label,  // Aquí asignamos el nombre de la serie correctamente
+                            value: parseFloat(datoObj.valor),  // Asegurarnos de que el valor sea un número
+                            color: seriesColors[index % seriesColors.length],
+                            legendFontColor: "#7F7F7F",
+                            legendFontSize: 12,
+                            fecha: datoObj.fecha,
+                            serieName: serieObj.serie // También asignamos correctamente el nombre de la serie
+                        };
+                    });
+                }).flat();
+
+                console.log("Datos para gráfico circular:", pieData);
+
+                setChartData(pieData);
+                setIsChartModalVisible(true);
             }
 
         } catch (error) {
@@ -787,6 +815,50 @@ const DatosSeries = () => {
         );
     };
 
+    const handlePieSegmentClick = (dataPoint) => {
+        const { index } = dataPoint;  // Desestructuramos el índice del segmento
+
+        // Acceder al dato original a partir del índice del segmento
+        const clickedData = chartData[index];  // chartData es el array completo de pieData
+
+        // Desestructurar las propiedades del objeto original
+        const { value, fecha, color, serieName } = clickedData;
+
+        // Formatear el valor para que se vea de manera clara en el Alert
+        const formattedValue = new Intl.NumberFormat('es-ES').format(value);
+
+        // Formatear la fecha
+        const formattedDate = `${fecha.slice(6, 8)}/${fecha.slice(4, 6)}/${fecha.slice(0, 4)}`;
+
+        // Mostrar un Alert con la información completa del segmento seleccionado
+        Alert.alert(
+            'Segmento seleccionado',
+            `Serie: ${serieName}\nFecha: ${formattedDate}\nValor: ${formattedValue}`,
+            [{ text: 'OK' }]
+        );
+    };
+    const renderPieChart = () => {
+        return (
+            <PieChart
+                data={chartData}
+                accessor={"value"}  // Ajusta el nombre del campo con el valor numérico
+                width={Dimensions.get("window").width * 0.83} // Ajustar al 85% del ancho de la pantalla
+                height={320}
+                chartConfig={{
+                    backgroundColor: '#1cc910',
+                    backgroundGradientFrom: '#eff3ff',
+                    backgroundGradientTo: '#efefef',
+                    color: (opacity = 1) => `rgba(0, 0, 0, ${opacity})`,  // Añade esta línea
+
+                }}
+                onDataPointClick={handlePieSegmentClick}
+                hasLegend={false}  // Desactivar la leyenda
+                center={[Dimensions.get("window").width * 0.15, 0]}
+
+            />
+        );
+    };
+
 
     const renderChart = () => {
         if (!chartData) {
@@ -850,6 +922,8 @@ const DatosSeries = () => {
                 );
             case 'stackedBar':
                 return renderStackedBarChart();
+            case 'pie':
+                return renderPieChart();
         }
     };
 
@@ -893,6 +967,7 @@ const DatosSeries = () => {
                     <ViewStyled>
                         <ViewStyled className="mb-4">
                             <TextStyled className="font-bold mb-2">Seleccionar variables...</TextStyled>
+
                             {Object.keys(valoresObj).map((variableId) => (
                                 <ViewStyled key={variableId}>
                                     <TextStyled className="font-bold">{valoresObj[variableId][0]?.Variable?.Nombre}</TextStyled>

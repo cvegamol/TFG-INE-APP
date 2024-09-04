@@ -3,7 +3,7 @@ import React from "react";
 import { View } from "react-native";
 import { G, Path, Rect, Svg, Text } from "react-native-svg";
 
-import AbstractChart from "./AbstractChart";
+import AbstractChart from "../AbstractChart";
 
 class PieChart extends AbstractChart {
      static defaultProps = {
