@@ -1,8 +1,10 @@
 import React, { useEffect, useState, useMemo } from 'react';
 import { ScrollView, View, Text, Dimensions, Alert, Modal, TouchableOpacity } from 'react-native';
 import { styled } from 'nativewind';
-import { BarChart, LineChart, PieChart } from 'react-native-chart-kit';
+import { BarChart, LineChart } from 'react-native-chart-kit';
 import StackedBarChart from '../../components/graph/stackedBarChart/StackedBarChart';
+import PieChart from '../../components/graph/stackedBarChart/PieChart';
+
 import { CheckBox, Button } from 'react-native-elements';
 import { Picker } from '@react-native-picker/picker';
 import { useLocalSearchParams } from 'expo-router';
