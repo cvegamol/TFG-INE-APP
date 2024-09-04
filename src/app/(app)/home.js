@@ -3,7 +3,7 @@ import { View, Text, ScrollView, Dimensions } from 'react-native';
 import { styled } from 'nativewind';
 import Plantilla from '../../components/Plantilla';
 import ResponsiveTable from '../../components/ResponsiveTable';
-import { LineChart } from 'react-native-chart-kit';
+import { BarChart, LineChart } from 'react-native-chart-kit';
 import Loading from '../../components/Loading';
 import {
   widthPercentageToDP as wp,
@@ -212,6 +212,83 @@ const Home = () => {
             </>
           )}
         </ViewStyled>
+        <LineChart
+          data={{
+            labels: ["January", "February"],
+            datasets: [
+            {
+              data: [10000,15000, 20000], // Primer valor para cada mes
+              color: (opacity = 1) => `rgba(255, 0, 0, ${opacity})`, // Rojo
+            },
+            {
+              data: [11000,35000, 40000], // Segundo valor para cada mes
+              color: (opacity = 1) => `rgba(0, 0, 255, ${opacity})`, // Azul
+            }
+          ]
+          }}
+          width={Dimensions.get("window").width} // from react-native
+          height={220}
+          
+          yAxisInterval={1} // optional, defaults to 1
+          chartConfig={{
+            backgroundColor: "#e26a00",
+            backgroundGradientFrom: "#fb8c00",
+            backgroundGradientTo: "#ffa726",
+            decimalPlaces: 2, // optional, defaults to 2dp
+            color: (opacity = 1) => `rgba(255, 255, 255, ${opacity})`,
+            labelColor: (opacity = 1) => `rgba(255, 255, 255, ${opacity})`,
+            style: {
+              borderRadius: 16
+            },
+            propsForDots: {
+              r: "6",
+              strokeWidth: "2",
+              stroke: "#ffa726"
+            }
+          }}
+          bezier
+          style={{
+            marginVertical: 8,
+            borderRadius: 16
+          }}
+            fromZero={true}
+        />
+        <BarChart
+        data={{
+          labels: ["January", "February"],
+          datasets: [
+            {
+              data: [10000,15000, 20000], // Primer valor para cada mes
+              color: (opacity = 1) => `rgba(255, 0, 0, ${opacity})`, // Rojo
+            },
+            {
+              data: [30000,35000, 40000], // Segundo valor para cada mes
+              color: (opacity = 1) => `rgba(0, 0, 255, ${opacity})`, // Azul
+            }
+          ]
+        }}
+        width={Dimensions.get("window").width - 16} // Ancho de la gráfica
+        height={220} // Altura de la gráfica
+        yAxisLabel="$"
+        chartConfig={{
+          backgroundColor: "#e26a00",
+          backgroundGradientFrom: "#fb8c00",
+          backgroundGradientTo: "#ffa726",
+          decimalPlaces: 2, // Número de decimales
+          color: (opacity = 1) => `rgba(255, 255, 255, ${opacity})`,
+          labelColor: (opacity = 1) => `rgba(255, 255, 255, ${opacity})`,
+          style: {
+            borderRadius: 16
+          },
+          barPercentage: 0.5, // Ajusta este valor para controlar el ancho de las barras y su superposición
+          useShadowColorFromDataset: false, // Desactiva sombras si es necesario
+        }}
+        style={{
+          marginVertical: 8,
+          borderRadius: 16
+        }}
+        withHorizontalLabels={false} // Opcional: remueve etiquetas horizontales para un look más limpio
+      />
       </ScrollView>
     </Plantilla>
   );

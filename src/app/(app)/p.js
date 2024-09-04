@@ -1,8 +1,7 @@
 import React, { useEffect, useState, useMemo } from 'react';
 import { ScrollView, View, Text, Dimensions, Alert, Modal, TouchableOpacity } from 'react-native';
 import { styled } from 'nativewind';
-import { BarChart, LineChart, PieChart } from 'react-native-chart-kit';
-import StackedBarChart from '../../components/graph/stackedBarChart/StackedBarChart';
+import { BarChart, LineChart, StackedBarChart, PieChart } from 'react-native-chart-kit';
 import { CheckBox, Button } from 'react-native-elements';
 import { Picker } from '@react-native-picker/picker';
 import { useLocalSearchParams } from 'expo-router';
@@ -17,7 +16,6 @@ import { shareAsync } from 'expo-sharing';
 import * as XLSX from 'xlsx';
 import { AntDesign } from '@expo/vector-icons';
 
-
 const ViewStyled = styled(View);
 const TextStyled = styled(Text);
 const ScrollViewStyled = styled(ScrollView);
@@ -28,59 +26,21 @@ const DatosSeries = () => {
     const [viewMode, setViewMode] = useState('table'); // 'table' or 'chart'
     const [selectedVariables, setSelectedVariables] = useState({});
     const [selectedPeriods, setSelectedPeriods] = useState({});
-    const [chartType, setChartType] = useState('bar'); // 'bar', 'line'
+    const [chartType, setChartType] = useState('line'); // 'bar', 'line'
     const [xAxis, setXAxis] = useState('Periodo'); // Eje X dinámico, por defecto es Periodo
     const [isLoading, setIsLoading] = useState(true);
     const [datosSeries, setDatosSeries] = useState([]);
-    const [leyenda, setLeyenda] = useState([]);
     const [htmlContent, setHtmlContent] = useState('');
     const [modalVisible, setModalVisible] = useState(false);
     const [chartData, setChartData] = useState(null); // Para almacenar los datos del gráfico
     const [isChartModalVisible, setIsChartModalVisible] = useState(false); // Para controlar la visibilidad del modal de gráficos
+    const [selectedDataPoint, setSelectedDataPoint] = useState(null); // Nuevo estado para el punto seleccionado
     const { tabla, series, periodicidades, valores } = useLocalSearchParams();
-    const [scale, setScale] = useState(1)
+
     const seriesObj = useMemo(() => JSON.parse(series), [series]);
     const periodicidadesObj = useMemo(() => JSON.parse(periodicidades), [periodicidades]);
     const tablaObj = JSON.parse(tabla);
     const valoresObj = useMemo(() => JSON.parse(valores), [valores]);
-    const noPeriodSelected = Object.keys(selectedPeriods).length === 0;
-    const allVariablesSelected = Object.keys(valoresObj).every(variableId =>
-        valoresObj[variableId].some(valor => selectedVariables[valor.Id])
-    );
-    // Contar cuántas variables tienen múltiples valores seleccionados (incluyendo periodicidad)
-    const multiSelectedVariablesCount = Object.keys(valoresObj).filter(variableId =>
-        valoresObj[variableId].filter(valor => selectedVariables[valor.Id]).length > 1
-    ).length;
-
-    // Contar si la periodicidad tiene múltiples valores seleccionados
-    const multiSelectedPeriodsCount = Object.keys(selectedPeriods).length > 1;
-
-    // Sumar las variables que tienen múltiples valores seleccionados y la periodicidad
-    const multiSelectCount = multiSelectedVariablesCount + (multiSelectedPeriodsCount ? 1 : 0);
-
-    // Condición para habilitar el gráfico circular: solo una "variable" (variables o periodicidad) puede tener múltiples valores
-    const isPieChartDisabled = multiSelectCount > 1;
-
-    // Función para manejar la selección del tipo de gráfico
-    const handleChartTypeChange = (itemValue) => {
-        if (itemValue === 'pie' && isPieChartDisabled) {
-            Alert.alert(
-                'Restricción',
-                'Ha seleccionado más de una variable con varios valores. Solo puede seleccionar este gráfico con una sola variable con varios valores.'
-            );
-            return;
-        }
-        setChartType(itemValue); // Cambia el tipo de gráfico si se cumplen las condiciones
-    };
-
-    const seriesColors = [
-        'rgba(255, 99, 132, 0.8)',  // Rojo
-        'rgba(54, 162, 235, 0.8)',  // Azul
-        'rgba(75, 192, 192, 0.8)',  // Verde
-        'rgba(153, 102, 255, 0.8)', // Morado
-        'rgba(255, 159, 64, 0.8)',  // Naranja
-        'rgba(255, 205, 86, 0.8)',  // Amarillo
-    ];
 
     const formatFecha = (ano, mes, dia, exportFormat = false) => {
         if (exportFormat) {
@@ -257,7 +217,7 @@ const DatosSeries = () => {
         setViewMode(viewMode === 'table' ? 'chart' : 'table');
     };
 
-    const handleVariableSelection = (valor, variableId) => {
+    const handleVariableSelection = (valor) => {
         const newSelectedVariables = { ...selectedVariables };
 
         if (newSelectedVariables[valor.Id]) {
@@ -265,46 +225,9 @@ const DatosSeries = () => {
             delete newSelectedVariables[valor.Id];
         } else {
             // Si no está seleccionado, agregar la selección completa
-            newSelectedVariables[valor.Id] = {
-                ...valor,
-                variableId, // También almacenamos variableId para uso futuro si es necesario
-            };
+            newSelectedVariables[valor.Id] = valor;
         }
 
-        // Contar cuántas categorías tienen múltiples selecciones
-        let multiSelectCategoriesCount = 0;
-        const variableSelectionCounts = {};
-
-        // Contar valores seleccionados por cada variable usando variableId
-        for (const selectedVal in newSelectedVariables) {
-            const selectedVariableId = newSelectedVariables[selectedVal]?.variableId;
-            if (selectedVariableId) {
-                if (!variableSelectionCounts[selectedVariableId]) {
-                    variableSelectionCounts[selectedVariableId] = 0;
-                }
-                variableSelectionCounts[selectedVariableId]++;
-            }
-        }
-
-        // Contar cuántas variables tienen más de un valor seleccionado
-        for (const count in variableSelectionCounts) {
-            if (variableSelectionCounts[count] > 1) {
-                multiSelectCategoriesCount++;
-            }
-        }
-
-        // Contar las selecciones de periodicidades
-        const selectedPeriodCount = Object.keys(selectedPeriods).filter((key) => selectedPeriods[key]).length;
-        if (selectedPeriodCount > 1) {
-            multiSelectCategoriesCount++;
-        }
-
-        // Aplicar la restricción de solo permitir múltiples selecciones en dos categorías
-        if (multiSelectCategoriesCount > 2) {
-            Alert.alert('Restricción', 'Solo se pueden seleccionar múltiples valores en dos categorías (variables o periodicidades).');
-            return;
-        }
-        console.log(newSelectedVariables);
         setSelectedVariables(newSelectedVariables);
     };
 
@@ -329,60 +252,24 @@ const DatosSeries = () => {
             Object.entries(newSelectedPeriods).filter(([key, value]) => value !== undefined)
         );
 
-        // Contar cuántas categorías tienen múltiples selecciones
-        let multiSelectCategoriesCount = 0;
-
-        // Contar valores seleccionados por cada variable usando variableId
-        const variableSelectionCounts = {};
-        for (const selectedVal in selectedVariables) {
-            const selectedVariableId = selectedVariables[selectedVal]?.variableId;
-            if (selectedVariableId) {
-                if (!variableSelectionCounts[selectedVariableId]) {
-                    variableSelectionCounts[selectedVariableId] = 0;
-                }
-                variableSelectionCounts[selectedVariableId]++;
-            }
-        }
-
-        // Contar cuántas variables tienen más de un valor seleccionado
-        for (const count in variableSelectionCounts) {
-            if (variableSelectionCounts[count] > 1) {
-                multiSelectCategoriesCount++;
-            }
-        }
-
-        // Contar las selecciones de periodicidades
-        const selectedPeriodCount = Object.keys(filteredSelectedPeriods).length;
-        if (selectedPeriodCount > 1) {
-            multiSelectCategoriesCount++;
-        }
-
-        // Aplicar la restricción de solo permitir múltiples selecciones en dos categorías
-        if (multiSelectCategoriesCount > 2) {
-            Alert.alert('Restricción', 'Solo se pueden seleccionar múltiples valores en dos categorías (variables o periodicidades).');
-            return;
-        }
-
         setSelectedPeriods(filteredSelectedPeriods);
     };
 
-
     const chartConfig = {
-        strokeWidth: 2,
-        backgroundGradientFrom: '#f7f7f7',
-        backgroundGradientTo: '#f7f7f7',
-        propsForBackgroundLines: {
-            stroke: '#000',
-            strokeWidth: 1,
+        backgroundGradientFrom: '#fff',
+        backgroundGradientTo: '#fff',
+
+        color: (opacity = 1, index) => {
+            const colors = [
+                `rgba(255, 99, 132, ${opacity})`, // Rojo
+                `rgba(54, 162, 235, ${opacity})`, // Azul
+                `rgba(75, 192, 192, ${opacity})`, // Verde
+                `rgba(153, 102, 255, ${opacity})`, // Morado
+                `rgba(255, 159, 64, ${opacity})`, // Naranja
+                `rgba(255, 205, 86, ${opacity})`, // Amarillo
+            ];
+            return colors[index % colors.length];
         },
-        propsForHorizontalLabels: {
-            fontSize: 10,
-            fill: '#000',
-        },
-        propsForLabels: {
-            fill: '#000',
-        },
-        color: (opacity = 1, index) => seriesColors[index % seriesColors.length],
 
         labelColor: (opacity = 1) => `rgba(0, 0, 0, ${opacity})`,
         style: {
@@ -393,29 +280,9 @@ const DatosSeries = () => {
 
     };
 
-
-
-
-    const sortDataset = (dataset) => {
-        return dataset.sort((a, b) => {
-            if (a < b) return -1;
-            if (a > b) return 1;
-            return 0;
-        });
-    };
-
-
-
     const generateChart = async () => {
         try {
-            if (noPeriodSelected) {
-                Alert.alert('Advertencia', 'Debe seleccionar al menos una periodicidad para generar el gráfico.');
-                return;
-            }
-            else if (!allVariablesSelected) {
-                Alert.alert('Advertencia', 'Debe seleccionar al menos un valor para cada variable.');
-            }
-
+            // Construimos la URL para poder obtener las series de las variables-valores seleccionados
             const url_base = `https://servicios.ine.es/wstempus/js/ES/SERIES_TABLA/${tablaObj.Id}?`;
             const parametros_url = Object.entries(selectedVariables)
                 .flatMap(([variableId, objeto]) =>
@@ -425,10 +292,10 @@ const DatosSeries = () => {
             const url_final = url_base + parametros_url;
 
             console.log('URL Final:', url_final);
-
+            // Obtenemos las series 
             const seriesJson = await fetch(url_final);
             const series_variables = await seriesJson.json();
-
+            // Por último tenemos que obtener los datos de las series
             const datos = await Promise.all(
                 series_variables.map(async (serie) => {
                     const datosSerie = await Promise.all(
@@ -438,43 +305,49 @@ const DatosSeries = () => {
                             console.log('Fecha:', formattedDate);
 
                             try {
-                                const response = await fetch(`https://servicios.ine.es/wstempus/js/ES/DATOS_SERIE/${serie.COD}?date=${formattedDate}&tip=M`);
-                                console.log(`Url:https://servicios.ine.es/wstempus/js/ES/DATOS_SERIE/${serie.COD}?date=${formattedDate}&tip=M`);
+                                const response = await fetch(`https://servicios.ine.es/wstempus/js/ES/DATOS_SERIE/${serie.COD}?date=${formattedDate}`);
+                                console.log(`Url:https://servicios.ine.es/wstempus/js/ES/DATOS_SERIE/${serie.COD}?date=${formattedDate}`);
 
                                 if (!response.ok) {
                                     console.error(`Error en la solicitud para la fecha ${fechaKey}: ${response.statusText}`);
-                                    return { fecha: formattedDate, valor: 'N/A', variables: [] };
+                                    return { fecha: fechaKey, valor: 'N/A' };
                                 }
 
                                 const textResponse = await response.text();
 
                                 if (!textResponse) {
                                     console.warn(`Respuesta vacía para la fecha ${fechaKey}`);
-                                    return { fecha: formattedDate, valor: 'N/A' };
+                                    return { fecha: fechaKey, valor: 'N/A' };
                                 }
 
                                 const data = JSON.parse(textResponse);
-                                console.log('asadasda', data)
+
                                 if (data?.Data?.length > 0) {
-                                    return { fecha: formattedDate, valor: data.Data[0].Valor, variables: data.MetaData };
+                                    return { fecha: fechaKey, valor: data.Data[0].Valor };
                                 } else {
-                                    return { fecha: formattedDate, valor: 'N/A', variables: [] };
+                                    return { fecha: fechaKey, valor: 'N/A' };
                                 }
                             } catch (error) {
                                 console.error(`Error al obtener datos para la fecha ${fechaKey}:`, error.message);
-                                return { fecha: formattedDate, valor: 'N/A', variables: [] };
+                                return { fecha: fechaKey, valor: 'N/A' };
                             }
                         })
                     );
                     return { serie: serie.Nombre, datos: datosSerie };
                 })
             );
-
-            console.log('Datos finales:', JSON.stringify(datos, null, 2));
-
-
+            console.log(JSON.stringify(datos, null, 2));
             let labels = [];
             let datasets = [];
+
+            const colors = [
+                'rgba(255, 99, 132, 0.8)', // Rojo
+                'rgba(54, 162, 235, 0.8)', // Azul
+                'rgba(75, 192, 192, 0.8)', // Verde
+                'rgba(153, 102, 255, 0.8)', // Morado
+                'rgba(255, 159, 64, 0.8)', // Naranja
+                'rgba(255, 205, 86, 0.8)', // Amarillo
+            ];
 
             if (xAxis === 'Periodo') {
                 // Generar etiquetas basadas en los periodos seleccionados
@@ -483,66 +356,41 @@ const DatosSeries = () => {
                     return `${dia}/${mes}/${ano}`;
                 });
 
-                // Crear un objeto para almacenar los datasets agrupados por fecha
-                let groupedDatasets = {};
-
-                datos.forEach((serieObj) => {
-                    serieObj.datos.forEach((datoObj) => {
-                        // Convertir la fecha del dato al formato "dd/mm/yyyy"
-                        const [year, month, day] = datoObj.fecha.split(/[-T]/);
-                        const formattedDate = `${day}/${month}/${year}`;
-
-                        if (!groupedDatasets[formattedDate]) {
-                            groupedDatasets[formattedDate] = {
-                                label: formattedDate,
-                                data: [],
-                            };
-                        }
-
-                        groupedDatasets[formattedDate].data.push({
-                            value: datoObj.valor,
-                            fecha: datoObj.fecha,
-                            serie: serieObj.serie,
-                            color: seriesColors[Object.keys(groupedDatasets).length % seriesColors.length],
-                            variables: datoObj.variables
-                        });
-                    });
-                });
-
-                // Convertir el objeto a un array de datasets
-                datasets = Object.values(groupedDatasets);
-
-                console.log("Labels:", Object.keys(groupedDatasets));
-                console.log("Datasets:", datasets);
-
+                // Crear los datasets iniciales
+                datasets = datos.map((serieObj, index) => {
+                    const matchedVariable = Object.values(selectedVariables).find(variable => serieObj.serie.includes(variable.Nombre));
+                    if (matchedVariable) {
+                        return {
+                            label: serieObj.serie,
+                            color: colors[index % colors.length],
+                            data: serieObj.datos.map(datoObj => datoObj.valor),
+                        };
+                    }
+                    return null;
+                }).filter(dataset => dataset !== null);
             } else {
                 // Si el eje X es otra variable (como Sexo, Edad, etc.)
                 labels = valoresObj[xAxis]
                     .filter(valor => selectedVariables[valor.Id])
                     .map((valor) => valor.Nombre);
 
-                datasets = labels.map((label) => {
+                datasets = labels.map((label, index) => {
                     const dataset = datos.map(serieObj => {
-                        if (serieObj.datos.some(dato =>
-                            dato.variables.slice(0, -2).some(variable => variable.Nombre.includes(label))
-                        )) {
-                            const valoresConFecha = serieObj.datos.map(dato => ({
-                                value: dato.valor,
-                                fecha: dato.fecha,
-                                serie: serieObj.serie,
-                                variables: dato.variables
-                            }));
-                            return valoresConFecha;
+                        if (serieObj.serie.includes(label)) {
+                            const valores = serieObj.datos.map(dato => dato.valor);
+                            console.log(`Valores para ${label}:`, valores);
+                            return valores;
                         }
                         return null;
                     }).filter(data => data !== null);
 
                     const flatDataset = dataset.flat();
 
-                    if (flatDataset.every(item => item.value !== null && item.value !== undefined)) {
+                    if (flatDataset.every(value => value !== null && value !== undefined)) {
                         return {
                             label: label,
                             data: flatDataset,
+                            color: colors[index % colors.length],
                         };
                     } else {
                         console.error(`Dataset inválido para la serie: ${label} con labels: ${labels}`, flatDataset);
@@ -553,142 +401,17 @@ const DatosSeries = () => {
                 console.log("Labels:", labels);
                 console.log("Datasets:", datasets);
             }
-            let leyendaArray = [];  // Inicializar como un array vacío
-            const variablesNoEje = Object.entries(selectedVariables).filter(([key]) => key !== xAxis);
-            const periodosNoEje = Object.entries(selectedPeriods).filter(([key]) => key !== xAxis);
-
-            const variableConMasDeUnaSeleccion = variablesNoEje.find(([, valor]) => valor.length > 1);
-            const periodoConMasDeUnaSeleccion = periodosNoEje.length > 1;
-
-            if (!periodoConMasDeUnaSeleccion && variableConMasDeUnaSeleccion) {
-                // Filtrar valores que ya están en las etiquetas (labels)
-                leyendaArray = variablesNoEje
-                    .map(([_, valor]) => valor.Nombre)
-                    .filter(nombre => !labels.includes(nombre));
-            } else if (periodoConMasDeUnaSeleccion) {
-                leyendaArray = periodosNoEje
-                    .map(([key, _]) => {
-                        const { ano, mes, dia } = selectedPeriods[key];
-                        const nombrePeriodo = `${dia}/${mes}/${ano}`;
-                        return nombrePeriodo;
-                    })
-                    .filter(nombre => !labels.includes(nombre)); // Filtrar los nombres que ya están en las etiquetas
-            } else {
-                leyendaArray = variablesNoEje
-                    .map(([_, valor]) => valor.Nombre)
-                    .filter(nombre => !labels.includes(nombre)); // Filtrar los nombres que ya están en las etiquetas
-            }
-
-            setLeyenda(leyendaArray);
-
-            console.log(leyenda)
-
-
-            console.log("Final Dataset:", { labels, datasets });
 
             if (chartType === 'line') {
-                // Reestructuración de datasets para el formato correcto
-                let reorganizedDatasets = [];
-
-                if (datasets.length > 0) {
-                    // Determinamos la longitud de los datos de la primera serie
-                    const dataLength = datasets[0].data.length;
-
-                    for (let i = 0; i < dataLength; i++) {
-                        let newDataArray = datasets.map((dataset, datasetIndex) => ({
-                            value: dataset.data[i].value, // Extraer el valor
-                            fecha: dataset.data[i].fecha, // Mantener la fecha formateada
-                            serie: dataset.data[i].serie, // Mantener el nombre de la serie
-                            color: seriesColors[datasetIndex % seriesColors.length], // Asignar color basado en el índice
-                        }));
-
-                        reorganizedDatasets.push({
-                            data: newDataArray, // Guardar el array completo con objetos
-                        });
-                    }
-                }
-
-                // Configuramos el chartData con los datasets reorganizados
                 const chartData = {
                     labels: labels,
-                    datasets: reorganizedDatasets.map((dataset, datasetIndex) => ({
-                        data: dataset.data.map(item => item.value), // Extraer solo los valores para el gráfico
-                        originalData: dataset.data, // Guardar los objetos completos para acceder a ellos en el click
-                        color: (opacity = 1, index) => {
-                            const color = dataset.data[index] && dataset.data[index].color;
-                            return color ? color : seriesColors[datasetIndex % seriesColors.length]; // Usar el color del dataset o un color por defecto
-                        },
+                    datasets: datasets.map((dataset) => ({
+                        data: dataset.data,
+                        color: (opacity = 1) => dataset.color,
                     })),
                 };
 
-                console.log("Labels:", labels);
-                console.log("Reorganized Datasets:", reorganizedDatasets);
                 setChartData(chartData);
-                console.log(chartData);
-                const scale = determineScale(chartData.datasets.flatMap(dataset => dataset.data));
-                setScale(scale);
-                setIsChartModalVisible(true);
-
-            } else if (chartType === 'stackedBar') {
-                // Para stackedBar no reestructuramos, simplemente agregamos la información necesaria
-                const chartData = {
-                    labels: labels,
-                    datasets: datasets.map((dataset, datasetIndex) => {
-                        console.log(`Procesando dataset ${dataset.label} (Índice: ${datasetIndex})`); // Log para cada dataset
-
-                        const processedData = dataset.data.map((d, dataIndex) => {
-                            console.log(`  - Procesando dato ${dataIndex + 1}:`, {
-                                value: d.value,
-                                fecha: d.fecha,
-                                serie: d.serie
-                            }); // Log para cada dato en el dataset
-
-                            // Identificar la variable que no está en el label exterior
-                            const variablesNotInLabel = d.variables.filter(variable => !labels.includes(variable.Nombre));
-                            const additionalLabel = variablesNotInLabel.map(variable => variable.Nombre).join(", ");
-
-                            return {
-                                value: d.value,
-                                fecha: d.fecha,  // Agregando la fecha
-                                serie: d.serie,   // Agregando el nombre de la serie
-                                label: `${dataset.label} (${additionalLabel})` // Combinar el label exterior con la variable adicional
-                            };
-                        });
-
-                        return {
-                            label: dataset.label,
-                            data: processedData,
-                            originalData: dataset.data,  // Mantener los datos originales para acceder a la fecha y la serie
-                            color: (opacity = 1) => seriesColors[datasetIndex % seriesColors.length]  // Asigna un color a cada serie
-                        };
-                    })
-                };
-
-                setChartData(chartData);
-
-                const datasetSums = chartData.datasets.map(dataset =>
-                    dataset.data.reduce((sum, datum) => {
-                        const value = parseFloat(datum.value);
-                        if (isNaN(value)) {
-                            console.warn(`Valor inválido encontrado: ${datum.value} en serie ${datum.serie} y fecha ${datum.fecha}`);
-                            return sum;  // Ignorar valores no numéricos
-                        }
-                        return sum + value;
-                    }, 0)
-                );
-
-                console.log('Suma de los datasets:', datasetSums);
-
-                // Ahora toma el valor más grande para determinar la escala
-                const maxSum = Math.max(...datasetSums);
-
-                console.log('Valor máximo entre los datasets:', maxSum);
-
-                const scale = determineScale([maxSum]);
-
-                console.log('Escala determinada:', scale);
-                console.log(scale)
-                setScale(scale);
                 setIsChartModalVisible(true);
             }
 
@@ -697,165 +420,35 @@ const DatosSeries = () => {
         }
     };
 
-    const truncateLabel = (label, maxLength = 8) => {
-        return label.length > maxLength ? `${label.slice(0, maxLength)}...` : label;
-    };
-    const determineScale = (data) => {
-        const maxValue = Math.max(...data.map(d => Math.abs(d)));
-        if (maxValue >= 1.0e9) {
-            return 1.0e9; // Escala en miles de millones (Billions)
-        } else if (maxValue >= 1.0e6) {
-            return 1.0e6; // Escala en millones (Millions)
-        } else if (maxValue >= 1.0e3) {
-            return 1.0e3; // Escala en miles (Thousands)
-        } else {
-            return 1; // Sin escala (valores pequeños)
-        }
-    };
-
-
-    const formatYLabel = (value, scale) => {
-        switch (scale) {
-            case 1.0e9:
-                return `${(value / 1.0e9).toFixed(1)}B`;
-            case 1.0e6:
-                return `${(value / 1.0e6).toFixed(1)}M`;
-            case 1.0e3:
-                return `${(value / 1.0e3).toFixed(1)}k`;
-            default:
-                return value.toString();
-        }
-    };
-    const handleBarPress = (datum) => {
-        const formattedValue = new Intl.NumberFormat('es-ES').format(datum.value);
-        const formattedDate = `${datum.fecha.slice(6, 8)}/${datum.fecha.slice(4, 6)}/${datum.fecha.slice(0, 4)}`;
-
-
-
-        Alert.alert(
-            'Información del segmento',
-            `Serie: ${datum.serie}\nFecha: ${formattedDate}\nValor: ${formattedValue}`,
-            [{ text: 'OK' }]
-        );
-    };
-
-    const renderStackedBarChart = () => {
-        return (
-            <StackedBarChart
-                style={{
-                    marginVertical: 8,
-                    borderRadius: 10,
-                }}
-                data={{
-                    labels: chartData.labels,
-                    legend: leyenda,
-                    data: chartData.datasets.map(dataset => dataset.data.map(d => d.value)),
-                    barColors: seriesColors,
-                }}
-                width={Dimensions.get("window").width * 0.83}
-                height={320}
-                formatYLabel={(value) => formatYLabel(value, scale)}
-                formatXLabel={(label) => truncateLabel(label)}
-                chartConfig={{
-                    backgroundColor: '#1cc910',
-                    backgroundGradientFrom: '#eff3ff',
-                    backgroundGradientTo: '#efefef',
-                    decimalPlaces: 0,
-                    color: (opacity = 1) => `rgba(0, 0, 0, ${opacity})`,
-                    style: {
-                        borderRadius: 16,
-                    },
-                    showValuesOnTopOfBars: false, // Asegúrate de que no se muestren los valores sobre las barras
-                    verticalLabelRotation: 270,
-                    // Rotación de las etiquetas del eje X a 270 grados
-                }}
-                xLabelsOffset={30}
-                hideLegend={true}
-                onDataPointClick={(datum) => {
-                    const { datasetIndex, index } = datum;
-                    const clickedData = chartData.datasets[index].originalData[datasetIndex];
-
-                    if (clickedData) {
-                        handleBarPress(clickedData);
-                    } else {
-                        console.error('No se encontraron datos originales para el punto clicado.');
-                    }
-                }}
-            />
-        );
-    };
-
-
     const renderChart = () => {
         if (!chartData) {
             return <TextStyled className="text-center mt-4">Seleccione variables y periodos para generar el gráfico.</TextStyled>;
         }
-
 
         switch (chartType) {
             case 'line':
                 return (
                     <LineChart
                         data={chartData}
-                        width={Dimensions.get("window").width * 0.83} // Ajustar al 85% del ancho de la pantalla
-                        height={320}
-                        yLabelsOffset={5}
+                        width={Dimensions.get("window").width}
+                        height={220}
                         chartConfig={chartConfig}
                         bezier
                         fromZero={true}
-                        horizontalLabelRotation={0}
-                        verticalLabelRotation={270}
-                        xLabelsOffset={30}
-                        formatXLabel={(label) => truncateLabel(label)}
                         style={{
                             marginVertical: 8,
-                            borderRadius: 10,
-                            paddingRight: 40,
-
-
+                            borderRadius: 16,
                         }}
-                        formatYLabel={(value) => formatYLabel(value, scale)}
-                        onDataPointClick={(data) => {
-                            console.log('Data Point Clicked:', data);
-
-                            const { dataset, index } = data;
-
-                            if (!dataset || index === undefined) {
-                                console.error('Dataset o index no encontrado');
-                                return;
-                            }
-
-                            const clickedData = dataset.originalData[index]; // Acceder a los datos originales
-
-                            if (!clickedData) {
-                                console.error('No se encontraron datos originales para el punto clicado.');
-                                return;
-                            }
-
-                            const serieName = clickedData.serie;
-                            const formattedDate = `${clickedData.fecha.slice(6, 8)}/${clickedData.fecha.slice(4, 6)}/${clickedData.fecha.slice(0, 4)}`;
-
-                            const formattedValue = new Intl.NumberFormat('es-ES').format(clickedData.value);
-
-
-                            Alert.alert(
-                                'Información del punto',
-                                `Serie: ${serieName}\nFecha: ${formattedDate}\nValor: ${formattedValue}`,
-                                [{ text: 'OK' }]
-                            );
+                        onDataPointClick={({ value, dataset, getColor, index }) => {
+                            const seriesName = dataset.label;
+                            const date = chartData.labels[index];
+                            setSelectedDataPoint({ seriesName, date, value });
+                            Alert.alert("Detalle del Punto", `Serie: ${seriesName}\nFecha: ${date}\nValor: ${value}`);
                         }}
                     />
                 );
-            case 'stackedBar':
-                return renderStackedBarChart();
         }
     };
-
-
-
-
-
-
 
     const renderView = () => {
         if (viewMode === 'table') {
@@ -898,14 +491,13 @@ const DatosSeries = () => {
                                         <CheckBox
                                             key={valor.Id}
                                             title={valor.Nombre}
-                                            checked={Boolean(selectedVariables[valor.Id])}  // Comprobamos si el valor está en selectedVariables
-                                            onPress={() => handleVariableSelection(valor, variableId)}  // Pasamos variableId y valor
+                                            checked={selectedVariables[valor.Id] || false}
+                                            onPress={() => handleVariableSelection(valor)}
                                         />
                                     ))}
                                 </ViewStyled>
                             ))}
                         </ViewStyled>
-
 
                         <ViewStyled className="mb-4">
                             <TextStyled className="font-bold mb-2">Seleccione los periodos:</TextStyled>
@@ -937,7 +529,7 @@ const DatosSeries = () => {
                             <Picker
                                 selectedValue={chartType}
                                 style={{ height: 50, width: 200 }}
-                                onValueChange={handleChartTypeChange}  // Usamos la función para manejar la selección del tipo de gráfico
+                                onValueChange={(itemValue) => setChartType(itemValue)}
                             >
                                 <Picker.Item label="Líneas" value="line" />
                                 <Picker.Item label="Barras verticales" value="bar" />
@@ -1122,7 +714,6 @@ const DatosSeries = () => {
                         <TouchableOpacity onPress={() => setIsChartModalVisible(false)}>
                             <TextStyled className="text-right text-blue-500">Cerrar</TextStyled>
                         </TouchableOpacity>
-
                         {renderChart()}
                     </ViewStyled>
                 </ViewStyled>
