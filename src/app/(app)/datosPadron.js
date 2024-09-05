@@ -72,6 +72,10 @@ const DatosSeries = () => {
             );
             return;
         }
+        setLeyenda([]);//Restablecemos la leyenda
+        setChartData(null); // Restablecer los datos del gráfico
+        setIsChartModalVisible(false); // Cerrar el modal de gráficos
+
         setChartType(itemValue); // Cambia el tipo de gráfico si se cumplen las condiciones
     };
 
@@ -480,47 +484,56 @@ const DatosSeries = () => {
 
             if (xAxis === 'Periodo') {
                 // Generar etiquetas basadas en los periodos seleccionados
-                const labels = Object.keys(selectedPeriods).map((key) => {
+                labels = Object.keys(selectedPeriods).map((key) => {
                     const { ano, mes, dia } = selectedPeriods[key];
                     return `${dia}/${mes}/${ano}`;
                 });
+                console.log('PPPPPP', labels);
 
-                // Crear un objeto para almacenar los datasets agrupados por fecha
                 let groupedDatasets = {};
 
                 datos.forEach((serieObj) => {
                     serieObj.datos.forEach((datoObj) => {
-                        // Convertir la fecha del dato al formato "dd/mm/yyyy"
-                        const [year, month, day] = datoObj.fecha.split(/[-T]/);
+                        // Convertir la fecha del dato al formato "d/m/yyyy"
+                        const year = datoObj.fecha.slice(0, 4);  // Extrae los primeros 4 caracteres para el año
+                        const month = parseInt(datoObj.fecha.slice(4, 6), 10); // Convierte el mes a número para evitar ceros iniciales
+                        const day = parseInt(datoObj.fecha.slice(6, 8), 10);   // Convierte el día a número para evitar ceros iniciales
+
                         const formattedDate = `${day}/${month}/${year}`;
+                        console.log('Fecha formateada de los datos:', formattedDate);
 
-                        // Buscar la etiqueta correspondiente en el array de labels basado en la fecha formateada
-                        const label = labels.find((lbl) => lbl === formattedDate) || formattedDate;
+                        // Verificar si la fecha formateada coincide con alguna de las etiquetas generadas (labels)
+                        if (labels.includes(formattedDate)) {
+                            console.log(`Fecha ${formattedDate} encontrada en labels, agregando al dataset.`);
 
-                        if (!groupedDatasets[formattedDate]) {
-                            groupedDatasets[formattedDate] = {
-                                label: formattedDate,
-                                data: [],
-                            };
+                            // Si existe, agrupar los datos por fecha
+                            if (!groupedDatasets[formattedDate]) {
+                                groupedDatasets[formattedDate] = {
+                                    label: formattedDate,
+                                    data: []
+                                };
+                            }
+
+                            groupedDatasets[formattedDate].data.push({
+                                value: datoObj.valor,
+                                fecha: datoObj.fecha,
+                                serie: serieObj.serie,
+                                color: seriesColors[Object.keys(groupedDatasets).length % seriesColors.length],
+                                variables: datoObj.variables
+                            });
+                        } else {
+                            console.log(`Fecha ${formattedDate} no encontrada en labels`);
                         }
-
-                        groupedDatasets[formattedDate].data.push({
-                            value: datoObj.valor,
-                            fecha: datoObj.fecha,
-                            serie: serieObj.serie,
-                            color: seriesColors[Object.keys(groupedDatasets).length % seriesColors.length],
-                            variables: datoObj.variables,
-                            label: label // Asignar la etiqueta correspondiente al dato
-                        });
                     });
                 });
 
                 // Convertir el objeto a un array de datasets
                 datasets = Object.values(groupedDatasets);
-
-                console.log("Labels:", Object.keys(groupedDatasets));
-                console.log("Datasets:", datasets);
+                //labels = Object.keys(groupedDatasets);
+                console.log("Final Labels (después de agrupar):", labels);
+                console.log("Final Datasets (después de agrupar):", datasets);
             }
+
             else {
                 // Si el eje X es otra variable (como Sexo, Edad, etc.)
                 labels = valoresObj[xAxis]
@@ -638,7 +651,14 @@ const DatosSeries = () => {
 
             } else if (chartType === 'stackedBar') {
                 // Para stackedBar no reestructuramos, simplemente agregamos la información necesaria
+                console.log('Labels antes de chartData:', labels);
+
+                if (labels.length === 0) {
+                    console.warn('Labels está vacío. Verifica la lógica de agrupación de períodos.');
+                    return;
+                }
                 const chartData = {
+
                     labels: labels,
                     datasets: datasets.map((dataset, datasetIndex) => {
                         console.log(`Procesando dataset ${dataset.label} (Índice: ${datasetIndex})`); // Log para cada dataset
@@ -698,23 +718,48 @@ const DatosSeries = () => {
                 setScale(scale);
                 setIsChartModalVisible(true);
             } else if (chartType === 'pie') {
+
                 console.log("Labels/Pie:", labels);
                 console.log("Datasets/Pie:", datasets);
                 // Reorganizar datos para el gráfico de pie
-                const pieData = datos.map((serieObj, index) => {
-                    return serieObj.datos.map((datoObj) => {
-                        console.log(serieObj)
-                        return {
-                            name: datasets[index].label,  // Aquí asignamos el nombre de la serie correctamente
-                            value: parseFloat(datoObj.valor),  // Asegurarnos de que el valor sea un número
-                            color: seriesColors[index % seriesColors.length],
-                            legendFontColor: "#7F7F7F",
-                            legendFontSize: 12,
-                            fecha: datoObj.fecha,
-                            serieName: serieObj.serie // También asignamos correctamente el nombre de la serie
-                        };
-                    });
-                }).flat();
+                let pieData;
+                if (xAxis === 'Periodo') {
+                    pieData = datasets.map((datasetObj, index) => {
+                        console.log('ah', datasetObj.label);  // Verifica qué hay dentro de datasetObj
+
+                        return datasetObj.data.map((dataObj) => {
+                            console.log(dataObj.serie)
+                            // Accedemos a cada campo dentro de 'data' de cada datasetObj
+                            return {
+                                name: datasetObj.label,  // Usamos el label del dataset para el nombre
+                                value: parseFloat(dataObj.value),  // Accedemos a 'value' dentro de dataObj
+                                color: dataObj.color,  // Accedemos a 'color' dentro de dataObj
+                                legendFontColor: "#7F7F7F",
+                                legendFontSize: 12,
+                                fecha: dataObj.fecha,  // Accedemos a 'fecha' dentro de dataObj
+                                serieName: dataObj.serie  // Accedemos a 'serie' dentro de dataObj
+                            };
+                        });
+                    }).flat();
+
+                } else {
+                    pieData = datos.map((serieObj, index) => {
+                        return serieObj.datos.map((datoObj) => {
+                            console.log(serieObj)
+                            return {
+                                name: datasets[index].label,  // Aquí asignamos el nombre de la serie correctamente
+                                value: parseFloat(datoObj.valor),  // Asegurarnos de que el valor sea un número
+                                color: seriesColors[index % seriesColors.length],
+                                legendFontColor: "#7F7F7F",
+                                legendFontSize: 12,
+                                fecha: datoObj.fecha,
+                                serieName: serieObj.serie // También asignamos correctamente el nombre de la serie
+                            };
+                        });
+                    }).flat();
+
+                }
+
 
                 console.log("Datos para gráfico circular:", pieData);
 
