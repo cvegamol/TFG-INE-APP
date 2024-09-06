@@ -1,10 +1,10 @@
 import React, { useEffect, useState, useMemo } from 'react';
 import { ScrollView, View, Text, Dimensions, Alert, Modal, TouchableOpacity } from 'react-native';
 import { styled } from 'nativewind';
-import { BarChart } from 'react-native-chart-kit';
 import StackedBarChart from '../../components/graph/stackedBarChart/StackedBarChart';
 import PieChart from '../../components/graph/stackedBarChart/PieChart';
 import LineChart from '../../components/graph/stackedBarChart/line-chart/LineChart';
+import BarChart from '../../components/graph/stackedBarChart/BarChart';
 import { CheckBox, Button } from 'react-native-elements';
 import { Picker } from '@react-native-picker/picker';
 import { useLocalSearchParams } from 'expo-router';
@@ -765,6 +765,33 @@ const DatosSeries = () => {
 
                 setChartData(pieData);
                 setIsChartModalVisible(true);
+            } else if (chartType === 'bar') {
+                console.log("Labels/Bar:", labels);
+                console.log("Datasets/Bar:", datasets);
+
+                // Transformar los datos para el formato del BarChart
+                const ca = {
+                    labels: labels, // Las etiquetas para el eje X
+                    datasets: datasets.map((dataset, datasetIndex) => {
+                        if (!dataset || !dataset.data) {
+                            console.error(`El dataset en el índice ${datasetIndex} no tiene datos`);
+                            return null;
+                        }
+
+                        // Para cada dataset, transformar los valores y asignar color
+                        return {
+                            data: dataset.data.map((d) => parseFloat(d.value)), // Asegurarse de que los valores sean numéricos
+                            color: () => seriesColors[datasetIndex % seriesColors.length], // Asignar el color correspondiente
+                            strokeWidth: 2 // Grosor de las barras
+                        };
+                    }).filter(dataset => dataset !== null) // Filtrar datasets vacíos
+                };
+
+                console.log('Datos transformados para BarChart:', ca);
+
+                // Configurar los datos del gráfico
+                setChartData(ca);
+                setIsChartModalVisible(true);
             }
 
         } catch (error) {
@@ -903,6 +930,59 @@ const DatosSeries = () => {
             />
         );
     };
+    const renderBarChart = () => {
+        if (!chartData) {
+            return <TextStyled className="text-center mt-4">No hay datos para mostrar.</TextStyled>;
+        }
+        // console.log('aaaa', chartData.labels)
+        // const transformedData = {
+        //     labels: chartData.labels,
+        //     datasets: chartData.datasets.map(dataset => ({
+        //         data: dataset.originalData.map(original => original.value),
+        //         color: (opacity = 1) => `rgba(0, 0, 0, ${opacity})`, // Color de la serie
+        //         strokeWidth: 2, // Grosor de la línea del gráfico
+        //     })),
+        // };
+
+        console.log('Chart Data', chartData)
+
+        return (
+            <BarChart
+                data={chartData}
+                fromZero={true}
+                width={Dimensions.get("window").width * 0.83}
+                height={320}
+                chartConfig={{
+                    backgroundGradientFrom: '#f7f7f7',
+                    backgroundGradientTo: '#f7f7f7',
+                    color: (opacity = 1) => `rgba(0, 0, 0, ${opacity})`,
+                    labelColor: (opacity = 1) => `rgba(0, 0, 0, ${opacity})`,
+                    style: {
+                        borderRadius: 16,
+                    },
+                    decimalPlaces: 0,
+                }}
+                style={{
+                    marginVertical: 8,
+                    borderRadius: 10,
+                }}
+                onDataPointClick={({ datasetIndex, index }) => {
+                    const clickedData = chartData.datasets[datasetIndex]?.originalData?.[index];
+                    if (clickedData) {
+                        const { value, fecha, serie } = clickedData;
+                        console.log(`Datos clicados: Valor: ${value}, Fecha: ${fecha}, Serie: ${serie}`);
+                        handleBarPress({ value, fecha, serie });
+                    } else {
+                        console.error('No se encontraron datos originales para el punto clicado.');
+                    }
+                }}
+            />
+
+        );
+    };
+
+
+
 
 
     const renderChart = () => {
@@ -969,6 +1049,8 @@ const DatosSeries = () => {
                 return renderStackedBarChart();
             case 'pie':
                 return renderPieChart();
+            case 'bar':
+                return renderBarChart();
         }
     };
 
