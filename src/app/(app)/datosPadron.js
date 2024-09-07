@@ -765,36 +765,51 @@ const DatosSeries = () => {
 
                 setChartData(pieData);
                 setIsChartModalVisible(true);
-            } else if (chartType === 'bar') {
+            }
+            else if (chartType === 'bar') {
                 console.log("Labels/Bar:", labels);
                 console.log("Datasets/Bar:", datasets);
 
-                // Transformar los datos para el formato del BarChart
-                const ca = {
-                    labels: labels, // Las etiquetas para el eje X
-                    datasets: datasets.map((dataset, datasetIndex) => {
-                        if (!dataset || !dataset.data) {
-                            console.error(`El dataset en el índice ${datasetIndex} no tiene datos`);
-                            return null;
-                        }
+                // Reestructuramos los datos manteniendo la información adicional (serie, fecha) en el mismo formato
+                const reorganizedDatasets = datasets.map((dataset, datasetIndex) => {
+                    if (!dataset || !dataset.data) {
+                        console.error(`El dataset en el índice ${datasetIndex} no tiene datos`);
+                        return null;
+                    }
 
-                        // Para cada dataset, transformar los valores y asignar color
-                        return {
-                            data: dataset.data.map((d) => parseFloat(d.value)), // Asegurarse de que los valores sean numéricos
-                            color: () => seriesColors[datasetIndex % seriesColors.length], // Asignar el color correspondiente
-                            strokeWidth: 2 // Grosor de las barras
-                        };
-                    }).filter(dataset => dataset !== null) // Filtrar datasets vacíos
+                    return {
+                        data: dataset.data.map((d, dataIndex) => {
+                            return {
+                                value: parseFloat(d.value), // Asegurarse de que el valor sea numérico
+                                fecha: d.fecha, // Mantener la fecha
+                                serie: d.serie, // Mantener el nombre de la serie
+                                color: seriesColors[datasetIndex % seriesColors.length] // Asignar color basado en el índice
+                            };
+                        }),
+                    };
+                }).filter(dataset => dataset !== null); // Filtrar datasets vacíos
+
+                // Configuramos los datos del gráfico manteniendo el formato original
+                const chartData = {
+                    labels: labels, // Las etiquetas para el eje X
+                    datasets: reorganizedDatasets.map((dataset, datasetIndex) => ({
+                        data: dataset.data.map(item => item.value), // Solo pasamos los valores para el gráfico
+                        originalData: dataset.data, // Guardamos los datos originales para acceder a ellos en el click (fecha, serie, etc.)
+                        color: () => seriesColors[datasetIndex % seriesColors.length], // Asignar el color correspondiente
+                        strokeWidth: 2 // Grosor de las barras
+                    }))
                 };
 
-                console.log('Datos transformados para BarChart:', ca);
-                const scale = determineScale(ca.datasets.flatMap(dataset => dataset.data));
-                console.log('Escala', scale)
-                setScale(scale);
+                console.log('Datos transformados para BarChart:', chartData);
+                const scale = determineScale(chartData.datasets.flatMap(dataset => dataset.data));
+                console.log('Escala', scale);
+
                 // Configurar los datos del gráfico
-                setChartData(ca);
+                setChartData(chartData);
+                setScale(scale);
                 setIsChartModalVisible(true);
             }
+
 
         } catch (error) {
             console.error('Error generando el gráfico:', error);
@@ -981,10 +996,22 @@ const DatosSeries = () => {
 
     const handleDataPointClick = (data) => {
         const { value, datasetIndex, valueIndex } = data;
+        console.log('AAa', chartData)
+
+        const pointClicked = chartData.datasets[datasetIndex].originalData[valueIndex];
+        const fecha = pointClicked.fecha;
+        const serie = pointClicked.serie;
+
+        const formattedValue = new Intl.NumberFormat('es-ES').format(value);
+
+        // Formatear la fecha
+        const formattedDate = `${fecha.slice(6, 8)}/${fecha.slice(4, 6)}/${fecha.slice(0, 4)}`;
+
+        console.log(pointClicked)
         // Mostrar un alert con el valor de la barra pulsada
         Alert.alert(
             "Valor de la barra",
-            `Valor: ${value}, Dataset: ${datasetIndex}, Índice: ${valueIndex}`
+            `Serie: ${serie}\nFecha: ${formattedDate}\nValor: ${formattedValue}`,
         );
     };
 
