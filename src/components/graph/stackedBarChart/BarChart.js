@@ -13,6 +13,7 @@ import {
 import AbstractChart from "../AbstractChart";
 
 const barWidth = 32;
+const barSpacing = 8; // Espacio entre las barras del mismo label
 
 class BarChart extends AbstractChart {
      getBarPercentage = () => {
@@ -20,13 +21,29 @@ class BarChart extends AbstractChart {
           return barPercentage;
      };
 
-     // Función para calcular la altura de la barra
-     calcHeight1 = (value, allData, height) => {
-          const maxValue = Math.max(...allData.filter(v => v !== undefined && v !== null)); // Excluir valores undefined/null
-          if (maxValue === 0 || isNaN(maxValue)) return 0; // Evita NaN y divisiones por 0
+     // Función para calcular la altura de la barra usando el valor máximo de todos los datasets
+     calcBaseHeightDef = (value, maxDatasetValue, height) => {
+          if (maxDatasetValue === 0 || isNaN(maxDatasetValue)) return 0; // Evita divisiones por 0
 
-          const heightRatio = value / maxValue;
+          const heightRatio = value / maxDatasetValue;
           return heightRatio * height;
+     };
+
+     getDynamicBarWidth = (dataLength, chartWidth, paddingRight) => {
+          const availableBarSpace = chartWidth - paddingRight * 2;
+          const maxBarWidth = availableBarSpace / dataLength;
+          const minBarWidth = 10; // Definimos un ancho mínimo para las barras
+          return Math.max(minBarWidth, Math.min(maxBarWidth, 40)); // Ajustamos el ancho máximo
+     };
+
+     handleBarClick = (datasetIndex, valueIndex, value) => {
+          if (this.props.onDataPointClick) {
+               this.props.onDataPointClick({
+                    datasetIndex,
+                    valueIndex,
+                    value
+               });
+          }
      };
 
      renderBars = ({
@@ -38,77 +55,62 @@ class BarChart extends AbstractChart {
           barRadius,
           withCustomBarColorFromData
      }) => {
-          const numberOfDataSets = data.datasets.length; // Cantidad de datasets (número de barras por etiqueta)
-          const totalLabels = data.labels.length; // Número de etiquetas (como "Almería", "Araba/Álava", etc.)
-          const barFullWidth = barWidth * this.getBarPercentage(); // Ancho completo de una barra
-          const baseHeight = this.calcBaseHeight(data.datasets[0].data, height); // Altura base para la primera serie
+          const numberOfDataSets = data.datasets.length; // Cantidad de datasets
+          const totalLabels = data.labels.length; // Número de etiquetas
+          const barWidth = this.getDynamicBarWidth(totalLabels, width, paddingRight); // Cálculo dinámico del ancho de las barras
 
-          // Recorremos los datasets, ya que cada dataset representa un grupo de valores asociados a un label.
+          // Obtener el valor máximo entre todos los datasets
+          const getMaxValue = (datasets) => {
+               let maxValue = 0;
+
+               datasets.forEach(dataset => {
+                    if (Array.isArray(dataset.data)) {
+                         const datasetMax = Math.max(...dataset.data); // Asegúrate de que dataset.data sea un array
+                         if (datasetMax > maxValue) {
+                              maxValue = datasetMax;
+                         }
+                    } else {
+                         console.error("dataset.data no es un array:", dataset.data);
+                    }
+               });
+
+               return maxValue;
+          };
+
+          const maxDatasetValue = getMaxValue(data.datasets); // Valor máximo entre todos los datasets
+
+          // Recorremos los datasets y valores dentro de cada dataset
           return data.datasets.map((dataset, datasetIndex) => {
-               const label = data.labels[datasetIndex]; // Tomamos el label correspondiente a este dataset
-               console.log(`\nDataset ${datasetIndex}, Label: ${label}`); // Log para el dataset actual
-
-               // Ahora iteramos sobre los valores dentro de este dataset
                return dataset.data.map((value, valueIndex) => {
-                    console.log(`Valor ${valueIndex} del dataset ${datasetIndex} para el label ${label}:`, value);
-
-                    // Verificar si el valor es válido; si es indefinido, usar 0
                     const validValue = value !== undefined && value !== null ? value : 0;
 
-                    // Calcular la altura de la barra
-                    const barHeight = this.calcHeight(validValue, dataset.data, height);
-                    console.log('Altura de la barra', barHeight);
+                    // Calcular la altura de la barra basado en maxDatasetValue
+                    const barHeight = this.calcBaseHeightDef(validValue, maxDatasetValue, height);
 
                     if (isNaN(barHeight) || barHeight === undefined) {
-                         console.error(`Altura de la barra es NaN o undefined para el dataset ${datasetIndex}, label ${label}, valor ${valueIndex}`);
+                         console.error(`Altura de la barra es NaN o undefined para el dataset ${datasetIndex}, valor ${valueIndex}`);
                          return null;
                     }
 
-                    // Calcular el ancho de cada barra (ajustado por dataset y porcentaje de barra)
-                    const individualBarWidth = (barFullWidth) / dataset.data.length;
-
-                    // Calcular el desplazamiento en X para cada barra
-                    const xOffset =
-                         paddingRight +
-                         (datasetIndex * (width - paddingRight)) / totalLabels + // Posición de la etiqueta en el eje X
-                         valueIndex * individualBarWidth; // Offset para las barras dentro del dataset
-
-                    console.log(`X Offset (Dataset ${datasetIndex}, Label ${label}, Valor ${valueIndex}):`, xOffset);
+                    const xOffset = paddingRight + (datasetIndex * (width - paddingRight)) / totalLabels + valueIndex * barWidth;
 
                     return (
                          <Rect
                               key={`${datasetIndex}-${valueIndex}`}
-                              x={xOffset}  // Posicionamos la barra horizontalmente
-                              y={
-                                   ((barHeight > 0 ? baseHeight - barHeight : baseHeight) / 4) * 3 + // Posición vertical
-                                   paddingTop
-                              }
-                              rx={barRadius}  // Borde redondeado
-                              width={individualBarWidth}  // Ancho de la barra
-                              height={(Math.abs(barHeight) / 4) * 3}  // Altura de la barra
-                              fill={
-                                   withCustomBarColorFromData
-                                        ? `url(#customColor_${datasetIndex}_${valueIndex})`
-                                        : dataset.color(1)  // Aplicamos el color de la barra
-                              }
+                              x={xOffset} // Posicionamos la barra horizontalmente
+                              y={((barHeight > 0 ? height - barHeight : height) / 4) * 3 + paddingTop}
+                              rx={barRadius} // Borde redondeado
+                              width={barWidth} // Ancho de la barra
+                              height={(Math.abs(barHeight) / 4) * 3} // Altura de la barra
+                              fill={withCustomBarColorFromData ? `url(#customColor_${datasetIndex}_${valueIndex})` : dataset.color(1)}
+                              onPress={() => this.handleBarClick(datasetIndex, valueIndex, validValue)} // Añadir evento de click
                          />
                     );
                });
           });
      };
 
-
-
-
-
-
-
-
-
-     renderColors = ({
-          data,
-          flatColor
-     }) => {
+     renderColors = ({ data, flatColor }) => {
           return data.datasets.map((dataset, index) => (
                <Defs key={dataset.key ?? index}>
                     {dataset.colors?.map((color, colorIndex) => {
@@ -145,35 +147,27 @@ class BarChart extends AbstractChart {
           paddingRight
      }) => {
           const numberOfDataSets = data.datasets.length;
-          const baseHeight = this.calcBaseHeight(data.datasets[0].data, height); // Calculamos el baseHeight para la primera serie
+          const maxDatasetValue = Math.max(...data.datasets.map(dataset => Math.max(...dataset.data)));
 
           return data.labels.map((label, i) => {
                return data.datasets.map((dataset, j) => {
-                    const barHeight = this.calcHeight(dataset.data[i], dataset.data, height);
-                    const individualBarWidth = (barWidth * this.getBarPercentage()) / numberOfDataSets; // Ajustamos el ancho de cada barra
+                    const barHeight = this.calcBaseHeightDef(dataset.data[i], maxDatasetValue, height);
+                    const individualBarWidth = (barWidth * this.getBarPercentage()) / numberOfDataSets;
                     const xOffset =
                          paddingRight +
                          (i * (width - paddingRight)) / data.labels.length +
-                         j * individualBarWidth; // Ajustamos el offset de cada barra dentro de un label
-
-                    const renderLabel = (value) => {
-                         if (this.props.chartConfig.formatTopBarValue) {
-                              return this.props.chartConfig.formatTopBarValue(value);
-                         } else {
-                              return value;
-                         }
-                    };
+                         j * individualBarWidth;
 
                     return (
                          <Text
                               key={`${i}-${j}`}
                               x={xOffset + individualBarWidth / 2}
-                              y={((baseHeight - barHeight) / 4) * 3 + paddingTop - 1}
+                              y={((height - barHeight) / 4) * 3 + paddingTop - 1}
                               fill={this.props.chartConfig.color(0.6)}
                               fontSize="12"
                               textAnchor="middle"
                          >
-                              {renderLabel(dataset.data[i])}
+                              {dataset.data[i]}
                          </Text>
                     );
                });
@@ -200,104 +194,58 @@ class BarChart extends AbstractChart {
 
           const { borderRadius = 0, paddingTop = 16, paddingRight = 64 } = style;
 
-          const config = {
-               width,
-               height,
-               verticalLabelRotation,
-               horizontalLabelRotation,
-               barRadius:
-                    (this.props.chartConfig && this.props.chartConfig.barRadius) || 0,
-               decimalPlaces:
-                    (this.props.chartConfig && this.props.chartConfig.decimalPlaces) ?? 2,
-               formatYLabel:
-                    (this.props.chartConfig && this.props.chartConfig.formatYLabel) ||
-                    function (label) {
-                         return label;
-                    },
-               formatXLabel:
-                    (this.props.chartConfig && this.props.chartConfig.formatXLabel) ||
-                    function (label) {
-                         return label;
-                    }
-          };
+          const numberOfDataSets = data.datasets.length;
+          const totalLabels = data.labels.length;
+          const barWidth = this.getDynamicBarWidth(totalLabels, width, paddingRight); // Calcular ancho dinámico de barras
+          const extraRightPadding = 30; // Margen adicional
 
-          const numberOfDataSets = data.datasets.length; // Cantidad de datasets (número de barras por etiqueta)
-          const totalLabels = data.labels.length; // Número de etiquetas (como "Mujeres", "Hombres", etc.)
-          const barFullWidth = barWidth * this.getBarPercentage(); // Ancho completo de una barra
+          // Calcular el ancho total, asegurando que haya espacio para todas las barras
+          const calculatedWidth = Math.max(width, totalLabels * barWidth * numberOfDataSets) + extraRightPadding;
 
-          const calculatedWidth = Math.max(width, totalLabels * barFullWidth * numberOfDataSets);
-
-
-          console.log('Width', calculatedWidth)
           return (
                <View style={style}>
                     <ScrollView horizontal={true}>
                          <Svg height={height} width={calculatedWidth}>
-                              {this.renderDefs({
-                                   ...config,
-                                   ...this.props.chartConfig
-                              })}
-                              {this.renderColors({
-                                   ...this.props.chartConfig,
-                                   flatColor: flatColor,
-                                   data: this.props.data
-                              })}
-                              <Rect
-                                   width="100%"
-                                   height={height}
-                                   rx={borderRadius}
-                                   ry={borderRadius}
-                                   fill="url(#backgroundGradient)"
-                              />
+                              <Rect width="100%" height={height} rx={borderRadius} ry={borderRadius} fill="white" />
                               <G>
-                                   {withInnerLines
-                                        ? this.renderHorizontalLines({
-                                             ...config,
-                                             count: segments,
-                                             paddingTop
-                                        })
-                                        : null}
+                                   {withInnerLines ? this.renderHorizontalLines({ width: calculatedWidth, height, count: segments, paddingTop }) : null}
                               </G>
                               <G>
                                    {withHorizontalLabels
                                         ? this.renderHorizontalLabels({
-                                             ...config,
+                                             width: calculatedWidth,
+                                             height,
                                              count: segments,
                                              data: data.datasets[0].data,
                                              paddingTop: paddingTop,
-                                             paddingRight: paddingRight
+                                             paddingRight: paddingRight,
+
                                         })
                                         : null}
                               </G>
                               <G>
                                    {withVerticalLabels
                                         ? this.renderVerticalLabels({
-                                             ...config,
+                                             width: calculatedWidth,
+                                             height,
                                              labels: data.labels,
                                              paddingRight: paddingRight,
                                              paddingTop: paddingTop,
-                                             horizontalOffset: barWidth * this.getBarPercentage()
+                                             horizontalOffset: barWidth / 2
                                         })
                                         : null}
                               </G>
                               <G>
                                    {this.renderBars({
-                                        ...config,
                                         data: data,
+                                        width: calculatedWidth,
+                                        height: height,
                                         paddingTop: paddingTop,
                                         paddingRight: paddingRight,
                                         withCustomBarColorFromData: withCustomBarColorFromData
                                    })}
                               </G>
-                              <G>
-                                   {showValuesOnTopOfBars &&
-                                        this.renderValuesOnTopOfBars({
-                                             ...config,
-                                             data: data,
-                                             paddingTop: paddingTop,
-                                             paddingRight: paddingRight
-                                        })}
-                              </G>
+                              {showValuesOnTopOfBars && this.renderValuesOnTopOfBars({ data, width: calculatedWidth, height, paddingTop, paddingRight })}
                          </Svg>
                     </ScrollView>
                </View>

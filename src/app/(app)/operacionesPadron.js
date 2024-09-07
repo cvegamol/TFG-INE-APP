@@ -20,28 +20,29 @@ const OperacionesPadron = () => {
      const [isLoading, setIsLoading] = useState(true);
 
      const handlePress = (tabla) => {
-         
+
           router.push({
                pathname: 'seriesPadron',
-              params: { tabla: JSON.stringify(tabla) },
+               params: { tabla: JSON.stringify(tabla) },
           });
      };
 
      useEffect(() => {
           const obtenerDatos = async () => {
                try {
-                    const seriesJson = await fetch(`http://192.168.1.13:3000/series/getSerieByFkOperation/${id}`);
+                    //const seriesJson = await fetch(`http://192.168.1.13:3000/series/getSerieByFkOperation/${id}`);
+                    const seriesJson = await fetch(`http://192.168.103.97:3000/series/getSerieByFkOperation/${id}`);
                     const series = await seriesJson.json();
-                   
+
                     const tablasJson = await fetch(`https://servicios.ine.es/wstempus/js/ES/TABLAS_OPERACION/${id}`);
                     const tablas = await tablasJson.json();
                     setTablas(tablas);
-                    
+
                     if (tablas && tablas.length > 0) {
                          const id_t = tablas[0].Id;
                          const variableTabla = await fetch(`https://servicios.ine.es/wstempus/js/ES/GRUPOS_TABLA/${id_t}`);
                          const variables = await variableTabla.json();
-                         
+
                     } else {
                          console.log('No hay tablas disponibles.');
                     }
@@ -85,7 +86,7 @@ const OperacionesPadron = () => {
                                              onPress={() => handlePress(table)}
                                         >
                                              <TextStyled className="text-lg text-gray-700">
-                                                  
+
                                                   {table.Nombre} - {table.Id} -{table.Anyo_Periodo_ini} -{table.FechaRef_fin}
                                              </TextStyled>
                                         </TouchableOpacityStyled>

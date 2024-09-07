@@ -36,10 +36,16 @@ class AbstractChart extends Component {
     if (min < 0 && max > 0) {
       return height * (val / this.calcScaler(data));
     } else if (min >= 0 && max >= 0) {
+      console.log('ALT', this.props.fromZero
+        ? height * (val / this.calcScaler(data))
+        : height * ((val - min) / this.calcScaler(data)))
       return this.props.fromZero
         ? height * (val / this.calcScaler(data))
         : height * ((val - min) / this.calcScaler(data));
     } else if (min < 0 && max <= 0) {
+      console.log('ALT', this.props.fromZero
+        ? height * (val / this.calcScaler(data))
+        : height * ((val - max) / this.calcScaler(data)))
       return this.props.fromZero
         ? height * (val / this.calcScaler(data))
         : height * ((val - max) / this.calcScaler(data));

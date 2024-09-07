@@ -27,7 +27,8 @@ const Home = () => {
     const obtenerDatosInicio = async () => {
       try {
         // Coloca aquí todas las llamadas a APIs
-        const estadisticaContinuaResponse = await fetch(`http://192.168.1.13:3000/operaciones/getOperationById/450`);
+        //const estadisticaContinuaResponse = await fetch(`http://192.168.1.13:3000/operaciones/getOperationById/450`);
+        const estadisticaContinuaResponse = await fetch(`http://192.168.103.97:3000/operaciones/getOperationById/450`);
         const estadisticaContinua = await estadisticaContinuaResponse.json();
         setEstadisticaContinua(estadisticaContinua[0]);
 
@@ -216,19 +217,19 @@ const Home = () => {
           data={{
             labels: ["January", "February"],
             datasets: [
-            {
-              data: [10000,15000, 20000], // Primer valor para cada mes
-              color: (opacity = 1) => `rgba(255, 0, 0, ${opacity})`, // Rojo
-            },
-            {
-              data: [11000,35000, 40000], // Segundo valor para cada mes
-              color: (opacity = 1) => `rgba(0, 0, 255, ${opacity})`, // Azul
-            }
-          ]
+              {
+                data: [10000, 15000, 20000], // Primer valor para cada mes
+                color: (opacity = 1) => `rgba(255, 0, 0, ${opacity})`, // Rojo
+              },
+              {
+                data: [11000, 35000, 40000], // Segundo valor para cada mes
+                color: (opacity = 1) => `rgba(0, 0, 255, ${opacity})`, // Azul
+              }
+            ]
           }}
           width={Dimensions.get("window").width} // from react-native
           height={220}
-          
+
           yAxisInterval={1} // optional, defaults to 1
           chartConfig={{
             backgroundColor: "#e26a00",
@@ -251,44 +252,44 @@ const Home = () => {
             marginVertical: 8,
             borderRadius: 16
           }}
-            fromZero={true}
+          fromZero={true}
         />
         <BarChart
-        data={{
-          labels: ["January", "February"],
-          datasets: [
-            {
-              data: [10000,15000, 20000], // Primer valor para cada mes
-              color: (opacity = 1) => `rgba(255, 0, 0, ${opacity})`, // Rojo
+          data={{
+            labels: ["January", "February"],
+            datasets: [
+              {
+                data: [10000, 15000, 20000], // Primer valor para cada mes
+                color: (opacity = 1) => `rgba(255, 0, 0, ${opacity})`, // Rojo
+              },
+              {
+                data: [30000, 35000, 40000], // Segundo valor para cada mes
+                color: (opacity = 1) => `rgba(0, 0, 255, ${opacity})`, // Azul
+              }
+            ]
+          }}
+          width={Dimensions.get("window").width - 16} // Ancho de la gráfica
+          height={220} // Altura de la gráfica
+          yAxisLabel="$"
+          chartConfig={{
+            backgroundColor: "#e26a00",
+            backgroundGradientFrom: "#fb8c00",
+            backgroundGradientTo: "#ffa726",
+            decimalPlaces: 2, // Número de decimales
+            color: (opacity = 1) => `rgba(255, 255, 255, ${opacity})`,
+            labelColor: (opacity = 1) => `rgba(255, 255, 255, ${opacity})`,
+            style: {
+              borderRadius: 16
             },
-            {
-              data: [30000,35000, 40000], // Segundo valor para cada mes
-              color: (opacity = 1) => `rgba(0, 0, 255, ${opacity})`, // Azul
-            }
-          ]
-        }}
-        width={Dimensions.get("window").width - 16} // Ancho de la gráfica
-        height={220} // Altura de la gráfica
-        yAxisLabel="$"
-        chartConfig={{
-          backgroundColor: "#e26a00",
-          backgroundGradientFrom: "#fb8c00",
-          backgroundGradientTo: "#ffa726",
-          decimalPlaces: 2, // Número de decimales
-          color: (opacity = 1) => `rgba(255, 255, 255, ${opacity})`,
-          labelColor: (opacity = 1) => `rgba(255, 255, 255, ${opacity})`,
-          style: {
+            barPercentage: 0.5, // Ajusta este valor para controlar el ancho de las barras y su superposición
+            useShadowColorFromDataset: false, // Desactiva sombras si es necesario
+          }}
+          style={{
+            marginVertical: 8,
             borderRadius: 16
-          },
-          barPercentage: 0.5, // Ajusta este valor para controlar el ancho de las barras y su superposición
-          useShadowColorFromDataset: false, // Desactiva sombras si es necesario
-        }}
-        style={{
-          marginVertical: 8,
-          borderRadius: 16
-        }}
-        withHorizontalLabels={false} // Opcional: remueve etiquetas horizontales para un look más limpio
-      />
+          }}
+          withHorizontalLabels={false} // Opcional: remueve etiquetas horizontales para un look más limpio
+        />
       </ScrollView>
     </Plantilla>
   );

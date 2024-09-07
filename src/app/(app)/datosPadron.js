@@ -788,7 +788,9 @@ const DatosSeries = () => {
                 };
 
                 console.log('Datos transformados para BarChart:', ca);
-
+                const scale = determineScale(ca.datasets.flatMap(dataset => dataset.data));
+                console.log('Escala', scale)
+                setScale(scale);
                 // Configurar los datos del gráfico
                 setChartData(ca);
                 setIsChartModalVisible(true);
@@ -817,10 +819,14 @@ const DatosSeries = () => {
 
 
     const formatYLabel = (value, scale) => {
+        console.log('Format', value, scale)
         switch (scale) {
             case 1.0e9:
+                console.log('Format', `${(value / 1.0e9).toFixed(1)}B`)
                 return `${(value / 1.0e9).toFixed(1)}B`;
             case 1.0e6:
+                console.log('Format', `${(value / 1.0e6).toFixed(1)}M`)
+
                 return `${(value / 1.0e6).toFixed(1)}M`;
             case 1.0e3:
                 return `${(value / 1.0e3).toFixed(1)}k`;
@@ -951,6 +957,7 @@ const DatosSeries = () => {
                 data={chartData}
                 fromZero={true}
                 width={Dimensions.get("window").width * 0.83}
+                formatYLabel={(value) => formatYLabel(value, scale)}
                 height={320}
                 chartConfig={{
                     backgroundGradientFrom: '#f7f7f7',
@@ -966,22 +973,20 @@ const DatosSeries = () => {
                     marginVertical: 8,
                     borderRadius: 10,
                 }}
-                onDataPointClick={({ datasetIndex, index }) => {
-                    const clickedData = chartData.datasets[datasetIndex]?.originalData?.[index];
-                    if (clickedData) {
-                        const { value, fecha, serie } = clickedData;
-                        console.log(`Datos clicados: Valor: ${value}, Fecha: ${fecha}, Serie: ${serie}`);
-                        handleBarPress({ value, fecha, serie });
-                    } else {
-                        console.error('No se encontraron datos originales para el punto clicado.');
-                    }
-                }}
+                onDataPointClick={handleDataPointClick} // Pasamos la función para manejar el click
             />
 
         );
     };
 
-
+    const handleDataPointClick = (data) => {
+        const { value, datasetIndex, valueIndex } = data;
+        // Mostrar un alert con el valor de la barra pulsada
+        Alert.alert(
+            "Valor de la barra",
+            `Valor: ${value}, Dataset: ${datasetIndex}, Índice: ${valueIndex}`
+        );
+    };
 
 
 
