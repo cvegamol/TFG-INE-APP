@@ -972,6 +972,7 @@ const DatosSeries = () => {
                 data={chartData}
                 width={Dimensions.get("window").width * 0.83}
                 height={320}
+                formatYLabel={(value) => formatYLabel(value, scale)}
                 fromZero={true}
                 chartConfig={{
                     backgroundGradientFrom: '#f7f7f7',

@@ -183,6 +183,36 @@ class BarChart extends AbstractChart {
           });
      };
 
+     renderVerticalLabels1 = ({
+          width,
+          height,
+          labels,
+          paddingRight,
+          paddingTop,
+          horizontalOffset = 0
+     }) => {
+          const numberOfDataSets = this.props.data.datasets.length;
+          const barWidth = this.getDynamicBarWidth(labels.length, width, paddingRight); // Calcula el ancho dinámico de las barras
+
+          return labels.map((label, i) => {
+               const xOffset = paddingRight + i * barWidth * numberOfDataSets; // Ajustamos el desplazamiento para que esté alineado con el inicio de las barras
+
+               return (
+                    <Text
+                         key={i}
+                         x={xOffset} // Posiciona la etiqueta al inicio de las barras
+                         y={height - (paddingTop / 2)} // Asegura que la etiqueta esté justo debajo del gráfico
+                         fontSize="12"
+                         fill={this.props.chartConfig.color(0.6)}
+                         textAnchor="start" // Ajusta el texto para que se alinee al inicio de la barra
+                    >
+                         {label}
+                    </Text>
+               );
+          });
+     };
+
+
      render() {
           const {
                width,
@@ -190,6 +220,8 @@ class BarChart extends AbstractChart {
                data,
                style = {},
                withHorizontalLabels = true,
+               formatYLabel = (value) => value, // Asegúrate de que se reciba la prop de formato
+
                withVerticalLabels = true,
                verticalLabelRotation = 0,
                horizontalLabelRotation = 0,
@@ -228,7 +260,7 @@ class BarChart extends AbstractChart {
                                              data: data.datasets[0].data,
                                              paddingTop: paddingTop,
                                              paddingRight: paddingRight,
-
+                                             formatYLabel
                                         })
                                         : null}
                               </G>
