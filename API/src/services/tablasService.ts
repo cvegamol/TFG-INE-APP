@@ -83,6 +83,22 @@ const getTableByFkPeriodIni = async (id: number): Promise<any> => {
         throw { message: 'Error al obtener la tabla por id', status: 500 };
     }
 }
+/**
+ * Función para obtener una tabla por Código y FK_Publicación
+ * @param {string} codigo - Código de la tabla a buscar
+ * @param {number} fkPublicacion - FK_Publicación de la tabla
+ * @returns {Promise} - Promesa que resuelve con el resultado de la consulta
+ */
+const getTableByCodeAndFkPublication = async (codigo: string, fkPublicacion: number): Promise<any> => {
+    try {
+        const connection = await getConnection();
+        const query = 'SELECT * FROM tablas WHERE Codigo LIKE ? AND FK_Publicacion = ? ORDER BY Nombre';
+        const result = await connection.query(query, [`%${codigo}%`, fkPublicacion]);
+        return result;
+    } catch (error: any) {
+        throw { message: 'Error al obtener la tabla por Código y FK_Publicación', status: 500 };
+    }
+};
 
-export const tablasMethods= { getTables, getTableById, getTableByFkPeriodicity, getTableByFkPublication, getTableByFkPeriodIni }; // Exporta los métodos de tablas
+export const tablasMethods= { getTables, getTableById, getTableByFkPeriodicity, getTableByFkPublication, getTableByFkPeriodIni,getTableByCodeAndFkPublication}; // Exporta los métodos de tablas
 export default tablasMethods; // Exporta los métodos de tablas por defecto

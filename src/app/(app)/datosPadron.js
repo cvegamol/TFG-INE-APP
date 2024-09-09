@@ -1,5 +1,5 @@
 import React, { useEffect, useState, useMemo } from 'react';
-import { ScrollView, View, Text, Dimensions, Alert, Modal, TouchableOpacity } from 'react-native';
+import { ScrollView, View, Text, Dimensions, Alert, Modal, TouchableOpacity, Platform, StyleSheet } from 'react-native';
 import { styled } from 'nativewind';
 import StackedBarChart from '../../components/graph/stackedBarChart/StackedBarChart';
 import PieChart from '../../components/graph/stackedBarChart/PieChart';
@@ -49,6 +49,16 @@ const DatosSeries = () => {
     const allVariablesSelected = Object.keys(valoresObj).every(variableId =>
         valoresObj[variableId].some(valor => selectedVariables[valor.Id])
     );
+    const pickerStyles = Platform.select({
+        ios: {
+            height: 40, // Puedes ajustar la altura para iOS
+            width: '100%', // Asegúrate de que se ajuste al contenedor
+        },
+        android: {
+            height: 50,
+            width: 200,
+        },
+    });
     // Contar cuántas variables tienen múltiples valores seleccionados (incluyendo periodicidad)
     const multiSelectedVariablesCount = Object.keys(valoresObj).filter(variableId =>
         valoresObj[variableId].filter(valor => selectedVariables[valor.Id]).length > 1
@@ -1124,72 +1134,80 @@ const DatosSeries = () => {
             );
         } else {
             return (
-                <ScrollViewStyled className="p-4">
-                    <ViewStyled>
-                        <ViewStyled className="mb-4">
-                            <TextStyled className="font-bold mb-2">Seleccionar variables...</TextStyled>
+                <ScrollViewStyled contentContainerStyle={styles.container}>
+                    <ViewStyled style={styles.section}>
+                        <TextStyled style={styles.textBold}>Seleccionar variables...</TextStyled>
+                        {Object.keys(valoresObj).map((variableId) => (
+                            <ViewStyled key={variableId}>
+                                <TextStyled style={{ fontWeight: 'bold' }}>
+                                    {valoresObj[variableId][0]?.Variable?.Nombre}
+                                </TextStyled>
+                                {valoresObj[variableId].map((valor) => (
+                                    <CheckBox
+                                        key={valor.Id}
+                                        title={valor.Nombre}
+                                        checked={Boolean(selectedVariables[valor.Id])}
+                                        onPress={() => handleVariableSelection(valor, variableId)}
+                                    />
+                                ))}
+                            </ViewStyled>
+                        ))}
+                    </ViewStyled>
 
+                    <ViewStyled style={styles.section}>
+                        <TextStyled style={styles.textBold}>Seleccione los periodos:</TextStyled>
+                        {Object.keys(periodicidadesObj).map((periodKey) => (
+                            <CheckBox
+                                key={periodKey}
+                                title={`${periodicidadesObj[periodKey].dia}/${periodicidadesObj[periodKey].mes}/${periodicidadesObj[periodKey].ano}`}
+                                checked={selectedPeriods[periodKey] || false}
+                                onPress={() => handlePeriodSelection(periodKey)}
+                            />
+                        ))}
+                    </ViewStyled>
+
+                    <ViewStyled style={styles.section}>
+                        <TextStyled style={styles.textBold}>Formato del gráfico</TextStyled>
+
+                        <TextStyled style={styles.pickerLabel}>Eje horizontal:</TextStyled>
+                        <Picker
+                            selectedValue={xAxis}
+                            style={styles.picker}
+                            onValueChange={(itemValue) => setXAxis(itemValue)}
+                        >
+                            <Picker.Item label="Periodo" value="Periodo" />
                             {Object.keys(valoresObj).map((variableId) => (
-                                <ViewStyled key={variableId}>
-                                    <TextStyled className="font-bold">{valoresObj[variableId][0]?.Variable?.Nombre}</TextStyled>
-                                    {valoresObj[variableId].map((valor) => (
-                                        <CheckBox
-                                            key={valor.Id}
-                                            title={valor.Nombre}
-                                            checked={Boolean(selectedVariables[valor.Id])}  // Comprobamos si el valor está en selectedVariables
-                                            onPress={() => handleVariableSelection(valor, variableId)}  // Pasamos variableId y valor
-                                        />
-                                    ))}
-                                </ViewStyled>
-                            ))}
-                        </ViewStyled>
-
-
-                        <ViewStyled className="mb-4">
-                            <TextStyled className="font-bold mb-2">Seleccione los periodos:</TextStyled>
-                            {Object.keys(periodicidadesObj).map((periodKey) => (
-                                <CheckBox
-                                    key={periodKey}
-                                    title={`${periodicidadesObj[periodKey].dia}/${periodicidadesObj[periodKey].mes}/${periodicidadesObj[periodKey].ano}`}
-                                    checked={selectedPeriods[periodKey] || false}
-                                    onPress={() => handlePeriodSelection(periodKey)}
+                                <Picker.Item
+                                    key={variableId}
+                                    label={valoresObj[variableId][0]?.Variable?.Nombre}
+                                    value={variableId}
                                 />
                             ))}
-                        </ViewStyled>
+                        </Picker>
 
-                        <ViewStyled className="mb-4">
-                            <TextStyled className="font-bold mb-2">Formato del gráfico</TextStyled>
-                            <TextStyled>Eje horizontal:</TextStyled>
-                            <Picker
-                                selectedValue={xAxis}
-                                style={{ height: 50, width: 200 }}
-                                onValueChange={(itemValue) => setXAxis(itemValue)}
-                            >
-                                <Picker.Item label="Periodo" value="Periodo" />
-                                {Object.keys(valoresObj).map((variableId) => (
-                                    <Picker.Item key={variableId} label={valoresObj[variableId][0]?.Variable?.Nombre} value={variableId} />
-                                ))}
-                            </Picker>
+                        <TextStyled style={styles.pickerLabel}>Tipo de gráfico:</TextStyled>
+                        <Picker
+                            selectedValue={chartType}
+                            style={styles.picker}
+                            onValueChange={handleChartTypeChange}
+                        >
+                            <Picker.Item label="Líneas" value="line" />
+                            <Picker.Item label="Barras verticales" value="bar" />
+                            <Picker.Item label="Barras horizontales" value="horizontalBar" />
+                            <Picker.Item label="Barras Apiladas" value="stackedBar" />
+                            <Picker.Item label="Barras Horizontales Apiladas" value="stackedHorizontalBar" />
+                            <Picker.Item label="Circular" value="pie" />
+                        </Picker>
 
-                            <TextStyled>Tipo de gráfico:</TextStyled>
-                            <Picker
-                                selectedValue={chartType}
-                                style={{ height: 50, width: 200 }}
-                                onValueChange={handleChartTypeChange}  // Usamos la función para manejar la selección del tipo de gráfico
-                            >
-                                <Picker.Item label="Líneas" value="line" />
-                                <Picker.Item label="Barras verticales" value="bar" />
-                                <Picker.Item label="Barras horizontales" value="horizontalBar" />
-                                <Picker.Item label="Barras Apiladas" value="stackedBar" />
-                                <Picker.Item label="Barras Horizontales Apiladas" value="stackedHorizontalBar" />
-                                <Picker.Item label="Circular" value="pie" />
-                            </Picker>
-
-                            <Button title="Generar Gráfico" onPress={generateChart} />
-                        </ViewStyled>
+                        <Button
+                            title="Generar Gráfico"
+                            onPress={generateChart}
+                            buttonStyle={styles.button}
+                        />
                     </ViewStyled>
                 </ScrollViewStyled>
             );
+
         }
     };
 
@@ -1368,5 +1386,27 @@ const DatosSeries = () => {
         </Plantilla>
     );
 };
-
+const styles = StyleSheet.create({
+    container: {
+        padding: 16, // Añade padding general al contenedor principal
+    },
+    section: {
+        marginBottom: 16, // Espacio entre secciones
+    },
+    picker: {
+        height: Platform.OS === 'ios' ? 40 : 50,
+        width: '100%', // Ocupa todo el ancho disponible
+        marginBottom: 100, // Espacio debajo del Picker
+    },
+    button: {
+        marginTop: 100, // Espacio encima del botón
+    },
+    textBold: {
+        fontWeight: 'bold',
+        marginBottom: 8,
+    },
+    pickerLabel: {
+        marginBottom: 4,
+    },
+});
 export default DatosSeries;

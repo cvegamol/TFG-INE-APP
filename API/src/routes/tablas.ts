@@ -71,5 +71,24 @@ router.get('/tablas/getTableByFkPeriodoIni/:id', async (req: Request, res: Respo
 }
 );
 
+// Nueva ruta para obtener una tabla por Código y FK_Publicación usando parámetros en la URL
+router.get('/tablas/getTableByCodeAndFkPublication/:code/:fk_publicacion', async (req: Request, res: Response) => {
+    try {
+        const { code, fk_publicacion } = req.params; // Obtiene los parámetros de la URL
+        if (!code || !fk_publicacion) {
+            return res.status(400).json({ message: 'Faltan parámetros: code y fk_publicacion son requeridos' });
+        }
+
+        const tablas = await tablasMethods.getTableByCodeAndFkPublication(code, Number(fk_publicacion)); // Llama al método correspondiente en tablasMethods
+        if (tablas && tablas.length > 0) {
+            res.json(tablas); // Devuelve las tablas si se encuentran
+        } else {
+            res.status(404).json({ message: 'No se encontraron tablas con los criterios proporcionados' }); // Devuelve un error 404 si no se encuentran tablas
+        }
+    } catch (error: any) {
+        res.status(500).json({ error: error.message }); // Devuelve un error 500 si hay algún error en el servidor
+    }
+});
+
 export default router;  // Exporta el enrutador de tablas por defecto
 

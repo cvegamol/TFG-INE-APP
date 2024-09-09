@@ -36,13 +36,13 @@ const Padron = () => {
         const datosVariaciones = await variacionesResidenciales.json();
 
         const nuevosDatos = [
-          { Nombre: datosPadron[0].Nombre, Id: datosPadron[0].Id },
-          { Nombre: datosVariaciones[0].Nombre, Id: datosVariaciones[0].Id }
+          { Nombre: datosPadron[0].Nombre, Id: datosPadron[0].Id, Url: '' },
+          { Nombre: datosVariaciones[0].Nombre, Id: datosVariaciones[0].Id, Url: '' }
         ];
 
         const datosPeriodicos = [
-          { Nombre: datosCifras[0].Nombre, Id: datosCifras[0].Id },
-          { Nombre: datosResidentes[0].Nombre, Id: datosResidentes[0].Id }
+          { Nombre: datosCifras[0].Nombre, Id: datosCifras[0].Id, Url: 'datosCifras' },
+          { Nombre: datosResidentes[0].Nombre, Id: datosResidentes[0].Id, Url: '' }
         ];
 
         setDataPeriodica(datosPeriodicos);
@@ -57,11 +57,21 @@ const Padron = () => {
     obtenerDatosOperaciones();
   }, []);
 
-  const handlePress = (id, nombre) => {
-    router.push({
-      pathname: 'operacionesPadron',
-      params: { id, nombre },
-    });
+  const handlePress = (id, nombre, url) => {
+
+    if (url === 'datosCifras') {
+      console.log('Dentro')
+      router.push({
+        pathname: 'cifrasMunicipios',
+        params: { id, nombre },
+      });
+    } else {
+      router.push({
+        pathname: 'operacionesPadron',
+        params: { id, nombre },
+      });
+    }
+
   };
 
   return (
@@ -84,7 +94,7 @@ const Padron = () => {
           renderItem={({ item }) => (
             <TouchableOpacityStyled
               className="p-4 bg-white rounded-md shadow-md my-2 mx-4"
-              onPress={() => handlePress(item.Id, item.Nombre)}
+              onPress={() => handlePress(item.Id, item.Nombre, item.Url)}
             >
               <TextStyled className="text-lg text-gray-700">{item.Nombre}</TextStyled>
             </TouchableOpacityStyled>

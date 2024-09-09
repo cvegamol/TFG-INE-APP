@@ -17,6 +17,22 @@ export default function Layout() {
         }}
       />
       <Stack.Screen
+        name="cifrasMunicipios"
+        options={({ route }) => {
+          return {
+            title: route.params?.nombre || '',
+          };
+        }}
+      />
+      <Stack.Screen
+        name="municipios"
+        options={({ route }) => {
+          return {
+            title: 'Ciudades de Espana',
+          };
+        }}
+      />
+      <Stack.Screen
         name="seriesPadron"
         options={({ route }) => {
           return {
