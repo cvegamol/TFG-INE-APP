@@ -94,6 +94,11 @@ class BarChart extends AbstractChart {
 
                     const xOffset = paddingRight + (datasetIndex * (width - paddingRight)) / totalLabels + valueIndex * barWidth;
 
+                    // Aquí aplicamos el color según la propiedad `colors` o un color por defecto
+                    const fillColor = withCustomBarColorFromData
+                         ? `url(#customColor_${datasetIndex}_${valueIndex})`
+                         : (dataset.colors ? dataset.colors[valueIndex % dataset.colors.length] : '#000'); // Usar negro si no hay colores
+
                     return (
                          <Rect
                               key={`${datasetIndex}-${valueIndex}`}
@@ -102,7 +107,7 @@ class BarChart extends AbstractChart {
                               rx={barRadius} // Borde redondeado
                               width={barWidth} // Ancho de la barra
                               height={(Math.abs(barHeight) / 4) * 3} // Altura de la barra
-                              fill={withCustomBarColorFromData ? `url(#customColor_${datasetIndex}_${valueIndex})` : dataset.color(1)}
+                              fill={fillColor}
                               onPress={() => this.handleBarClick(datasetIndex, valueIndex, validValue)} // Añadir evento de click
                          />
                     );

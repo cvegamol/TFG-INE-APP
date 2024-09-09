@@ -21,14 +21,14 @@ const Padron = () => {
   useEffect(() => {
     const obtenerDatosOperaciones = async () => {
       try {
-        // const estadisticaPadronContinuoNP = await fetch(`http://192.168.1.13:3000/operaciones/getOperationById/188`);
-        // const cifrasPoblacionMunicipios = await fetch(`http://192.168.1.13:3000/operaciones/getOperationById/22`);
-        // const residentesEspaExtranjeros = await fetch(`http://192.168.1.13:3000/operaciones/getOperationById/230`);
-        // const variacionesResidenciales = await fetch(`http://192.168.1.13:3000/operaciones/getOperationById/202`);
-        const estadisticaPadronContinuoNP = await fetch(`http://192.168.103.97:3000/operaciones/getOperationById/188`);
-        const cifrasPoblacionMunicipios = await fetch(`http://192.168.103.97:3000/operaciones/getOperationById/22`);
-        const residentesEspaExtranjeros = await fetch(`http://192.168.103.97:3000/operaciones/getOperationById/230`);
-        const variacionesResidenciales = await fetch(`http://192.168.103.97:3000/operaciones/getOperationById/202`);
+        const estadisticaPadronContinuoNP = await fetch(`http://192.168.1.13:3000/operaciones/getOperationById/188`);
+        const cifrasPoblacionMunicipios = await fetch(`http://192.168.1.13:3000/operaciones/getOperationById/22`);
+        const residentesEspaExtranjeros = await fetch(`http://192.168.1.13:3000/operaciones/getOperationById/230`);
+        const variacionesResidenciales = await fetch(`http://192.168.1.13:3000/operaciones/getOperationById/202`);
+        //const estadisticaPadronContinuoNP = await fetch(`http://192.168.103.97:3000/operaciones/getOperationById/188`);
+        //const cifrasPoblacionMunicipios = await fetch(`http://192.168.103.97:3000/operaciones/getOperationById/22`);
+        //const residentesEspaExtranjeros = await fetch(`http://192.168.103.97:3000/operaciones/getOperationById/230`);
+        //const variacionesResidenciales = await fetch(`http://192.168.103.97:3000/operaciones/getOperationById/202`);
 
         const datosPadron = await estadisticaPadronContinuoNP.json();
         const datosCifras = await cifrasPoblacionMunicipios.json();

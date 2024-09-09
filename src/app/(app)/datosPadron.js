@@ -778,14 +778,12 @@ const DatosSeries = () => {
                     }
 
                     return {
-                        data: dataset.data.map((d, dataIndex) => {
-                            return {
-                                value: parseFloat(d.value), // Asegurarse de que el valor sea numérico
-                                fecha: d.fecha, // Mantener la fecha
-                                serie: d.serie, // Mantener el nombre de la serie
-                                color: seriesColors[datasetIndex % seriesColors.length] // Asignar color basado en el índice
-                            };
-                        }),
+                        data: dataset.data.map((d) => ({
+                            value: parseFloat(d.value), // Asegurarse de que el valor sea numérico
+                            fecha: d.fecha, // Mantener la fecha
+                            serie: d.serie // Mantener el nombre de la serie
+                        })),
+                        colors: dataset.data.map((_, dataIndex) => seriesColors[dataIndex % seriesColors.length]) // Asignar un color basado en el índice
                     };
                 }).filter(dataset => dataset !== null); // Filtrar datasets vacíos
 
@@ -795,7 +793,7 @@ const DatosSeries = () => {
                     datasets: reorganizedDatasets.map((dataset, datasetIndex) => ({
                         data: dataset.data.map(item => item.value), // Solo pasamos los valores para el gráfico
                         originalData: dataset.data, // Guardamos los datos originales para acceder a ellos en el click (fecha, serie, etc.)
-                        color: () => seriesColors[datasetIndex % seriesColors.length], // Asignar el color correspondiente
+                        colors: dataset.colors, // Agregamos el array de colores generado
                         strokeWidth: 2 // Grosor de las barras
                     }))
                 };
@@ -809,6 +807,8 @@ const DatosSeries = () => {
                 setScale(scale);
                 setIsChartModalVisible(true);
             }
+
+
 
 
         } catch (error) {
@@ -970,26 +970,27 @@ const DatosSeries = () => {
         return (
             <BarChart
                 data={chartData}
-                fromZero={true}
                 width={Dimensions.get("window").width * 0.83}
-                formatYLabel={(value) => formatYLabel(value, scale)}
                 height={320}
+                fromZero={true}
                 chartConfig={{
                     backgroundGradientFrom: '#f7f7f7',
                     backgroundGradientTo: '#f7f7f7',
-                    color: (opacity = 1) => `rgba(0, 0, 0, ${opacity})`,
-                    labelColor: (opacity = 1) => `rgba(0, 0, 0, ${opacity})`,
+                    color: (opacity = 1, index) => seriesColors[index % seriesColors.length], // Función que asigna colores en base al índice
+                    labelColor: (opacity = 1) => `rgba(0, 0, 0, ${opacity})`, // Color de las etiquetas
                     style: {
                         borderRadius: 16,
                     },
-                    decimalPlaces: 0,
+                    decimalPlaces: 0, // Redondeo de los valores
                 }}
                 style={{
                     marginVertical: 8,
                     borderRadius: 10,
                 }}
-                onDataPointClick={handleDataPointClick} // Pasamos la función para manejar el click
+                onDataPointClick={handleDataPointClick}
             />
+
+
 
         );
     };

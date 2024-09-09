@@ -27,8 +27,8 @@ const Home = () => {
     const obtenerDatosInicio = async () => {
       try {
         // Coloca aquí todas las llamadas a APIs
-        //const estadisticaContinuaResponse = await fetch(`http://192.168.1.13:3000/operaciones/getOperationById/450`);
-        const estadisticaContinuaResponse = await fetch(`http://192.168.103.97:3000/operaciones/getOperationById/450`);
+        const estadisticaContinuaResponse = await fetch(`http://192.168.1.13:3000/operaciones/getOperationById/450`);
+        //const estadisticaContinuaResponse = await fetch(`http://192.168.103.97:3000/operaciones/getOperationById/450`);
         const estadisticaContinua = await estadisticaContinuaResponse.json();
         setEstadisticaContinua(estadisticaContinua[0]);
 
