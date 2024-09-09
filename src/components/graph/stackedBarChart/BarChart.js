@@ -29,12 +29,15 @@ class BarChart extends AbstractChart {
           return heightRatio * height;
      };
 
-     getDynamicBarWidth = (dataLength, chartWidth, paddingRight) => {
-          const availableBarSpace = chartWidth - paddingRight * 2;
-          const maxBarWidth = availableBarSpace / dataLength;
+     getDynamicBarWidth = (totalLabels, chartWidth, paddingRight) => {
+          const availableWidthPerLabel = (chartWidth - paddingRight * 2) / totalLabels; // Espacio total disponible para cada etiqueta
+          const numberOfDataSets = this.props.data.datasets[0].data.length; // Número de conjuntos de datos
+          console.log('me lla', numberOfDataSets)
+          const maxBarWidthPerDataset = availableWidthPerLabel / numberOfDataSets - barSpacing; // Espacio asignado a cada barra, menos el espacio entre barras
           const minBarWidth = 10; // Definimos un ancho mínimo para las barras
-          return Math.max(minBarWidth, Math.min(maxBarWidth, 40)); // Ajustamos el ancho máximo
+          return Math.max(minBarWidth, maxBarWidthPerDataset); // Ajustar ancho para evitar barras demasiado delgadas
      };
+
 
      handleBarClick = (datasetIndex, valueIndex, value) => {
           if (this.props.onDataPointClick) {
@@ -58,6 +61,7 @@ class BarChart extends AbstractChart {
           const numberOfDataSets = data.datasets.length; // Cantidad de datasets
           const totalLabels = data.labels.length; // Número de etiquetas
           const barWidth = this.getDynamicBarWidth(totalLabels, width, paddingRight); // Cálculo dinámico del ancho de las barras
+          const numbersBar = data.datasets[0].data.length;
 
           // Obtener el valor máximo entre todos los datasets
           const getMaxValue = (datasets) => {
