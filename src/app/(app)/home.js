@@ -26,9 +26,7 @@ const Home = () => {
   useEffect(() => {
     const obtenerDatosInicio = async () => {
       try {
-        // Coloca aquí todas las llamadas a APIs
         const estadisticaContinuaResponse = await fetch(`http://192.168.1.13:3000/operaciones/getOperationById/450`);
-        //const estadisticaContinuaResponse = await fetch(`http://192.168.103.97:3000/operaciones/getOperationById/450`);
         const estadisticaContinua = await estadisticaContinuaResponse.json();
         setEstadisticaContinua(estadisticaContinua[0]);
 
@@ -71,7 +69,7 @@ const Home = () => {
       } catch (error) {
         console.error(error.message);
       } finally {
-        setIsLoading(false); // Desactiva el loading después de obtener los datos
+        setIsLoading(false);
       }
     };
 
@@ -152,8 +150,8 @@ const Home = () => {
           ) : (
             <>
               {estadisticaContinua && (
-                <TextStyled className="text-xl font-bold text-gray-700">
-                  Últimos Datos: <TextStyled className='text-xl/4 text-gray-400'>
+                <TextStyled className="text-xl font-bold text-teal-800">
+                  Últimos Datos: <TextStyled className='text-xl/4 text-teal-400'>
                     {estadisticaContinua.Nombre}:
                     {chartData && chartData.length > 0 && ` ${chartData[chartData.length - 1].label}`}
                   </TextStyled>
@@ -186,18 +184,18 @@ const Home = () => {
                     formatYLabel={formatYAxisValue}
                     chartConfig={{
                       backgroundColor: '#f0f0f0',
-                      backgroundGradientFrom: '#d3d3d3',
-                      backgroundGradientTo: '#a9a9a9',
+                      backgroundGradientFrom: '#e0e0e0',
+                      backgroundGradientTo: '#c0c0c0',
                       decimalPlaces: 2,
-                      color: (opacity = 1) => `rgba(50, 50, 50, ${opacity})`,
-                      labelColor: (opacity = 1) => `rgba(50, 50, 50, ${opacity})`,
+                      color: (opacity = 1) => `rgba(0, 128, 128, ${opacity})`,
+                      labelColor: (opacity = 1) => `rgba(0, 77, 77, ${opacity})`,
                       style: {
                         borderRadius: 16,
                       },
                       propsForDots: {
                         r: '6',
                         strokeWidth: '2',
-                        stroke: '#999',
+                        stroke: '#004d4d',
                       },
                     }}
                     style={{
@@ -213,83 +211,6 @@ const Home = () => {
             </>
           )}
         </ViewStyled>
-        <LineChart
-          data={{
-            labels: ["January", "February"],
-            datasets: [
-              {
-                data: [10000, 15000, 20000], // Primer valor para cada mes
-                color: (opacity = 1) => `rgba(255, 0, 0, ${opacity})`, // Rojo
-              },
-              {
-                data: [11000, 35000, 40000], // Segundo valor para cada mes
-                color: (opacity = 1) => `rgba(0, 0, 255, ${opacity})`, // Azul
-              }
-            ]
-          }}
-          width={Dimensions.get("window").width} // from react-native
-          height={220}
-
-          yAxisInterval={1} // optional, defaults to 1
-          chartConfig={{
-            backgroundColor: "#e26a00",
-            backgroundGradientFrom: "#fb8c00",
-            backgroundGradientTo: "#ffa726",
-            decimalPlaces: 2, // optional, defaults to 2dp
-            color: (opacity = 1) => `rgba(255, 255, 255, ${opacity})`,
-            labelColor: (opacity = 1) => `rgba(255, 255, 255, ${opacity})`,
-            style: {
-              borderRadius: 16
-            },
-            propsForDots: {
-              r: "6",
-              strokeWidth: "2",
-              stroke: "#ffa726"
-            }
-          }}
-          bezier
-          style={{
-            marginVertical: 8,
-            borderRadius: 16
-          }}
-          fromZero={true}
-        />
-        <BarChart
-          data={{
-            labels: ["January", "February"],
-            datasets: [
-              {
-                data: [10000, 15000, 20000], // Primer valor para cada mes
-                color: (opacity = 1) => `rgba(255, 0, 0, ${opacity})`, // Rojo
-              },
-              {
-                data: [30000, 35000, 40000], // Segundo valor para cada mes
-                color: (opacity = 1) => `rgba(0, 0, 255, ${opacity})`, // Azul
-              }
-            ]
-          }}
-          width={Dimensions.get("window").width - 16} // Ancho de la gráfica
-          height={220} // Altura de la gráfica
-          yAxisLabel="$"
-          chartConfig={{
-            backgroundColor: "#e26a00",
-            backgroundGradientFrom: "#fb8c00",
-            backgroundGradientTo: "#ffa726",
-            decimalPlaces: 2, // Número de decimales
-            color: (opacity = 1) => `rgba(255, 255, 255, ${opacity})`,
-            labelColor: (opacity = 1) => `rgba(255, 255, 255, ${opacity})`,
-            style: {
-              borderRadius: 16
-            },
-            barPercentage: 0.5, // Ajusta este valor para controlar el ancho de las barras y su superposición
-            useShadowColorFromDataset: false, // Desactiva sombras si es necesario
-          }}
-          style={{
-            marginVertical: 8,
-            borderRadius: 16
-          }}
-          withHorizontalLabels={false} // Opcional: remueve etiquetas horizontales para un look más limpio
-        />
       </ScrollView>
     </Plantilla>
   );

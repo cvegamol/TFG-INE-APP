@@ -239,14 +239,14 @@ const SeriesTabla = () => {
         <Plantilla>
             <ScrollViewStyled contentContainerStyle={{ flexGrow: 1 }}>
                 <ViewStyled className="p-4">
-                    <TextStyled className="text-2xl font-bold text-gray-800 mb-4">Detalle de la Operación</TextStyled>
-                    <TextStyled className="text-xl text-gray-600 mb-2">ID: {tablaObj.Id}</TextStyled>
-                    <TextStyled className="text-xl text-gray-600 mb-4">Nombre: {tablaObj.Nombre}</TextStyled>
+                    <TextStyled className="text-3xl font-bold text-teal-800 mb-4">Detalle de la Operación</TextStyled>
+                    <TextStyled className="text-lg text-teal-600 mb-2">ID: {tablaObj.Id}</TextStyled>
+                    <TextStyled className="text-lg text-teal-600 mb-4">Nombre: {tablaObj.Nombre}</TextStyled>
 
                     {isLoading ? (
                         <ViewStyled className="flex-1 justify-center items-center mt-4">
                             <Loading size={hp(6)} />
-                            <TextStyled className="text-lg text-gray-500 mt-2">Cargando...</TextStyled>
+                            <TextStyled className="text-lg text-teal-500 mt-2">Cargando...</TextStyled>
                         </ViewStyled>
                     ) : (
                         <>
@@ -255,11 +255,10 @@ const SeriesTabla = () => {
                                     key={variable.Id}
                                     variable={variable}
                                     valoresVariables={valoresVariables[variable.Id]}
-                                    selecciones={selecciones[variable.Id] || []}  // Valor por defecto []
+                                    selecciones={selecciones[variable.Id] || []}
                                     handleSelectionChange={handleSelectionChange}
                                     handleSelectAll={handleSelectAll}
                                 />
-
                             ))}
 
                             {periodicidad.length > 0 && (
@@ -268,13 +267,21 @@ const SeriesTabla = () => {
                                     seleccionesPeriodicidades={seleccionesPeriodicidades}
                                     handleSelectionChangePeriodicidad={handleSelectionChangePeriodicidad}
                                     handleSelectAllPeriodicidades={handleSelectAllPeriodicidades}
-                                    formatDate={formatDate}  // Pasar la función como prop
+                                    formatDate={formatDate}
                                 />
                             )}
 
                             <Button
                                 title="Consultar Selección"
                                 onPress={handleConsultar}
+                                buttonStyle={{
+                                    backgroundColor: 'teal',
+                                    borderRadius: 10,
+                                    padding: 15
+                                }}
+                                icon={
+                                    <Icon name="checkmark-circle-outline" size={20} color="white" style={{ marginRight: 10 }} />
+                                }
                             />
                         </>
                     )}
