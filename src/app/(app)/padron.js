@@ -108,6 +108,7 @@ const Padron = () => {
               { title: 'Operaciones estadísticas sin periodicidad establecida', data: data },
               { title: 'Operaciones estadísticas elaboradas de forma periódica', data: dataPeriodica }
             ]}
+
             renderItem={({ item, index }) => (
               <TouchableOpacityStyled
                 className={`p-4 ${cardColors[index % cardColors.length]} rounded-md shadow-md my-2 mx-4 hover:bg-teal-100 active:bg-teal-200`}
@@ -117,13 +118,33 @@ const Padron = () => {
                 <TextStyled className="text-lg text-gray-700">{item.Nombre}</TextStyled>
               </TouchableOpacityStyled>
             )}
+
             renderSectionHeader={({ section }) => (
-              <TextStyled className="text-xl font-semibold text-white bg-teal-700 p-2">
-                {section.title}
-              </TextStyled>
+              <View
+                style={{
+                  backgroundColor: '#38b2ac', // Tono teal oscuro para el título
+                  paddingVertical: 8, // Espacio vertical
+                  paddingHorizontal: 16, // Espacio horizontal
+                  borderRadius: 8, // Bordes redondeados suaves
+                  marginBottom: 6, // Separación del contenido
+                  marginHorizontal: 4, // Espacio horizontal dentro del contenedor
+                }}
+              >
+                <TextStyled
+                  className="text-xl font-semibold text-white"
+                  style={{
+                    fontSize: 18, // Tamaño moderado
+                    fontWeight: 'bold',
+                  }}
+                >
+                  {section.title}
+                </TextStyled>
+              </View>
             )}
+
             keyExtractor={item => `basicListEntry-${item.Id}`}
           />
+
         </Animated.View>
       )}
     </Plantilla>

@@ -34,6 +34,7 @@ const PeriodicidadSelection = ({ periodicidad, seleccionesPeriodicidades, handle
                             <CheckBox
                                 checked={!!seleccionesPeriodicidades[`${p.dia}-${p.mes}-${p.ano}`]}
                                 onPress={() => handleSelectionChangePeriodicidad(p)}
+                                checkedColor="#00695c"
                             />
                             <TextStyled className="ml-2">{formatDate(p.dia, p.mes, p.ano)}</TextStyled>
                         </ViewStyled>

@@ -25,19 +25,19 @@ export default function Plantilla({ children }) {
     })
   ).current;
 
-  
+
 
   return (
     <StyledView className="flex-1">
-      
+
       <StyledView className="flex-row flex-1" {...panResponder.panHandlers}>
         {isSidebarOpen && (
-          <StyledView className="w-64 h-full bg-primary">
+          <StyledView className="w-64 h-full ">
             <Sidebar toggleSidebar={() => setIsSidebarOpen(false)} />
           </StyledView>
         )}
         <StyledView className={`flex-1 p-4 ${isSidebarOpen ? 'ml-64' : ''}`}>
-          {children }
+          {children}
         </StyledView>
       </StyledView>
     </StyledView>

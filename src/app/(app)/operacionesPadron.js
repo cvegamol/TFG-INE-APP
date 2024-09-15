@@ -88,21 +88,85 @@ const OperacionesPadron = () => {
      }, [id]);
 
      return (
-          <Plantilla>
-               <ScrollView contentContainerStyle={{ flexGrow: 1 }} className="bg-gray-50">
-                    <AnimatedViewStyled style={{ opacity: fadeAnim }} className="p-6 bg-white rounded-lg mx-4 my-6">
-                         <TextStyled className="text-2xl font-extrabold text-center text-teal-800 mb-6">
-                              Operación: {nombre}
+          <ScrollView contentContainerStyle={{ flexGrow: 1 }} className="bg-primary">
+               <Plantilla>
+
+                    <TextStyled
+                         className="text-xl font-extrabold text-center text-teal-800 mb-4"
+                         style={{
+                              textShadowColor: 'rgba(0, 0, 0, 0.1)', // Sombra muy sutil
+                              textShadowOffset: { width: 1, height: 1 },
+                              textShadowRadius: 2,
+                              paddingVertical: 6, // Espacio adicional
+                              paddingHorizontal: 10,
+                              borderRadius: 6, // Bordes suaves
+                         }}
+                    >
+                         Operación: {nombre}
+                    </TextStyled>
+
+                    <AnimatedViewStyled style={{ opacity: fadeAnim }} className="p-4 rounded-lg mx-2 ">
+                         <View
+                              style={{
+                                   borderBottomColor: '#2d3748', // Gris claro acorde con tu estilo
+                                   borderBottomWidth: 3,
+                                   marginVertical: 0, // Espacio entre el separador y los textos
+                              }}
+                         />
+
+                         <TextStyled
+                              className="text-base text-gray-700 mt-2 mb-4 px-3"
+                              style={{
+                                   textAlign: 'justify',
+                              }}
+                         >
+                              En esta sección, tienes acceso a las tablas relacionadas con la operación seleccionada. Cada tabla contiene datos específicos que podrás explorar para profundizar en la información disponible.
                          </TextStyled>
 
-                         <TextStyled className="text-2xl font-semibold text-gray-800 mt-6 mb-4">
+                         <TextStyled
+                              className="text-base text-gray-700 mb-4 px-3"
+                              style={{
+                                   textAlign: 'justify',
+                              }}
+                         >
+                              Para comenzar, selecciona una tabla de la lista. Al hacer clic en una de ellas, se redirigirá a una vista que muestra las variables y los valores asociados a dicha tabla. Esto te permitirá visualizar los datos detalladamente y realizar una selección más precisa.
+                         </TextStyled>
+
+                         <TextStyled
+                              className="text-base text-gray-700 mb-4 px-3"
+                              style={{
+                                   textAlign: 'justify',
+                              }}
+                         >
+                              Si deseas buscar una tabla en particular, puedes utilizar el buscador que se encuentra encima de la lista de tablas. A medida que escribes, las tablas se filtrarán en función de tu búsqueda, lo que facilita encontrar la que necesites.
+                         </TextStyled>
+
+
+
+                         {/* Separador con una línea sutil */}
+                         <View
+                              style={{
+                                   borderBottomColor: '#2d3748', // Gris claro acorde con tu estilo
+                                   borderBottomWidth: 3,
+                                   marginVertical: 0, // Espacio entre el separador y los textos
+                              }}
+                         />
+
+                         {/* Texto de tablas disponibles */}
+                         <TextStyled
+                              className="text-lg font-semibold text-gray-800 mt-4 mb-3"
+                              style={{
+                                   color: '#2d3748', // Gris oscuro como contraste
+                                   fontWeight: '600',
+                              }}
+                         >
                               Tablas Disponibles:
                          </TextStyled>
 
                          {/* Input de búsqueda con ícono */}
                          <View className="relative">
                               <TextInputStyled
-                                   className="flex-1 p-2 pr-10 bg-gray-200 rounded-lg"
+                                   className="flex-1 p-2 pr-10 bg-gray-200 rounded-lg mb-4"
                                    placeholder="Buscar tabla..."
                                    value={searchText}
                                    onChangeText={handleSearch}
@@ -139,13 +203,42 @@ const OperacionesPadron = () => {
                                    filteredTablas.map((table, index) => (
                                         <TouchableOpacityStyled
                                              key={index}
-                                             className="p-4 bg-teal-300 rounded-lg my-3"
+                                             className="p-3 my-3 rounded-lg"
                                              onPress={() => handlePress(table)}
+                                             style={{
+                                                  backgroundColor: '#38b2ac', // Tono teal atractivo
+                                                  shadowColor: '#000',
+                                                  shadowOffset: { width: 0, height: 2 },
+                                                  shadowOpacity: 0.25,
+                                                  shadowRadius: 3.84,
+                                                  elevation: 5, // Sombra para Android
+                                                  flexDirection: 'row',
+                                                  alignItems: 'center', // Alinear contenido
+                                                  paddingVertical: 12, // Ajuste de padding vertical para más espacio
+                                                  paddingHorizontal: 16, // Ajuste de padding horizontal para más espacio
+                                                  borderRadius: 10, // Bordes redondeados suaves
+                                             }}
                                         >
-                                             <TextStyled className="text-lg text-teal-800 font-semibold">
-                                                  {table.Nombre} - {table.Id} - {table.Anyo_Periodo_ini} - {table.FechaRef_fin}
+                                             {/* Ícono de mapa */}
+                                             <Icon name="map" size={20} color="white" style={{ marginRight: 12 }} />
+
+                                             {/* Texto estilizado con margen y ajustes de flex */}
+                                             <TextStyled
+                                                  className="font-semibold"
+                                                  style={{
+                                                       color: '#ffffff', // Texto blanco para buen contraste
+                                                       fontSize: 16, // Tamaño moderado
+                                                       fontWeight: '500',
+                                                       marginLeft: 10, // Espacio entre el ícono y el texto
+                                                       flexShrink: 1, // Evitar que el texto se corte
+                                                  }}
+                                             >
+                                                  {table.Nombre}
                                              </TextStyled>
                                         </TouchableOpacityStyled>
+
+
+
                                    ))
                               ) : (
                                    <TextStyled className="text-lg text-gray-600">
@@ -154,8 +247,9 @@ const OperacionesPadron = () => {
                               )
                          )}
                     </AnimatedViewStyled>
-               </ScrollView>
-          </Plantilla>
+
+               </Plantilla >
+          </ScrollView>
      );
 };
 

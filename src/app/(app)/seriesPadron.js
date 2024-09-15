@@ -1,5 +1,5 @@
-import React, { useEffect, useState } from 'react';
-import { ScrollView, View, Text, TouchableOpacity } from 'react-native';
+import React, { useEffect, useState, useRef } from 'react';
+import { ScrollView, View, Text, Animated, TouchableOpacity } from 'react-native';
 import { styled } from 'nativewind';
 import Plantilla from '../../components/Plantilla';
 
@@ -38,7 +38,20 @@ const SeriesTabla = () => {
     const [seleccionesPeriodicidades, setSeleccionesPeriodicidades] = useState({});
     const [isLoading, setIsLoading] = useState(true);
 
+    // Nuevo estado para guardar el número de series y datos
+    const [numSeries, setNumSeries] = useState(0);
+    const [numDatos, setNumDatos] = useState(0);
+
+    const fadeAnim = useRef(new Animated.Value(0)).current;
+    const pressAnim = useRef(new Animated.Value(1)).current;
+
     useEffect(() => {
+        Animated.timing(fadeAnim, {
+            toValue: 1,
+            duration: 1000,
+            useNativeDriver: true,
+        }).start();
+
         const obtenerDatos = async () => {
             try {
                 const variablesJson = await fetch(`https://servicios.ine.es/wstempus/js/ES/GRUPOS_TABLA/${tablaObj.Id}`);
@@ -98,7 +111,7 @@ const SeriesTabla = () => {
         }
 
         switch (tipoPeriodicidad) {
-            case 'A': // Anual
+            case 'A':
                 for (let year = startYear; year <= endYear; year++) {
                     periodicidades.push({
                         dia: 1,
@@ -108,7 +121,7 @@ const SeriesTabla = () => {
                 }
                 break;
 
-            case 'Q': // Trimestral
+            case 'Q':
                 for (let year = startYear; year <= endYear; year++) {
                     for (let trimestre = 1; trimestre <= 4; trimestre++) {
                         let mes = (trimestre - 1) * 3 + 1;
@@ -121,7 +134,7 @@ const SeriesTabla = () => {
                 }
                 break;
 
-            case 'M': // Mensual
+            case 'M':
                 for (let year = startYear; year <= endYear; year++) {
                     for (let mes = 1; mes <= 12; mes++) {
                         periodicidades.push({
@@ -133,7 +146,7 @@ const SeriesTabla = () => {
                 }
                 break;
 
-            case 'S': // Semestral
+            case 'S':
                 for (let year = startYear; year <= endYear; year++) {
                     for (let semestre = 1; semestre <= 2; semestre++) {
                         let mes = (semestre - 1) * 6 + 1;
@@ -153,6 +166,31 @@ const SeriesTabla = () => {
 
         return periodicidades;
     };
+
+    const calcularSeriesYDatos = () => {
+        let series = 1;
+        let datos = 0;
+
+        Object.values(selecciones).forEach(variableSelecciones => {
+            if (variableSelecciones.length > 0) {
+                series *= variableSelecciones.length;
+            }
+        });
+
+        const periodicidadesSeleccionadas = Object.keys(seleccionesPeriodicidades).length;
+        if (series > 0 && periodicidadesSeleccionadas > 0) {
+            datos = series * periodicidadesSeleccionadas;
+        } else {
+            series = 0;
+        }
+
+        setNumSeries(series);
+        setNumDatos(datos);
+    };
+
+    useEffect(() => {
+        calcularSeriesYDatos();
+    }, [selecciones, seleccionesPeriodicidades]);
 
     const handleSelectionChange = (variableId, valor) => {
         setSelecciones(prevState => {
@@ -208,8 +246,6 @@ const SeriesTabla = () => {
     };
 
     const handleConsultar = async () => {
-        console.log('Selecciones:', selecciones);
-        console.log('Periodicidades Seleccionadas:', seleccionesPeriodicidades);
         const url_base = `https://servicios.ine.es/wstempus/js/ES/SERIES_TABLA/${tablaObj.Id}?`;
 
         const parametros_url = Object.entries(selecciones)
@@ -220,33 +256,49 @@ const SeriesTabla = () => {
 
         const url_final = url_base + parametros_url;
 
-        console.log('URL Final:', url_final);
         const seriesJson = await fetch(url_final);
         const series = await seriesJson.json();
-        console.log(series.length);
-        console.log(seleccionesPeriodicidades);
-
 
         router.push({
             pathname: 'datosPadron',
             params: { tabla: JSON.stringify(tablaObj), series: JSON.stringify(series), periodicidades: JSON.stringify(seleccionesPeriodicidades), valores: JSON.stringify(selecciones) },
         });
-
-
     };
 
     return (
         <Plantilla>
             <ScrollViewStyled contentContainerStyle={{ flexGrow: 1 }}>
                 <ViewStyled className="p-4">
-                    <TextStyled className="text-3xl font-bold text-teal-800 mb-4">Detalle de la Operación</TextStyled>
-                    <TextStyled className="text-lg text-teal-600 mb-2">ID: {tablaObj.Id}</TextStyled>
-                    <TextStyled className="text-lg text-teal-600 mb-4">Nombre: {tablaObj.Nombre}</TextStyled>
+
+                    <Animated.View style={{ opacity: fadeAnim }}>
+                        <TextStyled className="text-2xl text-teal-700 mb-6 font-bold flex items-center">
+                            <Icon name="list-circle-outline" size={24} color="teal" />
+                            Tabla: {tablaObj.Nombre}
+                        </TextStyled>
+                    </Animated.View>
+
+                    <TextStyled className="text-sm text-gray-800 mb-4">
+                        En esta vista, puedes seleccionar las variables y las periodicidades para consultar los datos disponibles de la tabla seleccionada. Esto te permitirá personalizar tu consulta y visualizar solo los datos que te interesan.
+                    </TextStyled>
+
+                    <TextStyled className="text-sm text-gray-800 mb-4">
+                        <TextStyled className="font-bold">¿Cómo funciona?</TextStyled> Primero, selecciona los valores correspondientes a cada variable que te interese. Puedes elegir más de un valor por variable.
+                    </TextStyled>
+
+                    <TextStyled className="text-sm text-gray-800 mb-4">
+                        Luego, selecciona las periodicidades en las que deseas visualizar los datos. El número de series y datos resultantes se calculará automáticamente en función de las selecciones que hayas hecho.
+                    </TextStyled>
+
+                    <TextStyled className="text-sm text-gray-800 mb-4">
+                        Una vez que hayas realizado tus selecciones, puedes presionar el botón "Consultar Selección" para obtener los resultados filtrados de acuerdo a tus preferencias.
+                    </TextStyled>
 
                     {isLoading ? (
                         <ViewStyled className="flex-1 justify-center items-center mt-4">
                             <Loading size={hp(6)} />
-                            <TextStyled className="text-lg text-teal-500 mt-2">Cargando...</TextStyled>
+                            <TextStyled className="text-lg text-teal-500 mt-2">
+                                Cargando...
+                            </TextStyled>
                         </ViewStyled>
                     ) : (
                         <>
@@ -258,6 +310,7 @@ const SeriesTabla = () => {
                                     selecciones={selecciones[variable.Id] || []}
                                     handleSelectionChange={handleSelectionChange}
                                     handleSelectAll={handleSelectAll}
+                                    className="bg-gray-100 shadow-md rounded-lg mb-4 p-4"
                                 />
                             ))}
 
@@ -268,21 +321,37 @@ const SeriesTabla = () => {
                                     handleSelectionChangePeriodicidad={handleSelectionChangePeriodicidad}
                                     handleSelectAllPeriodicidades={handleSelectAllPeriodicidades}
                                     formatDate={formatDate}
+                                    className="bg-gray-100 shadow-md rounded-lg mb-4 p-4"
                                 />
                             )}
 
-                            <Button
-                                title="Consultar Selección"
+                            {/* Mostrar el número de series y datos */}
+                            <TextStyled className="text-sm text-teal-700 mb-4">
+                                Número de series: <TextStyled className="font-bold">{numSeries}</TextStyled> y Número de datos: <TextStyled className="font-bold">{numDatos}</TextStyled>
+                            </TextStyled>
+
+
+                            <TouchableOpacity
                                 onPress={handleConsultar}
-                                buttonStyle={{
-                                    backgroundColor: 'teal',
-                                    borderRadius: 10,
-                                    padding: 15
+                                style={{
+                                    backgroundColor: '#00695c',
+                                    borderRadius: 15,
+                                    padding: 15,
+                                    alignItems: 'center',
+                                    marginVertical: 10,
+                                    flexDirection: 'row',
+                                    justifyContent: 'center',
+                                    transform: [{ scale: pressAnim }]
                                 }}
-                                icon={
-                                    <Icon name="checkmark-circle-outline" size={20} color="white" style={{ marginRight: 10 }} />
-                                }
-                            />
+                                disabled={numSeries === 0 || Object.keys(seleccionesPeriodicidades).length === 0}
+                                onPressIn={() => Animated.spring(pressAnim, { toValue: 0.95, useNativeDriver: true }).start()}
+                                onPressOut={() => Animated.spring(pressAnim, { toValue: 1, useNativeDriver: true }).start()}
+                            >
+                                <TextStyled className="text-white font-bold">
+                                    Consultar Selección
+                                </TextStyled>
+                                <Icon name="checkmark-circle-outline" size={20} color="white" style={{ marginLeft: 10 }} />
+                            </TouchableOpacity>
                         </>
                     )}
                 </ViewStyled>

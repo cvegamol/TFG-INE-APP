@@ -39,6 +39,7 @@ const VariableSelection = ({ variable, valoresVariables, selecciones = [], handl
                             <CheckBox
                                 checked={selecciones.includes(valor)}
                                 onPress={() => handleSelectionChange(variable.Id, valor)}
+                                checkedColor="#00695c"
                             />
                             <TextStyled className="ml-2">{valor.Nombre}</TextStyled>
                         </ViewStyled>
