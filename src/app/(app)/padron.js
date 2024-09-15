@@ -4,10 +4,7 @@ import { styled } from 'nativewind';
 import Plantilla from '../../components/Plantilla';
 import { useRouter } from 'expo-router';
 import Loading from '../../components/Loading';
-import {
-  widthPercentageToDP as wp,
-  heightPercentageToDP as hp,
-} from "react-native-responsive-screen";
+import { widthPercentageToDP as wp, heightPercentageToDP as hp } from "react-native-responsive-screen";
 
 const ViewStyled = styled(View);
 const TextStyled = styled(Text);
@@ -18,13 +15,12 @@ const Padron = () => {
   const [data, setData] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
   const router = useRouter();
-  const fadeAnim = useState(new Animated.Value(0))[0]; // Aseguramos que la animación siempre sea reiniciada
+  const fadeAnim = useState(new Animated.Value(0))[0];
 
   useEffect(() => {
-    let isMounted = true;  // Control para saber si el componente está montado
-
+    let isMounted = true;
     const iniciarAnimacion = () => {
-      fadeAnim.setValue(0); // Reinicia la animación
+      fadeAnim.setValue(0);
       Animated.timing(fadeAnim, {
         toValue: 1,
         duration: 1000,
@@ -32,7 +28,7 @@ const Padron = () => {
       }).start();
     };
 
-    iniciarAnimacion(); // Llamamos a la animación
+    iniciarAnimacion();
 
     const obtenerDatosOperaciones = async () => {
       try {
@@ -41,13 +37,13 @@ const Padron = () => {
         const residentesEspaExtranjeros = await fetch(`http://192.168.1.13:3000/operaciones/getOperationById/230`);
         const variacionesResidenciales = await fetch(`http://192.168.1.13:3000/operaciones/getOperationById/202`);
 
-        if (!isMounted) return; // Verificamos si el componente sigue montado
+        if (!isMounted) return;
 
         const datosPadron = await estadisticaPadronContinuoNP.json();
         const datosCifras = await cifrasPoblacionMunicipios.json();
         const datosResidentes = await residentesEspaExtranjeros.json();
         const datosVariaciones = await variacionesResidenciales.json();
-        console.log('Cifras', cifrasPoblacionMunicipios)
+
         const nuevosDatos = [
           { Nombre: datosPadron[0].Nombre, Id: datosPadron[0].Id, Url: '' },
           { Nombre: datosVariaciones[0].Nombre, Id: datosVariaciones[0].Id, Url: '' },
@@ -73,11 +69,10 @@ const Padron = () => {
 
     obtenerDatosOperaciones();
 
-    // Cleanup: se ejecuta cuando el componente se desmonta
     return () => {
       isMounted = false;
     };
-  }, [fadeAnim]); // Agregamos `fadeAnim` como dependencia para asegurarnos de que se reinicie cada vez
+  }, [fadeAnim]);
 
   const handlePress = (id, nombre, url) => {
     if (url === 'datosCifras') {
@@ -92,6 +87,9 @@ const Padron = () => {
       });
     }
   };
+
+  // Array de colores para las tarjetas
+  const cardColors = ['bg-teal-200', 'bg-teal-300', 'bg-teal-400', 'bg-teal-500', 'bg-teal-600', 'bg-teal-700'];
 
   return (
     <Plantilla>
@@ -110,9 +108,9 @@ const Padron = () => {
               { title: 'Operaciones estadísticas sin periodicidad establecida', data: data },
               { title: 'Operaciones estadísticas elaboradas de forma periódica', data: dataPeriodica }
             ]}
-            renderItem={({ item }) => (
+            renderItem={({ item, index }) => (
               <TouchableOpacityStyled
-                className="p-4 bg-white rounded-md shadow-md my-2 mx-4 hover:bg-teal-100 active:bg-teal-200"
+                className={`p-4 ${cardColors[index % cardColors.length]} rounded-md shadow-md my-2 mx-4 hover:bg-teal-100 active:bg-teal-200`}
                 onPress={() => handlePress(item.Id, item.Nombre, item.Url)}
                 activeOpacity={0.6}
               >
