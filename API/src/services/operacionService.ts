@@ -25,8 +25,9 @@ const getOperations = async (req:any, res:any) => {
 const getOperationById = async (id: number): Promise<any> => {
     try {
         const connection = await getConnection();
+       
         const result = await connection.query('SELECT * FROM operaciones WHERE id = ' + id);
-
+        
         
 
         if (result.length === 0) {
@@ -47,7 +48,7 @@ const getOperationById = async (id: number): Promise<any> => {
             return result;
         }
     } catch (error: any) {
-        throw { message: 'Error al obtener la operación por id', status: 500 };
+        throw { message: error, status: 500 };
     }
 }
 

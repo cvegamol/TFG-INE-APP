@@ -18,14 +18,21 @@ const Padron = () => {
   const [data, setData] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
   const router = useRouter();
-  const [fadeAnim] = useState(new Animated.Value(0));
+  const fadeAnim = useState(new Animated.Value(0))[0]; // Aseguramos que la animación siempre sea reiniciada
 
   useEffect(() => {
-    Animated.timing(fadeAnim, {
-      toValue: 1,
-      duration: 1000,
-      useNativeDriver: true
-    }).start();
+    let isMounted = true;  // Control para saber si el componente está montado
+
+    const iniciarAnimacion = () => {
+      fadeAnim.setValue(0); // Reinicia la animación
+      Animated.timing(fadeAnim, {
+        toValue: 1,
+        duration: 1000,
+        useNativeDriver: true,
+      }).start();
+    };
+
+    iniciarAnimacion(); // Llamamos a la animación
 
     const obtenerDatosOperaciones = async () => {
       try {
@@ -34,32 +41,43 @@ const Padron = () => {
         const residentesEspaExtranjeros = await fetch(`http://192.168.1.13:3000/operaciones/getOperationById/230`);
         const variacionesResidenciales = await fetch(`http://192.168.1.13:3000/operaciones/getOperationById/202`);
 
+        if (!isMounted) return; // Verificamos si el componente sigue montado
+
         const datosPadron = await estadisticaPadronContinuoNP.json();
         const datosCifras = await cifrasPoblacionMunicipios.json();
         const datosResidentes = await residentesEspaExtranjeros.json();
         const datosVariaciones = await variacionesResidenciales.json();
-
+        console.log('Cifras', cifrasPoblacionMunicipios)
         const nuevosDatos = [
           { Nombre: datosPadron[0].Nombre, Id: datosPadron[0].Id, Url: '' },
-          { Nombre: datosVariaciones[0].Nombre, Id: datosVariaciones[0].Id, Url: '' }
+          { Nombre: datosVariaciones[0].Nombre, Id: datosVariaciones[0].Id, Url: '' },
         ];
 
         const datosPeriodicos = [
           { Nombre: datosCifras[0].Nombre, Id: datosCifras[0].Id, Url: 'datosCifras' },
-          { Nombre: datosResidentes[0].Nombre, Id: datosResidentes[0].Id, Url: '' }
+          { Nombre: datosResidentes[0].Nombre, Id: datosResidentes[0].Id, Url: '' },
         ];
 
         setDataPeriodica(datosPeriodicos);
         setData(nuevosDatos);
       } catch (error) {
-        console.error(error.message);
+        if (isMounted) {
+          console.error(error.message);
+        }
       } finally {
-        setIsLoading(false);
+        if (isMounted) {
+          setIsLoading(false);
+        }
       }
     };
 
     obtenerDatosOperaciones();
-  }, []);
+
+    // Cleanup: se ejecuta cuando el componente se desmonta
+    return () => {
+      isMounted = false;
+    };
+  }, [fadeAnim]); // Agregamos `fadeAnim` como dependencia para asegurarnos de que se reinicie cada vez
 
   const handlePress = (id, nombre, url) => {
     if (url === 'datosCifras') {
