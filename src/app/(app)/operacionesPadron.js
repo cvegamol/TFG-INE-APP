@@ -1,9 +1,10 @@
 import React, { useEffect, useState } from 'react';
-import { ScrollView, Animated, Text, TouchableOpacity, TextInput, Button } from 'react-native';
+import { ScrollView, Animated, Text, TouchableOpacity, TextInput, View } from 'react-native';
 import { styled } from 'nativewind';
 import Plantilla from '../../components/Plantilla';
 import { useLocalSearchParams, useRouter } from 'expo-router';
 import Loading from '../../components/Loading';
+import Icon from 'react-native-vector-icons/Ionicons'; // Importar íconos
 import {
      widthPercentageToDP as wp,
      heightPercentageToDP as hp,
@@ -13,7 +14,6 @@ const AnimatedViewStyled = styled(Animated.View);
 const TextStyled = styled(Text);
 const TouchableOpacityStyled = styled(TouchableOpacity);
 const TextInputStyled = styled(TextInput);
-const ButtonStyled = styled(Button);
 
 const OperacionesPadron = () => {
      const router = useRouter();
@@ -99,25 +99,36 @@ const OperacionesPadron = () => {
                               Tablas Disponibles:
                          </TextStyled>
 
-                         {/* Input de búsqueda */}
-                         <TextInputStyled
-                              className="p-2 border  rounded-lg mb-4"
-                              placeholder="Buscar tabla..."
-                              value={searchText}
-                              onChangeText={handleSearch}
-                              keyboardType="default" // Asegúrate que los props son correctos para Android
-                         />
+                         {/* Input de búsqueda con ícono */}
+                         <View className="relative">
+                              <TextInputStyled
+                                   className="flex-1 p-2 pr-10 bg-gray-200 rounded-lg"
+                                   placeholder="Buscar tabla..."
+                                   value={searchText}
+                                   onChangeText={handleSearch}
+                                   keyboardType="default" // Asegúrate que los props son correctos para Android
+                                   style={{ paddingRight: searchText !== '' ? 40 : 20 }}
+                              />
+
+                              {/* Mostrar el ícono de búsqueda solo si no hay texto */}
+                              {searchText === '' && (
+                                   <Icon
+                                        name="search"
+                                        size={24}
+                                        color="gray"
+                                        style={{ position: 'absolute', right: 10, top: 10 }}
+                                   />
+                              )}
+
+                              {/* Mostrar el ícono de cancelar solo cuando haya texto */}
+                              {searchText !== '' && (
+                                   <TouchableOpacityStyled onPress={clearSearch} style={{ position: 'absolute', right: 10, top: 10 }}>
+                                        <Icon name="close-circle" size={24} color="gray" />
+                                   </TouchableOpacityStyled>
+                              )}
+                         </View>
 
                          {/* Botón para limpiar búsqueda */}
-                         {searchText !== '' && (
-                              <TouchableOpacityStyled
-                                   className="bg-teal-500 rounded-lg p-2 mb-4"
-                                   onPress={clearSearch}
-                              >
-                                   <TextStyled className="text-white text-center">Limpiar Búsqueda</TextStyled>
-                              </TouchableOpacityStyled>
-                         )}
-
                          {isLoading ? (
                               <AnimatedViewStyled className="flex-1 justify-center items-center">
                                    <Loading size={hp(6)} />
