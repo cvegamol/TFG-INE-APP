@@ -28,7 +28,7 @@ export default function Plantilla({ children }) {
 
 
   return (
-    <StyledView className="flex-1">
+    <StyledView className="flex-1 ">
 
       <StyledView className="flex-row flex-1" {...panResponder.panHandlers}>
         {isSidebarOpen && (

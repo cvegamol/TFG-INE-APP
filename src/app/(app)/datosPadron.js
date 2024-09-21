@@ -36,6 +36,7 @@ const DatosSeries = () => {
     const [datosSeries, setDatosSeries] = useState([]);
     const [leyenda, setLeyenda] = useState([]);
     const [htmlContent, setHtmlContent] = useState('');
+    const [unidad, setUnidad] = useState('');
     const [modalVisible, setModalVisible] = useState(false);
     const [chartData, setChartData] = useState(null); // Para almacenar los datos del gráfico
     const [isChartModalVisible, setIsChartModalVisible] = useState(false); // Para controlar la visibilidad del modal de gráficos
@@ -217,8 +218,17 @@ const DatosSeries = () => {
     };
 
     useEffect(() => {
+        console.log('tablaobhb', tablaObj, 'esdffds', seriesObj[0])
+        const fk_unidad = seriesObj[0].FK_Unidad;
+
+
         const obtenerDatos = async () => {
             try {
+                const response1 = await fetch(`https://servicios.ine.es/wstempus/js/ES/UNIDAD/${fk_unidad}`);
+                const textResponse1 = await response1.text();
+                const data1 = JSON.parse(textResponse1);
+                console.log('Data Unidad', data1)
+                setUnidad(data1.Nombre);
                 const datos = await Promise.all(
                     seriesObj.map(async (serie) => {
                         const datosSerie = await Promise.all(
@@ -1331,7 +1341,7 @@ const DatosSeries = () => {
 
     if (isLoading) {
         return (
-            <ViewStyled className="flex-1 justify-center items-center mt-4">
+            <ViewStyled className="flex-1 justify-center items-center mt-">
                 <Loading size={50} />
                 <TextStyled className="text-lg text-gray-500 mt-2">Cargando...</TextStyled>
             </ViewStyled>
@@ -1340,16 +1350,54 @@ const DatosSeries = () => {
 
     return (
         <Plantilla>
-            <ViewStyled className="p-4 bg-gray-100 rounded-lg m-4 shadow-md">
-                <ViewStyled className="flex-row justify-center">
-                    <Button
-                        title={viewMode === 'table' ? 'Ver Gráfico' : 'Ver Tabla'}
-                        onPress={toggleViewMode}
-                        buttonStyle={{ flex: 1, backgroundColor: '#4CAF50', marginBottom: 20 }}
-                    />
-                </ViewStyled>
-                {renderView()}
+
+            <TextStyled
+                className="text-xl font-extrabold text-center text-teal-800 mb-2"
+                style={{
+                    textShadowColor: 'rgba(0, 0, 0, 0.1)', // Sombra muy sutil
+                    textShadowOffset: { width: 1, height: 1 },
+                    textShadowRadius: 2,
+                    paddingVertical: 6, // Espacio adicional
+                    paddingHorizontal: 10,
+                    borderRadius: 6, // Bordes suaves
+                }}
+            >
+                {tablaObj.Nombre}
+            </TextStyled>
+            <TextStyled
+                className="text-sm font-extrabold text-center text-teal-700 mb-4"
+            >
+                Unidades: {unidad}
+            </TextStyled>
+
+
+
+            <ViewStyled style={styles.switchContainer}>
+                <TouchableOpacity
+                    style={[
+                        styles.switchButton,
+                        viewMode === 'table' ? styles.activeButton : styles.inactiveButton
+                    ]}
+                    onPress={() => setViewMode('table')}
+                >
+                    <TextStyled style={viewMode === 'table' ? styles.activeText : styles.inactiveText}>
+                        Tabla
+                    </TextStyled>
+                </TouchableOpacity>
+                <TouchableOpacity
+                    style={[
+                        styles.switchButton,
+                        viewMode === 'chart' ? styles.activeButton : styles.inactiveButton
+                    ]}
+                    onPress={() => setViewMode('chart')}
+                >
+                    <TextStyled style={viewMode === 'chart' ? styles.activeText : styles.inactiveText}>
+                        Gráfico
+                    </TextStyled>
+                </TouchableOpacity>
             </ViewStyled>
+            {renderView()}
+
             <Button
                 icon={<AntDesign name="sharealt" size={24} color="black" />}
                 title=" Compartir"
@@ -1418,6 +1466,37 @@ const styles = StyleSheet.create({
         backgroundColor: '#008080',  // Usa el color teal
         color: 'white',
         fontWeight: 'bold',
+    },
+    switchContainer: {
+        flexDirection: 'row',
+        justifyContent: 'center',
+        alignItems: 'center',
+        marginBottom: 20, // Espacio debajo de los botones
+        marginHorizontal: 10, // Márgenes laterales
+        borderWidth: 1,
+        borderColor: '#0c4a4e', // Borde exterior para todo el contenedor
+        borderRadius: 5, // Bordes redondeados para todo el contenedor
+        overflow: 'hidden', // Asegura que los bordes redondeados afecten los hijos
+    },
+    switchButton: {
+        paddingVertical: 10,
+        paddingHorizontal: 20, // Espacio interno horizontal
+        width: '50%', // Cada botón ocupa la mitad del espacio disponible
+        justifyContent: 'center',
+        alignItems: 'center',
+    },
+    activeButton: {
+        backgroundColor: '#0c4a4e', // Color teal para el botón activo
+    },
+    inactiveButton: {
+        backgroundColor: '#f0f0f0', // Color gris claro para el botón inactivo
+    },
+    activeText: {
+        color: '#fff', // Texto blanco para el botón activo
+        fontWeight: 'bold',
+    },
+    inactiveText: {
+        color: '#0c4a4e', // Texto color teal oscuro para el botón inactivo
     },
 });
 export default DatosSeries;
