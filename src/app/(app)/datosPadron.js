@@ -115,8 +115,8 @@ const DatosSeries = () => {
         return num % 1 === 0 ? num.toLocaleString('es-ES') : num.toLocaleString('es-ES', { minimumFractionDigits: 1 });
     };
 
-    const firstColumnWidth = width * 0.5;
-    const otherColumnFixedWidth = 150;
+    const firstColumnWidth = width * 0.4;
+    const otherColumnFixedWidth = width * 0.25;  // Ajusta el ancho de las demás columnas
     const paddingEnd = 20;
 
     const totalTableWidth = firstColumnWidth + (Object.keys(periodicidadesObj).length * otherColumnFixedWidth) + paddingEnd;
@@ -1107,30 +1107,26 @@ const DatosSeries = () => {
     const renderView = () => {
         if (viewMode === 'table') {
             return (
-                <ViewStyled>
-                    <ScrollViewStyled horizontal contentContainerStyle={{ width: Math.max(totalTableWidth, width) }}>
-                        <ScrollViewStyled contentContainerStyle={{ flexGrow: 1 }}>
-                            <ViewStyled style={{ padding: 10 }}>
-                                <TableHeader
-                                    firstColumnWidth={firstColumnWidth}
-                                    periodicidadesObj={periodicidadesObj}
-                                    otherColumnFixedWidth={otherColumnFixedWidth}
-                                    formatFecha={formatFecha}
-                                />
-                                {datosSeries.map((serieObj, index) => (
-                                    <TableRow
-                                        key={index}
-                                        serieObj={serieObj}
-                                        firstColumnWidth={firstColumnWidth}
-                                        otherColumnFixedWidth={otherColumnFixedWidth}
-                                        index={index}
-                                        formatNumero={formatNumero}
-                                    />
-                                ))}
-                            </ViewStyled>
-                        </ScrollViewStyled>
+                <ScrollViewStyled horizontal contentContainerStyle={{ width: Math.max(totalTableWidth, width) }}>
+                    <ScrollViewStyled contentContainerStyle={styles.tableContainer}>
+                        <TableHeader
+                            firstColumnWidth={firstColumnWidth}
+                            periodicidadesObj={periodicidadesObj}
+                            otherColumnFixedWidth={otherColumnFixedWidth}
+                            formatFecha={(ano, mes, dia) => `${dia}/${mes}/${ano}`}
+                        />
+                        {datosSeries.map((serieObj, index) => (
+                            <TableRow
+                                key={index}
+                                serieObj={serieObj}
+                                firstColumnWidth={firstColumnWidth}
+                                otherColumnFixedWidth={otherColumnFixedWidth}
+                                index={index}
+                                formatNumero={formatNumero}
+                            />
+                        ))}
                     </ScrollViewStyled>
-                </ViewStyled>
+                </ScrollViewStyled>
             );
         } else {
             return (
@@ -1407,6 +1403,21 @@ const styles = StyleSheet.create({
     },
     pickerLabel: {
         marginBottom: 4,
+    },
+    tableContainer: {
+        paddingHorizontal: 10,  // Ajuste para mayor espacio
+    },
+    cellStyle: {
+        padding: 8,
+        borderWidth: 1,
+        borderColor: '#ddd',
+        textAlign: 'center',
+        backgroundColor: '#fff',  // Fondo blanco para un look más limpio
+    },
+    headerStyle: {
+        backgroundColor: '#008080',  // Usa el color teal
+        color: 'white',
+        fontWeight: 'bold',
     },
 });
 export default DatosSeries;

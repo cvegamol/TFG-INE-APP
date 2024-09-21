@@ -1,5 +1,5 @@
 
-import {  Text } from "react-native";
+import { Text } from "react-native";
 import { View } from "react-native";
 
 import { styled } from "nativewind";
@@ -12,7 +12,7 @@ const TableHeader = ({ firstColumnWidth, periodicidadesObj, otherColumnFixedWidt
             <TextStyled style={{
                 width: firstColumnWidth,
                 fontWeight: 'bold',
-                backgroundColor: '#4CAF50',
+                backgroundColor: '#0c4a4e',
                 color: '#fff',
                 borderWidth: 1,
                 borderColor: '#ccc',
@@ -25,7 +25,7 @@ const TableHeader = ({ firstColumnWidth, periodicidadesObj, otherColumnFixedWidt
                     width: otherColumnFixedWidth,
                     fontWeight: 'bold',
                     textAlign: 'center',
-                    backgroundColor: '#4CAF50',
+                    backgroundColor: '#0c4a4e',
                     color: '#fff',
                     borderWidth: 1,
                     borderColor: '#ccc',
