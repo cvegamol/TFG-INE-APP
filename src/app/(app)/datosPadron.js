@@ -18,6 +18,7 @@ import * as FileSystem from 'expo-file-system';
 import { shareAsync } from 'expo-sharing';
 import * as XLSX from 'xlsx';
 import { AntDesign } from '@expo/vector-icons';
+import PickerSelect from '../../components/PickerSelect'; // Asegúrate de cambiar la ruta según donde lo coloques
 
 
 const ViewStyled = styled(View);
@@ -60,6 +61,14 @@ const DatosSeries = () => {
             width: 200,
         },
     });
+    const chartTypeOptions = [
+        { label: 'Líneas', value: 'line' },
+        { label: 'Barras verticales', value: 'bar' },
+        { label: 'Barras horizontales', value: 'horizontalBar' },
+        { label: 'Barras Apiladas', value: 'stackedBar' },
+        { label: 'Barras Horizontales Apiladas', value: 'stackedHorizontalBar' },
+        { label: 'Circular', value: 'pie' },
+    ];
     // Contar cuántas variables tienen múltiples valores seleccionados (incluyendo periodicidad)
     const multiSelectedVariablesCount = Object.keys(valoresObj).filter(variableId =>
         valoresObj[variableId].filter(valor => selectedVariables[valor.Id]).length > 1
@@ -1125,16 +1134,20 @@ const DatosSeries = () => {
                             otherColumnFixedWidth={otherColumnFixedWidth}
                             formatFecha={(ano, mes, dia) => `${dia}/${mes}/${ano}`}
                         />
-                        {datosSeries.map((serieObj, index) => (
-                            <TableRow
-                                key={index}
-                                serieObj={serieObj}
-                                firstColumnWidth={firstColumnWidth}
-                                otherColumnFixedWidth={otherColumnFixedWidth}
-                                index={index}
-                                formatNumero={formatNumero}
-                            />
-                        ))}
+                        {datosSeries.map((serieObj, index) => {
+                            console.log(`Datos en la fila ${index}:`, serieObj);
+
+                            return (
+                                <TableRow
+                                    key={index}
+                                    serieObj={serieObj}
+                                    firstColumnWidth={firstColumnWidth}
+                                    otherColumnFixedWidth={otherColumnFixedWidth}
+                                    index={index}
+                                    formatNumero={formatNumero}
+                                />
+                            );
+                        })}
                     </ScrollViewStyled>
                 </ScrollViewStyled>
             );
@@ -1198,35 +1211,23 @@ const DatosSeries = () => {
                     <ViewStyled style={styles.section}>
                         <TextStyled style={styles.textBold}>Formato del gráfico</TextStyled>
 
-                        <TextStyled style={styles.pickerLabel}>Eje horizontal:</TextStyled>
-                        <Picker
-                            selectedValue={xAxis}
-                            style={styles.picker}
-                            onValueChange={(itemValue) => setXAxis(itemValue)}
-                        >
-                            <Picker.Item label="Periodo" value="Periodo" />
-                            {Object.keys(valoresObj).map((variableId) => (
-                                <Picker.Item
-                                    key={variableId}
-                                    label={valoresObj[variableId][0]?.Variable?.Nombre}
-                                    value={variableId}
-                                />
-                            ))}
-                        </Picker>
 
-                        <TextStyled style={styles.pickerLabel}>Tipo de gráfico:</TextStyled>
-                        <Picker
+                        <PickerSelect
+                            label="Eje Horizontal"
+                            selectedValue={xAxis}
+                            onValueChange={(itemValue) => setXAxis(itemValue)}
+                            options={Object.keys(valoresObj).map((variableId) => ({
+                                label: valoresObj[variableId][0]?.Variable?.Nombre,
+                                value: variableId,
+                            }))}
+                        />
+
+                        <PickerSelect
+                            label="Tipo de gráfico"
                             selectedValue={chartType}
-                            style={styles.picker}
                             onValueChange={handleChartTypeChange}
-                        >
-                            <Picker.Item label="Líneas" value="line" />
-                            <Picker.Item label="Barras verticales" value="bar" />
-                            <Picker.Item label="Barras horizontales" value="horizontalBar" />
-                            <Picker.Item label="Barras Apiladas" value="stackedBar" />
-                            <Picker.Item label="Barras Horizontales Apiladas" value="stackedHorizontalBar" />
-                            <Picker.Item label="Circular" value="pie" />
-                        </Picker>
+                            options={chartTypeOptions}
+                        />
 
                         <Button
                             title="Generar Gráfico"

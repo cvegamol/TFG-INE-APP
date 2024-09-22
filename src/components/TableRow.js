@@ -12,32 +12,33 @@ const TableRow = ({ serieObj, firstColumnWidth, otherColumnFixedWidth, index, fo
             style={{
                 flexDirection: 'row',
                 marginBottom: 10,
-                backgroundColor: index % 2 === 0 ? '#EDEDE9' : '#D5BDAF',  // Alternar entre tonos teal más claros
             }}
         >
+            {/* Primera columna con su propio fondo */}
             <TextStyled style={{
                 width: firstColumnWidth,
                 fontWeight: 'bold',
                 borderWidth: 1,
                 borderColor: '#ccc',
                 padding: 10,
-                color: '#000',  // Texto negro
+                color: '#000',
+                backgroundColor: index % 2 === 0 ? '#EDEDE9' : '#D5BDAF',  // Aplicar el fondo aquí en lugar de en la fila
             }}>
-                {serieObj.serie}  {/* Primera columna */}
+                {serieObj.serie}
             </TextStyled>
 
-            {/* Aplicar los datos de la fila */}
+            {/* Otras columnas con el mismo patrón de fondo */}
             {serieObj.datos.map((datoObj, idx) => (
                 <TextStyled
-                    key={`${serieObj.serie}-${idx}`}  // Clave única basada en serieObj
+                    key={`${serieObj.serie}-${idx}`}
                     style={{
                         width: otherColumnFixedWidth,
                         textAlign: 'center',
                         borderWidth: 1,
                         borderColor: '#ccc',
                         padding: 10,
-                        color: '#000',  // Texto negro
-                        backgroundColor: 'transparent',  // Mantener transparente para heredar el fondo de la fila
+                        color: '#000',
+                        backgroundColor: index % 2 === 0 ? '#EDEDE9' : '#D5BDAF',  // Aplicar el mismo fondo a las demás columnas
                     }}
                 >
                     {datoObj.valor !== 'N/A' ? formatNumero(datoObj.valor) : datoObj.valor}
