@@ -1126,41 +1126,82 @@ const DatosSeries = () => {
     const renderView = () => {
         if (viewMode === 'table') {
             return (
-                <ScrollViewStyled horizontal contentContainerStyle={{ width: Math.max(totalTableWidth, width) }}>
-                    <ScrollViewStyled contentContainerStyle={styles.tableContainer}>
-                        <TableHeader
-                            firstColumnWidth={firstColumnWidth}
-                            periodicidadesObj={periodicidadesObj}
-                            otherColumnFixedWidth={otherColumnFixedWidth}
-                            formatFecha={(ano, mes, dia) => `${dia}/${mes}/${ano}`}
-                        />
-                        {datosSeries.map((serieObj, index) => {
-                            console.log(`Datos en la fila ${index}:`, serieObj);
 
-                            return (
-                                <TableRow
-                                    key={index}
-                                    serieObj={serieObj}
-                                    firstColumnWidth={firstColumnWidth}
-                                    otherColumnFixedWidth={otherColumnFixedWidth}
-                                    index={index}
-                                    formatNumero={formatNumero}
-                                />
-                            );
-                        })}
-                    </ScrollViewStyled>
+                <ScrollViewStyled horizontal contentContainerStyle={{ width: Math.max(totalTableWidth, width) }}>
+                    <ViewStyled>
+                        {/* Botón compartir en la esquina superior izquierda */}
+                        <ViewStyled ViewStyled style={{
+                            marginBottom: 14,   // Espacio debajo del botón
+                            justifyContent: 'flex-start',  // Alinear a la izquierda
+                            alignItems: 'flex-start',
+                            marginLeft: 8
+                        }
+                        }>
+                            <Button
+                                icon={<AntDesign name="sharealt" size={24} color="white" />}
+                                title=" Compartir"
+                                onPress={onSharePress}
+                                buttonStyle={{
+                                    backgroundColor: '#2c7a7b',  // Color teal medio
+                                    paddingHorizontal: 15,
+                                    paddingVertical: 10,
+                                    borderRadius: 8,
+                                }}
+                                titleStyle={{
+                                    color: '#ffffff',            // Texto blanco para contraste
+                                    fontWeight: 'bold',
+                                    fontSize: 16,
+                                }}
+                            />
+                        </ViewStyled >
+
+                        <ScrollViewStyled contentContainerStyle={styles.tableContainer}>
+                            {/* Encabezado de la tabla */}
+                            <TableHeader
+                                firstColumnWidth={firstColumnWidth}
+                                periodicidadesObj={periodicidadesObj}
+                                otherColumnFixedWidth={otherColumnFixedWidth}
+                                formatFecha={(ano, mes, dia) => `${dia}/${mes}/${ano}`}
+                            />
+
+                            {/* Filas de la tabla */}
+                            {datosSeries.map((serieObj, index) => {
+                                console.log(`Datos en la fila ${index}:`, serieObj);
+
+                                return (
+                                    <TableRow
+                                        key={index}
+                                        serieObj={serieObj}
+                                        firstColumnWidth={firstColumnWidth}
+                                        otherColumnFixedWidth={otherColumnFixedWidth}
+                                        index={index}
+                                        formatNumero={formatNumero}
+                                    />
+                                );
+                            })}
+                        </ScrollViewStyled>
+                    </ViewStyled>
                 </ScrollViewStyled>
+
+
+
+
             );
         } else {
             return (
                 <ScrollViewStyled contentContainerStyle={styles.container}>
 
                     {Object.keys(valoresObj).map((variableId) => (
-                        <ViewStyled key={variableId} className="mb-4 p-4 bg-white rounded-lg shadow-md">
+                        <ViewStyled key={variableId} className="mb-4 p-4 bg-teal-100 rounded-lg shadow-lg">
                             <ViewStyled className="flex-1">
-                                <ViewStyled className="flex-row justify-between items-center mb-2">
-                                    <TextStyled className="text-lg font-semibold text-gray-700">
-                                        {valoresObj[variableId][0]?.Variable?.Nombre}
+                                <ViewStyled style={{
+                                    borderBottomColor: '#38b2ac',
+                                    borderBottomWidth: 2,
+                                    marginVertical: 0,
+                                }} className="flex-row justify-between items-center mb-2">
+                                    {/* Asegurarse de que el texto esté dentro de un componente <TextStyled> */}
+                                    <TextStyled className="text-lg font-semibold text-teal-900">
+                                        {valoresObj[variableId][0]?.Variable?.Nombre || 'Nombre no disponible'}
                                     </TextStyled>
                                 </ViewStyled>
 
@@ -1170,23 +1211,31 @@ const DatosSeries = () => {
                                             <CheckBox
                                                 checked={Boolean(selectedVariables[valor.Id])}
                                                 onPress={() => handleVariableSelection(valor, variableId)}
-                                                checkedColor="#00695c" // Color Teal oscuro
+                                                checkedColor="#2c7a7b"
                                             />
-                                            <TextStyled className="ml-2 text-gray-700">{valor.Nombre}</TextStyled>
+                                            {/* Asegurarse de que el texto esté dentro de un componente <TextStyled> */}
+                                            <TextStyled className="ml-2 text-teal-800">
+                                                {valor.Nombre}
+                                            </TextStyled>
                                         </ViewStyled>
                                     ))}
                                 </ScrollViewStyled>
                             </ViewStyled>
                         </ViewStyled>
+
                     ))}
 
 
 
-                    <ViewStyled className="mb-6 p-4 bg-white rounded-lg shadow-lg"
+                    <ViewStyled className="mb-6 p-4 bg-teal-100 rounded-lg shadow-lg"
                         style={{ borderBottomWidth: 2, borderBottomColor: '#D1D5DB' }}>
                         <ViewStyled className="flex-1">
-                            <ViewStyled className="flex-row justify-between items-center mb-2">
-                                <TextStyled className="text-lg font-semibold text-gray-700">
+                            <ViewStyled style={{
+                                borderBottomColor: '#38b2ac',
+                                borderBottomWidth: 2,
+                                marginVertical: 0,
+                            }} className="flex-row justify-between items-center mb-2">
+                                <TextStyled className="text-lg font-semibold text-teal-900">
                                     Seleccione los periodos:
                                 </TextStyled>
                             </ViewStyled>
@@ -1199,7 +1248,7 @@ const DatosSeries = () => {
                                             onPress={() => handlePeriodSelection(periodKey)}
                                             checkedColor="#00695c" // Color Teal oscuro
                                         />
-                                        <TextStyled className="ml-2 text-gray-700">
+                                        <TextStyled className="ml-2 text-teal-800">
                                             {`${periodicidadesObj[periodKey].dia}/${periodicidadesObj[periodKey].mes}/${periodicidadesObj[periodKey].ano}`}
                                         </TextStyled>
                                     </ViewStyled>
@@ -1209,7 +1258,9 @@ const DatosSeries = () => {
                     </ViewStyled>
 
                     <ViewStyled style={styles.section}>
-                        <TextStyled style={styles.textBold}>Formato del gráfico</TextStyled>
+                        <TextStyled className="text-lg font-bold text-teal-700 mb-4">
+                            Formato del gráfico
+                        </TextStyled>
 
 
                         <PickerSelect
@@ -1232,8 +1283,27 @@ const DatosSeries = () => {
                         <Button
                             title="Generar Gráfico"
                             onPress={generateChart}
-                            buttonStyle={styles.button}
+                            buttonStyle={{
+                                backgroundColor: '#2c7a7b',
+                                paddingVertical: 12,
+                                paddingHorizontal: 20,
+                                borderRadius: 10,
+                                marginTop: 6,
+                            }}
+                            titleStyle={{
+                                color: '#ffffff',
+                                fontWeight: 'bold',
+                                fontSize: 16,
+                            }}
+                            containerStyle={{
+                                shadowColor: '#000',
+                                shadowOffset: { width: 0, height: 2 },
+                                shadowOpacity: 0.25,
+                                shadowRadius: 4,
+                                marginTop: 10,
+                            }}
                         />
+
                     </ViewStyled>
                 </ScrollViewStyled>
             );
@@ -1422,12 +1492,7 @@ const DatosSeries = () => {
             </ViewStyled>
             {renderView()}
 
-            <Button
-                icon={<AntDesign name="sharealt" size={24} color="black" />}
-                title=" Compartir"
-                onPress={onSharePress}
-                buttonStyle={{ backgroundColor: '#4CAF50' }}
-            />
+
             <ModalComponent
                 modalVisible={modalVisible}
                 setModalVisible={setModalVisible}
@@ -1467,7 +1532,7 @@ const styles = StyleSheet.create({
         marginBottom: 100, // Espacio debajo del Picker
     },
     button: {
-        marginTop: 100, // Espacio encima del botón
+        marginTop: 10, // Espacio encima del botón
     },
     textBold: {
         fontWeight: 'bold',

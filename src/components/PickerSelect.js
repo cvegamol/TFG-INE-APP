@@ -9,7 +9,9 @@ const TextStyled = styled(Text);
 const PickerSelect = ({ label, selectedValue, onValueChange, options }) => {
      return (
           <ViewStyled className="mb-4">
-               <TextStyled className="text-gray-700 mb-2 font-semibold">{label}</TextStyled>
+               <TextStyled className="text-gray-700 mb-2 font-semibold">
+                    {label}
+               </TextStyled>
                <RNPickerSelect
                     onValueChange={onValueChange}
                     items={options}
