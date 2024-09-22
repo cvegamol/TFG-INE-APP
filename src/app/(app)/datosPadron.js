@@ -51,6 +51,16 @@ const DatosSeries = () => {
     const allVariablesSelected = Object.keys(valoresObj).every(variableId =>
         valoresObj[variableId].some(valor => selectedVariables[valor.Id])
     );
+    const opciones = [
+        {
+            label: 'Periodo',
+            value: 'Periodo', // Aseguramos que coincide con xAxis === 'Periodo'
+        },
+        ...Object.keys(valoresObj).map((variableId) => ({
+            label: valoresObj[variableId][0]?.Variable?.Nombre,
+            value: variableId,
+        })),
+    ];
     const pickerStyles = Platform.select({
         ios: {
             height: 40, // Puedes ajustar la altura para iOS
@@ -1269,10 +1279,7 @@ const DatosSeries = () => {
                             label="Eje Horizontal"
                             selectedValue={xAxis}
                             onValueChange={(itemValue) => setXAxis(itemValue)}
-                            options={Object.keys(valoresObj).map((variableId) => ({
-                                label: valoresObj[variableId][0]?.Variable?.Nombre,
-                                value: variableId,
-                            }))}
+                            options={opciones}
                         />
 
                         <PickerSelect
