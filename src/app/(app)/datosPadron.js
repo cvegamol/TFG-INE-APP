@@ -1141,35 +1141,58 @@ const DatosSeries = () => {
         } else {
             return (
                 <ScrollViewStyled contentContainerStyle={styles.container}>
-                    <ViewStyled style={styles.section}>
-                        <TextStyled style={styles.textBold}>Seleccionar variables...</TextStyled>
-                        {Object.keys(valoresObj).map((variableId) => (
-                            <ViewStyled key={variableId}>
-                                <TextStyled style={{ fontWeight: 'bold' }}>
-                                    {valoresObj[variableId][0]?.Variable?.Nombre}
-                                </TextStyled>
-                                {valoresObj[variableId].map((valor) => (
-                                    <CheckBox
-                                        key={valor.Id}
-                                        title={valor.Nombre}
-                                        checked={Boolean(selectedVariables[valor.Id])}
-                                        onPress={() => handleVariableSelection(valor, variableId)}
-                                    />
-                                ))}
-                            </ViewStyled>
-                        ))}
-                    </ViewStyled>
 
-                    <ViewStyled style={styles.section}>
-                        <TextStyled style={styles.textBold}>Seleccione los periodos:</TextStyled>
-                        {Object.keys(periodicidadesObj).map((periodKey) => (
-                            <CheckBox
-                                key={periodKey}
-                                title={`${periodicidadesObj[periodKey].dia}/${periodicidadesObj[periodKey].mes}/${periodicidadesObj[periodKey].ano}`}
-                                checked={selectedPeriods[periodKey] || false}
-                                onPress={() => handlePeriodSelection(periodKey)}
-                            />
-                        ))}
+                    {Object.keys(valoresObj).map((variableId) => (
+                        <ViewStyled key={variableId} className="mb-4 p-4 bg-white rounded-lg shadow-md">
+                            <ViewStyled className="flex-1">
+                                <ViewStyled className="flex-row justify-between items-center mb-2">
+                                    <TextStyled className="text-lg font-semibold text-gray-700">
+                                        {valoresObj[variableId][0]?.Variable?.Nombre}
+                                    </TextStyled>
+                                </ViewStyled>
+
+                                <ScrollViewStyled className="max-h-40" nestedScrollEnabled={true}>
+                                    {valoresObj[variableId].map((valor) => (
+                                        <ViewStyled key={valor.Id} className="flex-row items-center mb-2">
+                                            <CheckBox
+                                                checked={Boolean(selectedVariables[valor.Id])}
+                                                onPress={() => handleVariableSelection(valor, variableId)}
+                                                checkedColor="#00695c" // Color Teal oscuro
+                                            />
+                                            <TextStyled className="ml-2 text-gray-700">{valor.Nombre}</TextStyled>
+                                        </ViewStyled>
+                                    ))}
+                                </ScrollViewStyled>
+                            </ViewStyled>
+                        </ViewStyled>
+                    ))}
+
+
+
+                    <ViewStyled className="mb-6 p-4 bg-white rounded-lg shadow-lg"
+                        style={{ borderBottomWidth: 2, borderBottomColor: '#D1D5DB' }}>
+                        <ViewStyled className="flex-1">
+                            <ViewStyled className="flex-row justify-between items-center mb-2">
+                                <TextStyled className="text-lg font-semibold text-gray-700">
+                                    Seleccione los periodos:
+                                </TextStyled>
+                            </ViewStyled>
+
+                            <ScrollViewStyled className="max-h-40" nestedScrollEnabled={true}>
+                                {Object.keys(periodicidadesObj).map((periodKey) => (
+                                    <ViewStyled key={periodKey} className="flex-row items-center mb-2">
+                                        <CheckBox
+                                            checked={Boolean(selectedPeriods[periodKey])}
+                                            onPress={() => handlePeriodSelection(periodKey)}
+                                            checkedColor="#00695c" // Color Teal oscuro
+                                        />
+                                        <TextStyled className="ml-2 text-gray-700">
+                                            {`${periodicidadesObj[periodKey].dia}/${periodicidadesObj[periodKey].mes}/${periodicidadesObj[periodKey].ano}`}
+                                        </TextStyled>
+                                    </ViewStyled>
+                                ))}
+                            </ScrollViewStyled>
+                        </ViewStyled>
                     </ViewStyled>
 
                     <ViewStyled style={styles.section}>
