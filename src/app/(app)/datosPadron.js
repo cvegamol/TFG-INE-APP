@@ -1,5 +1,5 @@
 import React, { useEffect, useState, useMemo } from 'react';
-import { ScrollView, View, Text, Dimensions, Alert, Modal, TouchableOpacity, Platform, StyleSheet } from 'react-native';
+import { ScrollView, View, Text, Dimensions, Alert, Platform, Modal, TouchableOpacity, StyleSheet } from 'react-native';
 import { styled } from 'nativewind';
 import StackedBarChart from '../../components/graph/stackedBarChart/StackedBarChart';
 import PieChart from '../../components/graph/stackedBarChart/PieChart';
@@ -1127,33 +1127,35 @@ const DatosSeries = () => {
         if (viewMode === 'table') {
             return (
 
+
                 <ScrollViewStyled horizontal contentContainerStyle={{ width: Math.max(totalTableWidth, width) }}>
                     <ViewStyled>
-                        {/* Botón compartir en la esquina superior izquierda */}
-                        <ViewStyled ViewStyled style={{
-                            marginBottom: 14,   // Espacio debajo del botón
-                            justifyContent: 'flex-start',  // Alinear a la izquierda
-                            alignItems: 'flex-start',
-                            marginLeft: 8
-                        }
-                        }>
-                            <Button
-                                icon={<AntDesign name="sharealt" size={24} color="white" />}
-                                title=" Compartir"
-                                onPress={onSharePress}
-                                buttonStyle={{
-                                    backgroundColor: '#2c7a7b',  // Color teal medio
-                                    paddingHorizontal: 15,
-                                    paddingVertical: 10,
-                                    borderRadius: 8,
-                                }}
-                                titleStyle={{
-                                    color: '#ffffff',            // Texto blanco para contraste
-                                    fontWeight: 'bold',
-                                    fontSize: 16,
-                                }}
-                            />
-                        </ViewStyled >
+                        {/* Botón compartir solo en Android */}
+                        {Platform.OS === 'android' && (
+                            <ViewStyled style={{
+                                marginBottom: 14,
+                                justifyContent: 'flex-start',
+                                alignItems: 'flex-start',
+                                marginLeft: 8
+                            }}>
+                                <Button
+                                    icon={<AntDesign name="sharealt" size={24} color="white" />}
+                                    title=" Compartir"
+                                    onPress={onSharePress}
+                                    buttonStyle={{
+                                        backgroundColor: '#2c7a7b',
+                                        paddingHorizontal: 15,
+                                        paddingVertical: 10,
+                                        borderRadius: 8,
+                                    }}
+                                    titleStyle={{
+                                        color: '#ffffff',
+                                        fontWeight: 'bold',
+                                        fontSize: 16,
+                                    }}
+                                />
+                            </ViewStyled>
+                        )}
 
                         <ScrollViewStyled contentContainerStyle={styles.tableContainer}>
                             {/* Encabezado de la tabla */}
