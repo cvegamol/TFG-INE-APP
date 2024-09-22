@@ -1327,7 +1327,7 @@ const DatosSeries = () => {
                 to: pdfName,
             });
             await shareAsync(pdfName);
-            Alert.alert('PDF guardado', `PDF guardado en: ${pdfName}`);
+
         } catch (error) {
             console.error('Error al generar PDF:', error);
             Alert.alert('Error', 'Hubo un problema al generar el PDF');
