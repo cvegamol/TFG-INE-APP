@@ -14,46 +14,46 @@ const ResponsiveTable = ({ headers, data, selectedCell, onCellPress }) => {
   const columnWidth = availableWidth / numColumns;
 
   return (
-    <ViewStyled className='bg-white items-center' style={styles.container}>
-      <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={styles.scrollView}>
-        <Table borderStyle={{ borderWidth: 2, borderColor: '#c8e1ff' }}>
-          {/* Primera fila en negrita */}
+    <ViewStyled className='items-center' style={styles.container}>
+
+      <Table borderStyle={{ borderWidth: 2, borderColor: '#08373b' }}>
+        {/* Primera fila en teal oscuro */}
+        <Row
+          data={headers.map(header => (
+            <Text style={[styles.text, styles.headerText]}>{header}</Text>
+          ))}
+          style={styles.head}
+          widthArr={headers.map(() => columnWidth)}
+        />
+        {data.map((row, rowIndex) => (
           <Row
-            data={headers.map(header => (
-              <Text style={[styles.text, styles.boldText]}>{header}</Text>
+            key={rowIndex}
+            data={row.map((cell, colIndex) => (
+              colIndex === 0 ? ( // Primera columna en negrita y no es clickeable
+                <View key={colIndex} style={{ width: columnWidth, alignItems: 'center', justifyContent: 'center' }}>
+                  <Text style={[styles.text, styles.boldText]}>{cell.value}</Text>
+                </View>
+              ) : (
+                <TouchableOpacity
+                  key={colIndex}
+                  onPress={() => onCellPress(rowIndex, colIndex, cell)}
+                  style={[
+                    { flex: 1 },
+                    selectedCell.row === rowIndex && selectedCell.col === colIndex && styles.selectedCell
+                  ]}
+                >
+                  <View style={{ flex: 1, alignItems: 'center', justifyContent: 'center' }}>
+                    <Text style={styles.text}>{cell.value}</Text>
+                  </View>
+                </TouchableOpacity>
+              )
             ))}
-            style={styles.head}
+            style={rowIndex % 2 === 0 ? styles.rowEven : styles.rowOdd}
             widthArr={headers.map(() => columnWidth)}
           />
-          {data.map((row, rowIndex) => (
-            <Row
-              key={rowIndex}
-              data={row.map((cell, colIndex) => (
-                colIndex === 0 ? ( // Primera columna en negrita y no es clickeable
-                  <View key={colIndex} style={{ width: columnWidth, alignItems: 'center', justifyContent: 'center' }}>
-                    <Text style={[styles.text, styles.boldText]}>{cell.value}</Text>
-                  </View>
-                ) : (
-                  <TouchableOpacity
-                    key={colIndex}
-                    onPress={() => onCellPress(rowIndex, colIndex, cell)}
-                    style={[
-                      { flex: 1 },
-                      selectedCell.row === rowIndex && selectedCell.col === colIndex && styles.selectedCell
-                    ]}
-                  >
-                    <View style={{ flex: 1, alignItems: 'center', justifyContent: 'center' }}>
-                      <Text style={styles.text}>{cell.value}</Text>
-                    </View>
-                  </TouchableOpacity>
-                )
-              ))}
-              style={styles.row}
-              widthArr={headers.map(() => columnWidth)}
-            />
-          ))}
-        </Table>
-      </ScrollView>
+        ))}
+      </Table>
+
     </ViewStyled>
   );
 };
@@ -63,27 +63,36 @@ const styles = StyleSheet.create({
     width: '100%',
     paddingHorizontal: MARGIN,
   },
-  scrollView: {
-    alignItems: 'flex-start',
-  },
   head: {
     height: 40,
-    backgroundColor: '#f1f8ff',
+    backgroundColor: '#0c4a4e', // Teal oscuro
     flexDirection: 'row',
   },
-  row: {
+  rowEven: {
     height: 40,
     flexDirection: 'row',
+    backgroundColor: '#d1e7e8', // Fila par - Teal claro
+  },
+  rowOdd: {
+    height: 40,
+    flexDirection: 'row',
+    backgroundColor: '#f1f8ff', // Fila impar - Gris claro
   },
   text: {
     margin: 6,
     textAlign: 'center',
+    color: '#000', // Texto en negro
   },
   boldText: {
     fontWeight: 'bold',
+    color: '#000', // Texto en negro para la primera columna
+  },
+  headerText: {
+    fontWeight: 'bold',
+    color: '#ffffff', // Texto blanco para la cabecera
   },
   selectedCell: {
-    backgroundColor: 'yellow',
+    backgroundColor: '#ffcccb', // Celda seleccionada en teal claro
   },
 });
 

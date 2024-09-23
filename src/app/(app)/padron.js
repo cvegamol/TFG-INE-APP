@@ -45,7 +45,7 @@ const Padron = () => {
         const datosVariaciones = await variacionesResidenciales.json();
 
         const nuevosDatos = [
-          { Nombre: datosPadron[0].Nombre, Id: datosPadron[0].Id, Url: '' },
+          { Nombre: datosPadron[0].Nombre, Id: datosPadron[0].Id, Url: 'estadisticasPadronContinuo' },
           { Nombre: datosVariaciones[0].Nombre, Id: datosVariaciones[0].Id, Url: '' },
         ];
 
@@ -78,6 +78,11 @@ const Padron = () => {
     if (url === 'datosCifras') {
       router.push({
         pathname: 'cifrasMunicipios',
+        params: { id, nombre },
+      });
+    } else if (url == 'estadisticasPadronContinuo') {
+      router.push({
+        pathname: 'estadisticasPadronContinuo',
         params: { id, nombre },
       });
     } else {

@@ -26,6 +26,14 @@ export default function Layout() {
         }}
       />
       <Stack.Screen
+        name="estadisticasPadronContinuo"
+        options={({ route }) => {
+          return {
+            title: route.params?.nombre || '',
+          };
+        }}
+      />
+      <Stack.Screen
         name="municipios"
         options={({ route }) => {
           return {
