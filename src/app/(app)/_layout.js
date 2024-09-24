@@ -43,6 +43,22 @@ export default function Layout() {
         }}
       />
       <Stack.Screen
+        name="residentesExtranjero"
+        options={({ route }) => {
+          return {
+            title: route.params?.nombre || '',
+          };
+        }}
+      />
+      <Stack.Screen
+        name="cifrasP"
+        options={({ route }) => {
+          return {
+            title: route.params?.nombre || '',
+          };
+        }}
+      />
+      <Stack.Screen
         name="municipios"
         options={({ route }) => {
           return {

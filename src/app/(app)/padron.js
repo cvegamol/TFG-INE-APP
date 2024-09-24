@@ -51,7 +51,7 @@ const Padron = () => {
 
         const datosPeriodicos = [
           { Nombre: datosCifras[0].Nombre, Id: datosCifras[0].Id, Url: 'datosCifras' },
-          { Nombre: datosResidentes[0].Nombre, Id: datosResidentes[0].Id, Url: '' },
+          { Nombre: datosResidentes[0].Nombre, Id: datosResidentes[0].Id, Url: 'residentesExtranjero' },
         ];
 
         setDataPeriodica(datosPeriodicos);
@@ -92,7 +92,7 @@ const Padron = () => {
       });
     } else {
       router.push({
-        pathname: 'operacionesPadron',
+        pathname: 'residentesExtranjero',
         params: { id, nombre },
       });
     }

@@ -340,16 +340,17 @@ const PadronContinuo = () => {
 
                                    {/* Nombre de la gráfica */}
                                    <TextStyled className="text-xl font-semibold text-teal-700 mb-4 text-center">
-                                        Población inscrita en el padrón - Datos definitivos 01/01/2022
+                                        Variaciones residenciales - Año 2021
                                    </TextStyled>
 
                                    {/* Introducción breve */}
                                    <TextStyled className="text-base text-gray-700 mb-4">
-                                        La tabla presenta los datos de la población inscrita en el padrón a fecha del 01/01/2022,
-                                        desglosados entre el total de habitantes, ciudadanos españoles y extranjeros.{"\n"}
-                                        La segunda columna muestra los valores totales, mientras que la tercera refleja la variación anual.{"\n"}
-                                        Los datos corresponden a las cifras definitivas reportadas por el INE.{"\n"}
-                                        Además, la gráfica ofrece una visualización de la evolución de estos datos en los últimos años.
+                                        La tabla presenta los datos sobre las variaciones residenciales correspondientes al año 2021,
+                                        basados en las altas y bajas en los padrones municipales de habitantes motivadas por cambios de residencia.{"\n"}
+                                        La segunda columna muestra el total de movimientos interiores entre municipios de España,
+                                        mientras que la tercera columna refleja los movimientos exteriores entre municipios de España y el extranjero.{"\n"}
+                                        Estos datos corresponden a las cifras definitivas reportadas por el INE. Además, la gráfica ofrece
+                                        una visualización de la evolución de estos movimientos en los últimos años.
                                    </TextStyled>
                                    <ResponsiveTable
                                         headers={['', 'Total', 'Españoles', 'Extranjeros']}
@@ -413,32 +414,6 @@ const PadronContinuo = () => {
                                         }}
                                    />
 
-                                   {/* Barra de separación */}
-                                   <ViewStyled
-                                        style={{
-                                             borderBottomWidth: 2, // Ancho del borde
-                                             borderColor: '#065f5b', // Color del borde
-                                             marginVertical: 16, // Margen vertical para separar el contenido
-                                             width: '90%', // Ajuste de ancho
-                                             alignSelf: 'center', // Centra el View
-                                        }}
-                                   />
-
-                                   {/* Botón para consultar todas las tablas de la operación */}
-                                   <TouchableOpacityStyled
-                                        className="flex-row items-center p-4 bg-teal-600 rounded-xl shadow-lg my-3 mx-5 border-[1]"
-                                        style={{
-                                             borderColor: '#065f5b', // Color teal-600
-                                        }}
-                                        onPress={() =>
-                                             handlePressCifras(operacion[0].Id, operacion[0].Nombre)
-                                        }
-                                   >
-                                        <Ionicons name="grid-outline" size={24} color="white" />
-                                        <TextStyled className="text-lg font-semibold mx-2 text-white">
-                                             Tablas de las {operacion[0].Nombre}
-                                        </TextStyled>
-                                   </TouchableOpacityStyled>
 
 
 
@@ -519,10 +494,11 @@ const PadronContinuo = () => {
                                                        onTouchEnd={handleTouchEnd} // Habilita scroll global al soltar
                                                   >
                                                        <TextStyled className="text-base text-gray-800 leading-relaxed">
-                                                            <TextStyled className="font-semibold">El Padrón Municipal</TextStyled> es un registro administrativo que recoge a todos los residentes de un municipio. Los Ayuntamientos son responsables de su creación, mantenimiento, actualización y custodia, y cada mes deben informar al Instituto Nacional de Estadística (INE) sobre cualquier cambio en los datos del padrón.
+                                                            <TextStyled className="font-semibold">La Estadística de Variaciones Residenciales</TextStyled> se elabora por el INE a partir de la explotación de la información relativa a las altas y bajas en los padrones municipales de habitantes motivadas por cambios de residencia.
                                                             {'\n\n'}
-                                                            La Estadística del Padrón continuo se elabora a partir de la explotación exhaustiva de las variables básicas que contienen los ficheros padronales disponibles en el INE. Se ofrecen los datos de la población residente en España a 1 de enero de cada año, según lugar de residencia, sexo, edad, nacionalidad y lugar de nacimiento. Los datos de lugar de residencia se facilitan para distintos niveles de desagregación territorial: nacional, comunidades autónomas, provincias, municipios y secciones censales.
+                                                            Se obtienen así los saldos anuales por variación residencial tanto los interiores, entre los diferentes municipios de España, como los exteriores, entre municipios de España y el extranjero.
                                                        </TextStyled>
+
                                                   </ScrollView>
                                              </Animated.View>
                                         </AnimatedTouchableOpacity>

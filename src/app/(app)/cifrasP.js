@@ -20,7 +20,7 @@ const ImageStyled = styled(Image);
 const ImageBackgroundStyled = styled(ImageBackground);
 const AnimatedTouchableOpacity = Animated.createAnimatedComponent(TouchableOpacityStyled);
 
-const ResidentesExtranjero = () => {
+const CifrasP = () => {
      const router = useRouter();
      const { id } = useLocalSearchParams();
      const [operacion, setOperacion] = useState(null);
@@ -76,107 +76,77 @@ const ResidentesExtranjero = () => {
                     }
                     console.log('ID', id)
                     const series = await Promise.all([
-                         obtenerDatosSerie('DCD65832'),
-                         obtenerDatosSerie('DCD65838'),
+                         obtenerDatosSerie('CP335'),
+                         obtenerDatosSerie('CP557199'),
 
-                         obtenerDatosSerie('DCD65833'),
-                         obtenerDatosSerie('DCD65839'),
+                         obtenerDatosSerie('CP300335'),
+                         obtenerDatosSerie('CP557200'),
 
-                         obtenerDatosSerie('DCD65834'),
-                         obtenerDatosSerie('DCD65840'),
+                         obtenerDatosSerie('CP300334'),
+                         obtenerDatosSerie('CP557201'),
 
-                         obtenerDatosSerie('DCD65835'),
-                         obtenerDatosSerie('DCD65841'),
+                         obtenerDatosSerie('CP556362'),
+                         obtenerDatosSerie('CP557202'),
 
-                         obtenerDatosSerie('DCD65836'),
-                         obtenerDatosSerie('DCD65842'),
 
-                         obtenerDatosSerie('DCD65837'),
-                         obtenerDatosSerie('DCD65843'),
                     ]);
 
 
                     const formattedTableData = [
                          [
-                              { label: 'Total', value: 'Total' },
+                              { label: 'Poblacion Total', value: 'Población total' },
                               {
                                    label: 'Valor',
                                    value: series[0]?.datos?.length ? formatNumber(series[0].datos[series[0].datos.length - 1]?.Valor) : 'N/A',
                                    chartData: series[0]?.datos?.length ? getDatosForChart(series[0].datos, series[0].nombreSerie) : [],
                               },
                               {
-                                   label: 'Variación Anual',
+                                   label: 'Variación semestral',
                                    value: series[1]?.datos?.length ? formatNumber(series[1].datos[series[1].datos.length - 1]?.Valor) : 'N/A',
                                    chartData: series[1]?.datos?.length ? getDatosForChart(series[1].datos, series[1].nombreSerie) : [],
                               },
                          ],
                          [
-                              { label: 'Europa', value: 'Europa' },
+                              { label: 'Hombres', value: 'Hombres' },
                               {
                                    label: 'Valor',
                                    value: series[2]?.datos?.length ? formatNumber(series[2].datos[series[2].datos.length - 1]?.Valor) : 'N/A',
                                    chartData: series[2]?.datos?.length ? getDatosForChart(series[2].datos, series[2].nombreSerie) : [],
                               },
                               {
-                                   label: 'Variación Anual',
+                                   label: 'Variación semestral',
                                    value: series[3]?.datos?.length ? formatNumber(series[3].datos[series[3].datos.length - 1]?.Valor) : 'N/A',
                                    chartData: series[3]?.datos?.length ? getDatosForChart(series[3].datos, series[3].nombreSerie) : [],
                               },
                          ],
                          [
-                              { label: 'África', value: 'África' },
+                              { label: 'Mujeres', value: 'Mujeres' },
                               {
                                    label: 'Valor',
                                    value: series[4]?.datos?.length ? formatNumber(series[4].datos[series[4].datos.length - 1]?.Valor) : 'N/A',
                                    chartData: series[4]?.datos?.length ? getDatosForChart(series[4].datos, series[4].nombreSerie) : [],
                               },
                               {
-                                   label: 'Variación Anual',
+                                   label: 'Variación semestral',
                                    value: series[5]?.datos?.length ? formatNumber(series[5].datos[series[5].datos.length - 1]?.Valor) : 'N/A',
                                    chartData: series[5]?.datos?.length ? getDatosForChart(series[5].datos, series[5].nombreSerie) : [],
                               },
                          ],
                          [
-                              { label: 'América', value: 'América' },
+                              { label: 'Extranjeros', value: 'Extranjeros' },
                               {
                                    label: 'Valor',
                                    value: series[6]?.datos?.length ? formatNumber(series[6].datos[series[6].datos.length - 1]?.Valor) : 'N/A',
                                    chartData: series[6]?.datos?.length ? getDatosForChart(series[6].datos, series[6].nombreSerie) : [],
                               },
                               {
-                                   label: 'Variación Anual',
+                                   label: 'Variación semestral',
                                    value: series[7]?.datos?.length ? formatNumber(series[7].datos[series[7].datos.length - 1]?.Valor) : 'N/A',
                                    chartData: series[7]?.datos?.length ? getDatosForChart(series[7].datos, series[7].nombreSerie) : [],
                               },
-                         ],
-                         [
-                              { label: 'Asia', value: 'Asia' },
-                              {
-                                   label: 'Valor',
-                                   value: series[8]?.datos?.length ? formatNumber(series[8].datos[series[8].datos.length - 1]?.Valor) : 'N/A',
-                                   chartData: series[8]?.datos?.length ? getDatosForChart(series[8].datos, series[8].nombreSerie) : [],
-                              },
-                              {
-                                   label: 'Variación Anual',
-                                   value: series[9]?.datos?.length ? formatNumber(series[9].datos[series[9].datos.length - 1]?.Valor) : 'N/A',
-                                   chartData: series[9]?.datos?.length ? getDatosForChart(series[9].datos, series[9].nombreSerie) : [],
-                              },
-                         ],
-                         [
-                              { label: 'Oceanía', value: 'Oceanía' },
-                              {
-                                   label: 'Valor',
-                                   value: series[10]?.datos?.length ? formatNumber(series[10].datos[series[10].datos.length - 1]?.Valor) : 'N/A',
-                                   chartData: series[10]?.datos?.length ? getDatosForChart(series[10].datos, series[10].nombreSerie) : [],
-                              },
-                              {
-                                   label: 'Variación Anual',
-                                   value: series[11]?.datos?.length ? formatNumber(series[11].datos[series[11].datos.length - 1]?.Valor) : 'N/A',
-                                   chartData: series[11]?.datos?.length ? getDatosForChart(series[11].datos, series[11].nombreSerie) : [],
-                              },
-                         ],
-                    ];
+                         ]
 
+                    ];
 
                     setTablaDatos(formattedTableData);
                     setChartData(getDatosForChart(series[0].datos, series[0].nombreSerie));
@@ -344,7 +314,7 @@ const ResidentesExtranjero = () => {
                                    {/* Imagen de encabezado que ocupa todo el View */}
                                    <ViewStyled className="mb-6">
                                         <ImageStyled
-                                             source={require('../../assets/images/login/imagen-padron.png')}
+                                             source={require('../../assets/images/login/header-cifras.png')}
                                              style={{
                                                   width: '100%',
                                                   height: hp('25%'),
@@ -371,24 +341,23 @@ const ResidentesExtranjero = () => {
 
                                    {/* Nombre de la gráfica */}
                                    <TextStyled className="text-xl font-semibold text-teal-700 mb-4 text-center">
-                                        Población de nacionalidad española residente en el extranjero - 01/01/2024
+                                        Cifras de Población. Datos definitivos 01/01/2022 y provisionales 01/07/2022
                                    </TextStyled>
 
                                    {/* Introducción breve */}
-                                   <TextStyled
-                                        className="text-base text-gray-700 mb-4"
-                                        style={{ flexShrink: 1, flexWrap: 'wrap' }}
-                                   >
-                                        La tabla presenta los datos del Padrón de españoles residentes en el extranjero a partir de la información disponible en el PERE.{"\n"}
-                                        La segunda columna muestra el total de personas inscritas en el Padrón, mientras que la tercera columna refleja las nuevas inscripciones realizadas en el año 2021.{"\n"}
-                                        Estos datos corresponden a las cifras definitivas reportadas por el INE. Además, la gráfica ofrece una visualización de la evolución de las inscripciones en los últimos años, desglosadas por país de residencia, sexo y lugar de nacimiento.
+                                   <TextStyled className="text-base text-gray-700 mb-4">
+                                        En esta sección se presentan las cifras de población residente en España a fecha de 1 de julio de 2022.{"\n"}
+                                        Los datos incluyen la población total, así como desagregaciones por sexo y nacionalidad.{"\n"}
+                                        Se muestran también las variaciones semestrales para cada categoría, lo que permite observar las tendencias en el movimiento de la población.{"\n"}
+                                        Es importante tener en cuenta que la suma de los datos desagregados puede diferir del total debido al redondeo.
                                    </TextStyled>
                                    <ResponsiveTable
-                                        headers={['', 'Valor', 'Variación Anual']}
+                                        headers={['', 'Total', '	Variación semestral']}
                                         data={tablaDatos}
                                         selectedCell={selectedCell}
                                         onCellPress={handleCellPress}
-                                        fontSize={11}
+                                        fontSize={12} // Ajusta el tamaño de fuente de toda la tabla
+
                                    />
 
                                    <LineChart
@@ -478,7 +447,7 @@ const ResidentesExtranjero = () => {
                                              >
                                                   {/* Lado frontal de la tarjeta */}
                                                   <ImageBackgroundStyled
-                                                       source={require('../../assets/images/login/imagen-spain.png')}
+                                                       source={require('../../assets/images/login/sabiasque-cifras.png')}
                                                        style={{ flex: 1 }}
                                                   >
                                                        <ViewStyled
@@ -524,9 +493,8 @@ const ResidentesExtranjero = () => {
                                                        onTouchEnd={handleTouchEnd} // Habilita scroll global al soltar
                                                   >
                                                        <TextStyled className="text-base text-gray-800 leading-relaxed">
-                                                            <TextStyled className="font-semibold">La Estadística del Padrón de españoles residentes en el extranjero</TextStyled> se obtiene a partir de la explotación estadística del fichero central del Padrón de españoles residentes en el extranjero (PERE), que contiene las inscripciones de las personas que poseen la nacionalidad española y viven habitualmente fuera de España, independientemente de si tienen otra nacionalidad.{"\n\n"}
-                                                            El PERE se conforma con los datos existentes en el Registro de Matrícula de cada Oficina Consular de Carrera o Sección Consular de las Misiones Diplomáticas.{"\n\n"}
-                                                            Esta estadística permite conocer la distribución de las personas inscritas y las nuevas inscripciones, a una fecha de referencia, clasificadas por país de residencia, provincia y municipio de inscripción a efectos electorales, así como por sexo, fecha y lugar de nacimiento.
+                                                            <TextStyled className="font-semibold">Cifras de población</TextStyled> es una operación estadística del INE que mide la población residente en España, desglosada por comunidad autónoma, provincia e isla, según sexo, edad, nacionalidad y lugar de nacimiento.{"\n\n"}
+                                                            La serie poblacional se publica desde 1971, utilizando estimaciones intercensales hasta 2012 y la propia operación desde ese año. Estos datos son utilizados como referencia oficial en todas las operaciones estadísticas del INE y a nivel internacional.
                                                        </TextStyled>
 
                                                   </ScrollView>
@@ -541,4 +509,4 @@ const ResidentesExtranjero = () => {
      );
 };
 
-export default ResidentesExtranjero;
+export default CifrasP;

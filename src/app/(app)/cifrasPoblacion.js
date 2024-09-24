@@ -39,7 +39,7 @@ const CifrasPoblacion = () => {
                     const datosCifrasPoblacion = await cifrasPoblacion.json();
 
                     const nuevosDatos = [
-                         { Nombre: datosCifrasPoblacion[0].Nombre, Id: datosCifrasPoblacion[0].Id, Url: '' },
+                         { Nombre: datosCifrasPoblacion[0].Nombre, Id: datosCifrasPoblacion[0].Id, Url: 'cifrasP' },
                     ];
 
                     const datosPeriodicos = [
@@ -62,10 +62,19 @@ const CifrasPoblacion = () => {
      }, []);
 
      const handlePress = (id, nombre, url) => {
-          router.push({
-               pathname: 'operacionesPadron',
-               params: { id, nombre },
-          });
+
+          if (url === 'cifrasP') {
+               router.push({
+                    pathname: 'cifrasP',
+                    params: { id, nombre },
+               });
+          } else {
+               router.push({
+                    pathname: 'operacionesPadron',
+                    params: { id, nombre },
+               });
+          }
+
      };
 
      return (
