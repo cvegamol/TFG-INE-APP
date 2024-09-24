@@ -46,7 +46,7 @@ const Padron = () => {
 
         const nuevosDatos = [
           { Nombre: datosPadron[0].Nombre, Id: datosPadron[0].Id, Url: 'estadisticasPadronContinuo' },
-          { Nombre: datosVariaciones[0].Nombre, Id: datosVariaciones[0].Id, Url: '' },
+          { Nombre: datosVariaciones[0].Nombre, Id: datosVariaciones[0].Id, Url: 'variacionesResidenciales' },
         ];
 
         const datosPeriodicos = [
@@ -83,6 +83,11 @@ const Padron = () => {
     } else if (url == 'estadisticasPadronContinuo') {
       router.push({
         pathname: 'estadisticasPadronContinuo',
+        params: { id, nombre },
+      });
+    } else if (url == 'variacionesResidenciales') {
+      router.push({
+        pathname: 'variacionesResidenciales',
         params: { id, nombre },
       });
     } else {

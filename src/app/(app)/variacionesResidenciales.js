@@ -23,7 +23,7 @@ const AnimatedTouchableOpacity = Animated.createAnimatedComponent(TouchableOpaci
 const PadronContinuo = () => {
      const router = useRouter();
      const { id } = useLocalSearchParams();
-     const [operacionPadron, setOperacionPadron] = useState(null);
+     const [operacion, setOperacion] = useState(null);
      const [isLoading, setIsLoading] = useState(true);
      const [scrollEnabled, setScrollEnabled] = useState(true); // Controla el scroll global
      const chartConfig = {
@@ -39,6 +39,9 @@ const PadronContinuo = () => {
                r: "4", // Tamaño de los puntos en la línea
                strokeWidth: "2", // Grosor del borde en los puntos
                stroke: "#065f5b", // Color del borde en los puntos
+          },
+          propsForLabels: {
+               fontSize: 10, // Cambia el tamaño de la fuente del eje Y aquí
           },
           propsForBackgroundLines: {
                strokeWidth: 1,
@@ -56,6 +59,7 @@ const PadronContinuo = () => {
 
      // Función para formatear los números según el formato español
      const formatNumber = (value) => {
+          console.log('Valor', value)
           return new Intl.NumberFormat('es-ES', { minimumFractionDigits: 0, maximumFractionDigits: 2 }).format(value);
      };
 
@@ -63,65 +67,84 @@ const PadronContinuo = () => {
           let isMounted = true;
           const obtenerDatos = async () => {
                try {
-                    const estadisticaPadronContinuo = await fetch(
+                    const operacion = await fetch(
                          `http://192.168.1.13:3000/operaciones/getOperationById/${id}`
                     );
-                    const datos = await estadisticaPadronContinuo.json();
+                    const datos = await operacion.json();
                     if (isMounted) {
-                         setOperacionPadron(datos);
+                         setOperacion(datos);
                     }
                     console.log('ID', id)
                     const series = await Promise.all([
-                         obtenerDatosSerie('PC93037'),
-                         obtenerDatosSerie('PC15030016'),
-                         obtenerDatosSerie('PC98911'),
-                         obtenerDatosSerie('PC15030017'),
-                         obtenerDatosSerie('PC98908'),
-                         obtenerDatosSerie('PC15030018'),
+                         obtenerDatosSerie('DCD65823'),
+                         obtenerDatosSerie('DCD65826'),
+                         obtenerDatosSerie('DCD65829'),
+
+                         obtenerDatosSerie('DCD65824'),
+                         obtenerDatosSerie('DCD65827'),
+                         obtenerDatosSerie('DCD65830'),
+
+                         obtenerDatosSerie('DCD65825'),
+                         obtenerDatosSerie('DCD65828'),
+                         obtenerDatosSerie('DCD65831'),
                     ]);
 
-                    console.log(series);
 
                     const formattedTableData = [
                          [
-                              { label: 'Total', value: 'Total' },
+                              { label: 'Variaciones Interiores', value: 'Variaciones Interiores:total' },
                               {
-                                   label: 'Valor Total',
+                                   label: 'Total',
                                    value: series[0]?.datos?.length ? formatNumber(series[0].datos[series[0].datos.length - 1]?.Valor) : 'N/A',
                                    chartData: series[0]?.datos?.length ? getDatosForChart(series[0].datos, series[0].nombreSerie) : [],
                               },
                               {
-                                   label: 'Varianza Total',
+                                   label: 'Espanoles',
                                    value: series[1]?.datos?.length ? formatNumber(series[1].datos[series[1].datos.length - 1]?.Valor) : 'N/A',
                                    chartData: series[1]?.datos?.length ? getDatosForChart(series[1].datos, series[1].nombreSerie) : [],
                               },
-                         ],
-                         [
-                              { label: 'Españoles', value: 'Españoles' },
                               {
-                                   label: 'Valor Españoles',
+                                   label: 'Extranjeros',
                                    value: series[2]?.datos?.length ? formatNumber(series[2].datos[series[2].datos.length - 1]?.Valor) : 'N/A',
                                    chartData: series[2]?.datos?.length ? getDatosForChart(series[2].datos, series[2].nombreSerie) : [],
                               },
+                         ],
+                         [
+                              { label: 'Variaciones Exteriores Altas', value: 'Variaciones exteriores: altas' },
                               {
-                                   label: 'Varianza Españoles',
+                                   label: 'Total',
                                    value: series[3]?.datos?.length ? formatNumber(series[3].datos[series[3].datos.length - 1]?.Valor) : 'N/A',
                                    chartData: series[3]?.datos?.length ? getDatosForChart(series[3].datos, series[3].nombreSerie) : [],
                               },
-                         ],
-                         [
-                              { label: 'Extranjeros', value: 'Extranjeros' },
                               {
-                                   label: 'Valor Extranjeros',
+                                   label: 'Espanoles',
                                    value: series[4]?.datos?.length ? formatNumber(series[4].datos[series[4].datos.length - 1]?.Valor) : 'N/A',
                                    chartData: series[4]?.datos?.length ? getDatosForChart(series[4].datos, series[4].nombreSerie) : [],
                               },
                               {
-                                   label: 'Varianza Extranjeros',
+                                   label: 'Extranjeros',
                                    value: series[5]?.datos?.length ? formatNumber(series[5].datos[series[5].datos.length - 1]?.Valor) : 'N/A',
                                    chartData: series[5]?.datos?.length ? getDatosForChart(series[5].datos, series[5].nombreSerie) : [],
                               },
                          ],
+                         [
+                              { label: 'Variaciones Exteriores Bajas', value: 'Variaciones exteriores: bajas' },
+                              {
+                                   label: 'Total',
+                                   value: series[6]?.datos?.length ? formatNumber(series[6].datos[series[6].datos.length - 1]?.Valor) : 'N/A',
+                                   chartData: series[6]?.datos?.length ? getDatosForChart(series[6].datos, series[6].nombreSerie) : [],
+                              },
+                              {
+                                   label: 'Espanoles',
+                                   value: series[7]?.datos?.length ? formatNumber(series[7].datos[series[7].datos.length - 1]?.Valor) : 'N/A',
+                                   chartData: series[7]?.datos?.length ? getDatosForChart(series[7].datos, series[7].nombreSerie) : [],
+                              },
+                              {
+                                   label: 'Extranjeros',
+                                   value: series[8]?.datos?.length ? formatNumber(series[8].datos[series[8].datos.length - 1]?.Valor) : 'N/A',
+                                   chartData: series[8]?.datos?.length ? getDatosForChart(series[8].datos, series[8].nombreSerie) : [],
+                              },
+                         ]
                     ];
 
                     setTablaDatos(formattedTableData);
@@ -161,7 +184,7 @@ const PadronContinuo = () => {
                     const fechaTimestamp = dato.Fecha / 1000;
                     const fechaObjeto = new Date(fechaTimestamp * 1000);
                     const fechaFormateada = fechaObjeto.toLocaleDateString('es-ES', { day: '2-digit', month: '2-digit', year: 'numeric' });
-
+                    console.log('dato', dato)
                     return {
                          ...dato,
                          fechaFormateada,
@@ -277,7 +300,7 @@ const PadronContinuo = () => {
                     contentContainerStyle={{ flexGrow: 1 }}
                     scrollEnabled={scrollEnabled} // Controla si se permite el scroll
                >
-                    <ViewStyled className="p-2">
+                    <ViewStyled className="p-4">
                          {isLoading ? (
                               <ViewStyled className="flex-1 justify-center items-center mt-8">
                                    <Loading size={hp(6)} />
@@ -301,7 +324,7 @@ const PadronContinuo = () => {
 
                                    {/* Título */}
                                    <TextStyled className="text-3xl font-bold text-teal-800 mb-6 text-center">
-                                        {operacionPadron[0].Nombre}
+                                        {operacion[0].Nombre}
                                    </TextStyled>
                                    <ViewStyled
                                         style={{
@@ -329,11 +352,12 @@ const PadronContinuo = () => {
                                         Además, la gráfica ofrece una visualización de la evolución de estos datos en los últimos años.
                                    </TextStyled>
                                    <ResponsiveTable
-                                        headers={['', 'Valor', 'Variación']}
+                                        headers={['', 'Total', 'Españoles', 'Extranjeros']}
                                         data={tablaDatos}
                                         selectedCell={selectedCell}
                                         onCellPress={handleCellPress}
-                                        fontSize={10}
+                                        fontSize={10} // Ajusta el tamaño de fuente de toda la tabla
+                                        responsive={true}
                                    />
 
                                    <LineChart
@@ -407,12 +431,12 @@ const PadronContinuo = () => {
                                              borderColor: '#065f5b', // Color teal-600
                                         }}
                                         onPress={() =>
-                                             handlePressCifras(operacionPadron[0].Id, operacionPadron[0].Nombre)
+                                             handlePressCifras(operacion[0].Id, operacion[0].Nombre)
                                         }
                                    >
                                         <Ionicons name="grid-outline" size={24} color="white" />
                                         <TextStyled className="text-lg font-semibold mx-2 text-white">
-                                             Tablas de las {operacionPadron[0].Nombre}
+                                             Tablas de las {operacion[0].Nombre}
                                         </TextStyled>
                                    </TouchableOpacityStyled>
 
