@@ -43,7 +43,7 @@ const CifrasPoblacion = () => {
                     ];
 
                     const datosPeriodicos = [
-                         { Nombre: datosEstContinuaPoblacion[0].Nombre, Id: datosEstContinuaPoblacion[0].Id, Url: '' },
+                         { Nombre: datosEstContinuaPoblacion[0].Nombre, Id: datosEstContinuaPoblacion[0].Id, Url: 'estadisticasContinuaPoblacion' },
                          { Nombre: datosProyecciones[0].Nombre, Id: datosProyecciones[0].Id, Url: 'datosCifras' },
                          { Nombre: datosProyeccionHogares[0].Nombre, Id: datosProyeccionHogares[0].Id, Url: '' },
                          { Nombre: datosCensosPoblacion[0].Nombre, Id: datosCensosPoblacion[0].Id, Url: '' }
@@ -66,6 +66,11 @@ const CifrasPoblacion = () => {
           if (url === 'cifrasP') {
                router.push({
                     pathname: 'cifrasP',
+                    params: { id, nombre },
+               });
+          } else if (url === 'estadisticasContinuaPoblacion') {
+               router.push({
+                    pathname: 'estadisticasContinuaPoblacion',
                     params: { id, nombre },
                });
           } else {
