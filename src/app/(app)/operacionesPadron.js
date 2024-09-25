@@ -26,6 +26,7 @@ const OperacionesPadron = () => {
      const [searchText, setSearchText] = useState(''); // Estado para el texto de búsqueda
 
      const handlePress = (tabla) => {
+          console.log('Tabla String', JSON.stringify(tabla))
           router.push({
                pathname: 'seriesPadron',
                params: { tabla: JSON.stringify(tabla) },

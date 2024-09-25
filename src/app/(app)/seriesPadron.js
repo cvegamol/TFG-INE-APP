@@ -54,6 +54,7 @@ const SeriesTabla = () => {
 
         const obtenerDatos = async () => {
             try {
+                console.log('Id de mi etabla', tablaObj.Id)
                 const variablesJson = await fetch(`https://servicios.ine.es/wstempus/js/ES/GRUPOS_TABLA/${tablaObj.Id}`);
                 if (!variablesJson.ok) {
                     throw new Error('Error al obtener las variables');

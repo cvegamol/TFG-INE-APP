@@ -11,6 +11,7 @@ import {
 import { Ionicons } from '@expo/vector-icons';
 import ResponsiveTable from '../../components/ResponsiveTable';
 import LineChart from '../../components/graph/stackedBarChart/line-chart/LineChart';
+import Icon from 'react-native-vector-icons/Ionicons'; // Importar íconos
 
 const ViewStyled = styled(View);
 const TextStyled = styled(Text);
@@ -25,7 +26,10 @@ const CifrasP = () => {
      const { id } = useLocalSearchParams();
      const [operacion, setOperacion] = useState(null);
      const [isLoading, setIsLoading] = useState(true);
+     const [tablasVisitadas, setTablasVisitadas] = useState([]);
      const [scrollEnabled, setScrollEnabled] = useState(true); // Controla el scroll global
+     const [scaleAnim] = useState(new Animated.Value(1)); // Inicializa el valor de la escala en 1
+
      const chartConfig = {
           backgroundGradientFrom: "#e6fffa", // Fondo claro para el gráfico
           backgroundGradientTo: "#e6fffa", // Fondo claro uniforme
@@ -147,6 +151,16 @@ const CifrasP = () => {
                          ]
 
                     ];
+
+                    const tablasMasVisitadas = [
+                         [{ Nombre: 'Población residente por fecha, sexo y edad' }, { Id: 48836 }, { NuevoId: 31304 }],
+                         [{ Nombre: 'Población residente por fecha, sexo y generación (edad a 31 de diciembre)' }, { Id: 48838 }, { NuevoId: 9688 }],
+                         [{ Nombre: 'Población residente por fecha, sexo, grupo de edad y nacionalidad (agrupación de países)' }, { Id: 48839 }, { NuevoId: 9689 }],
+                         [{ Nombre: 'Población residente por fecha, sexo, grupo de edad y lugar de nacimiento (agrupación de países)' }, { Id: 48849 }, { NuevoId: 9690 }],
+                         [{ Nombre: 'Población residente por fecha, sexo, nacionalidad (agrupación de países) y lugar de nacimiento (agrupación de países).' }, { Id: 48850 }, { NuevoId: 9691 }],
+
+                    ];
+                    setTablasVisitadas(tablasMasVisitadas);
 
                     setTablaDatos(formattedTableData);
                     setChartData(getDatosForChart(series[0].datos, series[0].nombreSerie));
@@ -294,6 +308,33 @@ const CifrasP = () => {
           setScrollEnabled(true);
      };
 
+     const handlePress = async (id, nuevoId) => {
+          try {
+               const response = await fetch(
+                    `http://192.168.1.13:3000/tablas/getTableById/${id}`
+               );
+
+               // Verifica si la respuesta es válida y tiene datos
+               if (!response.ok) {
+                    throw new Error(`Error en la solicitud: ${response.status}`);
+               }
+
+               const text = await response.json(); // Lee el contenido como JSON
+
+               // Cambiar el id dentro del objeto text[0] sin afectar el original
+               const tablaModificada = { ...text[0], Id: nuevoId }; // Aquí 'nuevoId' es el nuevo valor de ID
+
+               console.log('Tabla modificada con nuevo ID:', JSON.stringify(tablaModificada));
+
+               // Navegar pasando la tabla modificada
+               router.push({
+                    pathname: 'seriesPadron',
+                    params: { tabla: JSON.stringify(tablaModificada) }, // Pasar la tabla modificada
+               });
+          } catch (error) {
+               console.error('Error al obtener la tabla:', error.message);
+          }
+     };
      return (
           <Plantilla>
                {/* ScrollView global */}
@@ -414,6 +455,79 @@ const CifrasP = () => {
                                    />
 
 
+
+
+                                   {/* Barra de separación */}
+                                   <ViewStyled
+                                        style={{
+                                             borderBottomWidth: 2, // Ancho del borde
+                                             borderColor: '#065f5b', // Color del borde
+                                             marginVertical: 16, // Margen vertical para separar el contenido
+                                             width: '90%', // Ajuste de ancho
+                                             alignSelf: 'center', // Centra el View
+                                        }}
+                                   />
+                                   <TextStyled className="text-xl font-semibold text-teal-700 mb-4 text-center">
+                                        Tablas Más Consultadas
+                                   </TextStyled>
+
+                                   {tablasVisitadas.map((tabla, index) => {
+                                        const nombreTabla = tabla[0].Nombre;
+                                        const idTabla = tabla[1].Id;
+                                        const nuevoId = tabla[2].NuevoId;
+                                        return (
+                                             <TouchableOpacityStyled
+                                                  key={index}
+                                                  className="p-3 my-3 rounded-lg"
+                                                  onPress={() => handlePress(idTabla, nuevoId)}
+                                                  style={{
+                                                       backgroundColor: '#38b2ac', // Tono teal atractivo
+                                                       shadowColor: '#000',
+                                                       shadowOffset: { width: 0, height: 2 },
+                                                       shadowOpacity: 0.25,
+                                                       shadowRadius: 3.84,
+                                                       elevation: 5, // Sombra para Android
+                                                       flexDirection: 'row',
+                                                       alignItems: 'center', // Alinear contenido
+                                                       paddingVertical: 14, // Ajuste de padding vertical para más espacio
+                                                       paddingHorizontal: 18, // Ajuste de padding horizontal para más espacio
+                                                       borderRadius: 12, // Bordes redondeados suaves
+                                                       transform: [{ scale: 1 }],
+                                                  }}
+                                                  activeOpacity={0.7}
+                                                  onPressIn={() => {
+                                                       // Efecto de escala al presionar
+                                                       Animated.timing(scaleAnim, {
+                                                            toValue: 0.95,
+                                                            duration: 150,
+                                                            useNativeDriver: true,
+                                                       }).start();
+                                                  }}
+                                                  onPressOut={() => {
+                                                       // Vuelve al tamaño original
+                                                       Animated.timing(scaleAnim, {
+                                                            toValue: 1,
+                                                            duration: 150,
+                                                            useNativeDriver: true,
+                                                       }).start();
+                                                  }}
+                                             >
+                                                  <Icon name="map" size={20} color="white" style={{ marginRight: 12 }} />
+                                                  <TextStyled
+                                                       className="font-semibold"
+                                                       style={{
+                                                            color: '#ffffff', // Texto blanco para buen contraste
+                                                            fontSize: 16, // Tamaño moderado
+                                                            fontWeight: '500',
+                                                            marginLeft: 10, // Espacio entre el ícono y el texto
+                                                            flexShrink: 1, // Evitar que el texto se corte
+                                                       }}
+                                                  >
+                                                       {nombreTabla}
+                                                  </TextStyled>
+                                             </TouchableOpacityStyled>
+                                        );
+                                   })}
 
 
                                    {/* Barra de separación */}
