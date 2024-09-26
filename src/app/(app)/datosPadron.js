@@ -256,8 +256,9 @@ const DatosSeries = () => {
                                 const formattedDate = `${ano}${mes.toString().padStart(2, '0')}${dia.toString().padStart(2, '0')}`;
 
                                 try {
+                                    let u = 'https://servicios.ine.es/wstempus/js/ES/DATOS_SERIE/';
                                     const response = await fetch(`https://servicios.ine.es/wstempus/js/ES/DATOS_SERIE/${serie.COD}?date=${formattedDate}&tip=M`);
-
+                                    console.log(formattedDate, u, serie.COD)
                                     if (!response.ok) {
                                         console.error(`Error en la solicitud para la fecha ${fechaKey}: ${response.statusText}`);
                                         return { fecha: fechaKey, valor: 'N/A' };

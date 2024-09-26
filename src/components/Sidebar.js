@@ -101,6 +101,18 @@ const Sidebar = ({ toggleSidebar }) => {
             Cifras de población y Censos demográficos
           </Animated.Text>
         </TouchableOpacityStyled>
+        <TouchableOpacityStyled
+          onPress={() => router.replace('fenomenosDemograficos')}
+          onPressIn={handleButtonPressIn}
+          onPressOut={handleButtonPressOut}
+        >
+          <Animated.Text
+            className="text-lg text-white my-2 hover:bg-teal-600 p-2 rounded transition-all duration-200 ease-in-out"
+            style={{ transform: [{ scale: buttonScale }] }}
+          >
+            Fenomenos Demograficos
+          </Animated.Text>
+        </TouchableOpacityStyled>
       </View>
 
       {/* SignOut abajo a la izquierda */}

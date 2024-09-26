@@ -85,9 +85,35 @@ const SeriesTabla = () => {
 
                 setValoresVariables(valoresMap);
 
-                const periodicidadJson = await fetch(`https://servicios.ine.es/wstempus/js/ES/PERIODICIDAD/${tablaObj.FK_Periodicidad}`);
-                const periodicidadData = await periodicidadJson.json();
-                const periodicidades = generarPeriodicidades(periodicidadData.Codigo, tablaObj.Anyo_Periodo_ini, tablaObj.FechaRef_fin);
+                let periodicidadData;
+
+                // Verificar si FK_Periodicidad está definido
+                if (tablaObj.FK_Periodicidad) {
+                    // Consultar la API usando FK_Periodicidad
+                    const periodicidadJson = await fetch(`https://servicios.ine.es/wstempus/js/ES/PERIODICIDAD/${tablaObj.FK_Periodicidad}`);
+
+                    if (!periodicidadJson.ok) {
+                        console.error('Error al obtener la periodicidad con FK_Periodicidad.');
+                        return; // Manejar el error según sea necesario
+                    }
+
+                    periodicidadData = await periodicidadJson.json();
+                } else if (tablaObj.T3_Periodicidad) {
+                    // Usar T3_Periodicidad como respaldo
+                    periodicidadData = { Codigo: tablaObj.T3_Periodicidad }; // Crea un objeto con solo el código
+
+                    // Aquí puedes manejar directamente el caso en que no se consulta la API
+                } else {
+                    console.error('No se encontró un código de periodicidad válido.');
+                    return; // Salir si no hay códigos válidos
+                }
+
+                // Continuar con la lógica
+                console.log('Periodicidad', periodicidadData);
+                console.log('Tabla', tablaObj, tablaObj.Anyo_Periodo_ini, tablaObj.FechaRef_fin);
+
+                const date = new Date(tablaObj.Ultima_Modificacion);
+                const periodicidades = generarPeriodicidades(periodicidadData.Codigo, tablaObj.Anyo_Periodo_ini, date);
                 setPeriodicidad(periodicidades);
             } catch (error) {
                 console.error('Error al obtener las variables:', error.message);
@@ -105,8 +131,8 @@ const SeriesTabla = () => {
         const endYear = anoFin && !isNaN(parseInt(anoFin, 10))
             ? parseInt(anoFin, 10)
             : new Date().getFullYear();
-
-        if (isNaN(startYear) || isNaN(endYear) || startYear > endYear) {
+        console.log(tipoPeriodicidad)
+        if (tipoPeriodicidad !== 'Al Detalle' && (isNaN(startYear) || isNaN(endYear) || startYear > endYear)) {
             console.error('Años de inicio o fin inválidos.');
             return [];
         }
@@ -145,6 +171,21 @@ const SeriesTabla = () => {
                         });
                     }
                 }
+                break;
+            case 'N':
+            case 'Al Detalle':
+                // Obtener el último año (por ejemplo, usando el año actual)
+                const lastYear = new Date().getFullYear();
+
+                // Solo añadir los meses del último año
+                for (let mes = 1; mes <= 12; mes++) {
+                    periodicidades.push({
+                        dia: 1,
+                        mes: mes,
+                        ano: lastYear
+                    });
+                }
+                console.log('Prueba', periodicidades)
                 break;
 
             case 'S':
@@ -254,9 +295,9 @@ const SeriesTabla = () => {
                 valores.map(valor => `tv=${valor.Variable.Id}:${valor.Id}`)
             )
             .join('&');
-
+        console.log(parametros_url)
         const url_final = url_base + parametros_url;
-
+        console.log(url_final)
         const seriesJson = await fetch(url_final);
         const series = await seriesJson.json();
 

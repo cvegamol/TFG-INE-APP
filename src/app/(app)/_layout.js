@@ -25,7 +25,14 @@ export default function Layout() {
           };
         }}
       />
-
+      <Stack.Screen
+        name="fenomenosDemograficos"
+        options={({ route }) => {
+          return {
+            title: route.params?.nombre || '',
+          };
+        }}
+      />
       <Stack.Screen
         name="estadisticasPadronContinuo"
         options={({ route }) => {
@@ -42,6 +49,15 @@ export default function Layout() {
           };
         }}
       />
+      <Stack.Screen
+        name="estadisticasMigracionesCambiosResidencia"
+        options={({ route }) => {
+          return {
+            title: route.params?.nombre || '',
+          };
+        }}
+      />
+
       <Stack.Screen
         name="residentesExtranjero"
         options={({ route }) => {

@@ -69,6 +69,7 @@ const CensosPoblacionViviendas = () => {
           let isMounted = true;
           const obtenerDatos = async () => {
                try {
+                    console.log('Id', id)
                     const operacion = await fetch(
                          `http://192.168.1.13:3000/operaciones/getOperationById/${id}`
                     );
@@ -386,6 +387,24 @@ const CensosPoblacionViviendas = () => {
                                         }}
                                    />
 
+                                   <TouchableOpacityStyled
+                                        className="flex-row items-center p-4 bg-white rounded-xl shadow-lg my-3 mx-5 border-[1]"
+                                        style={{
+                                             borderColor: '#065f5b', // Color teal-600
+                                        }}
+                                        onPress={() =>
+                                             handlePressCifras(
+                                                  operacion[0].Id,
+                                                  operacion[0].Nombre
+                                             )
+                                        }
+                                   >
+                                        <Ionicons name="stats-chart-outline" size={24} color="#065f5b" />
+                                        <TextStyled className="text-lg font-semibold ml-2" style={{ color: '#065f5b' }}>
+                                             Tablas del {operacion[0].Nombre}
+                                        </TextStyled>
+                                   </TouchableOpacityStyled>
+
                                    {/*Tabla que muestra los datos*/}
 
                                    {/* Nombre de la gráfica */}
@@ -537,9 +556,11 @@ const CensosPoblacionViviendas = () => {
                                                        onTouchEnd={handleTouchEnd} // Habilita scroll global al soltar
                                                   >
                                                        <TextStyled className="text-base text-gray-800 leading-relaxed">
-                                                            <TextStyled className="font-semibold">La Estadística de Variaciones Residenciales</TextStyled> se elabora por el INE a partir de la explotación de la información relativa a las altas y bajas en los padrones municipales de habitantes motivadas por cambios de residencia.
+                                                            <TextStyled className="font-semibold">A partir de la publicación de los Censos de Población y Viviendas 2021,</TextStyled> se produce un cambio de paradigma en las estadísticas demográficas. La metodología empleada en el censo de 2021, basada por primera vez en la explotación de registros administrativos, permite reproducir cada año el proceso para obtener la información censal.
                                                             {'\n\n'}
-                                                            Se obtienen así los saldos anuales por variación residencial tanto los interiores, entre los diferentes municipios de España, como los exteriores, entre municipios de España y el extranjero.
+                                                            Así, el censo deja de ser una publicación decenal, como ha venido ocurriendo ininterrumpidamente desde 1857, basada en la información recopilada mediante entrevistas a los hogares, y se inaugura un nuevo sistema censal basado en fuentes administrativas que permite disponer de censos de población cada año y de censos de viviendas, previsiblemente, cada tres o cuatro años.
+                                                            {'\n\n'}
+                                                            La operación "Censo de población" se publica a finales de cada año y ofrece información muy detallada en el territorio, hasta el nivel de sección censal, de las principales características demográficas de la población residente a 1 de enero de ese mismo año. Posteriormente, en el segundo trimestre del año siguiente, se incorpora el resto de información censal (educativa, laboral, migratoria...).
                                                        </TextStyled>
 
                                                   </ScrollView>
