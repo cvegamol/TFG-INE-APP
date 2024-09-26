@@ -44,9 +44,9 @@ const CifrasPoblacion = () => {
 
                     const datosPeriodicos = [
                          { Nombre: datosEstContinuaPoblacion[0].Nombre, Id: datosEstContinuaPoblacion[0].Id, Url: 'estadisticasContinuaPoblacion' },
-                         { Nombre: datosProyecciones[0].Nombre, Id: datosProyecciones[0].Id, Url: 'datosCifras' },
-                         { Nombre: datosProyeccionHogares[0].Nombre, Id: datosProyeccionHogares[0].Id, Url: '' },
-                         { Nombre: datosCensosPoblacion[0].Nombre, Id: datosCensosPoblacion[0].Id, Url: '' }
+                         { Nombre: datosProyecciones[0].Nombre, Id: datosProyecciones[0].Id, Url: 'proyeccionesPoblacion' },
+                         { Nombre: datosProyeccionHogares[0].Nombre, Id: datosProyeccionHogares[0].Id, Url: 'proyeccionesHogares' },
+                         { Nombre: datosCensosPoblacion[0].Nombre, Id: datosCensosPoblacion[0].Id, Url: 'censosPoblacionViviendas' }
                     ];
 
                     setDataPeriodica(datosPeriodicos);
@@ -73,9 +73,19 @@ const CifrasPoblacion = () => {
                     pathname: 'estadisticasContinuaPoblacion',
                     params: { id, nombre },
                });
+          } else if (url === 'proyeccionesPoblacion') {
+               router.push({
+                    pathname: 'proyeccionesPoblacion',
+                    params: { id, nombre },
+               });
+          } else if (url === 'proyeccionesHogares') {
+               router.push({
+                    pathname: 'proyeccionesHogares',
+                    params: { id, nombre },
+               });
           } else {
                router.push({
-                    pathname: 'operacionesPadron',
+                    pathname: 'censosPoblacionViviendas',
                     params: { id, nombre },
                });
           }

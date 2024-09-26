@@ -67,6 +67,22 @@ export default function Layout() {
         }}
       />
       <Stack.Screen
+        name="proyeccionesPoblacion"
+        options={({ route }) => {
+          return {
+            title: route.params?.nombre || '',
+          };
+        }}
+      />
+      <Stack.Screen
+        name="proyeccionesHogares"
+        options={({ route }) => {
+          return {
+            title: route.params?.nombre || '',
+          };
+        }}
+      />
+      <Stack.Screen
         name="municipios"
         options={({ route }) => {
           return {
