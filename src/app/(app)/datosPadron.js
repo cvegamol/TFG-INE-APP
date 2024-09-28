@@ -246,19 +246,35 @@ const DatosSeries = () => {
                 const response1 = await fetch(`https://servicios.ine.es/wstempus/js/ES/UNIDAD/${fk_unidad}`);
                 const textResponse1 = await response1.text();
                 const data1 = JSON.parse(textResponse1);
-                console.log('Data Unidad', data1)
+                console.log('Data Unidad', data1);
                 setUnidad(data1.Nombre);
+
                 const datos = await Promise.all(
                     seriesObj.map(async (serie) => {
                         const datosSerie = await Promise.all(
                             Object.keys(periodicidadesObj).map(async (fechaKey) => {
-                                const { ano, mes, dia } = periodicidadesObj[fechaKey];
+                                let { ano, mes, dia, etiqueta } = periodicidadesObj[fechaKey];
+
+                                // Si no se tiene el año, mes y día, calcularlos a partir de la etiqueta
+                                if (etiqueta && (!ano || !mes || !dia)) {
+                                    const fechaCalculada = calcularFechaDesdeEtiqueta(etiqueta);
+                                    if (fechaCalculada) {
+                                        ano = fechaCalculada.ano;
+                                        mes = fechaCalculada.mes;
+                                        dia = fechaCalculada.dia;
+                                    } else {
+                                        console.error(`No se pudo calcular la fecha desde la etiqueta: ${etiqueta}`);
+                                        return { fecha: fechaKey, valor: 'N/A' };
+                                    }
+                                }
+
+                                // Calcular la fecha en el formato "año-mes-día"
                                 const formattedDate = `${ano}${mes.toString().padStart(2, '0')}${dia.toString().padStart(2, '0')}`;
 
                                 try {
-                                    let u = 'https://servicios.ine.es/wstempus/js/ES/DATOS_SERIE/';
                                     const response = await fetch(`https://servicios.ine.es/wstempus/js/ES/DATOS_SERIE/${serie.COD}?date=${formattedDate}&tip=M`);
-                                    console.log(formattedDate, u, serie.COD)
+                                    console.log(formattedDate, serie.COD);
+
                                     if (!response.ok) {
                                         console.error(`Error en la solicitud para la fecha ${fechaKey}: ${response.statusText}`);
                                         return { fecha: fechaKey, valor: 'N/A' };
@@ -284,9 +300,11 @@ const DatosSeries = () => {
                                 }
                             })
                         );
+
                         return { serie: serie.Nombre, datos: datosSerie };
                     })
                 );
+
                 setDatosSeries(datos);
                 generateHtmlContentPaginated(datos);
             } catch (error) {
@@ -296,13 +314,44 @@ const DatosSeries = () => {
             }
         };
 
+
+
         obtenerDatos();
     }, [seriesObj, periodicidadesObj]);
 
     const toggleViewMode = () => {
         setViewMode(viewMode === 'table' ? 'chart' : 'table');
     };
+    // Función para obtener el primer día de una semana específica en un año específico
+    const calcularFechaDesdeEtiqueta = (etiqueta) => {
+        // Ejemplo: etiqueta "2016SM23" -> semana 23 del año 2016
+        const yearMatch = etiqueta.match(/^(\d{4})/);
+        const smMatch = etiqueta.match(/SM(\d+)/);
 
+        if (yearMatch && smMatch) {
+            const ano = parseInt(yearMatch[1], 10);
+            const semana = parseInt(smMatch[1], 10);
+
+            // Calcular el primer día de la semana (asumiendo que la semana comienza el lunes)
+            const firstDayOfYear = new Date(ano, 0, 1);
+            const daysOffset = (semana - 1) * 7;
+            const startOfWeek = new Date(firstDayOfYear.setDate(firstDayOfYear.getDate() + daysOffset));
+
+            // Ajustar para que el comienzo de la semana sea lunes
+            const dayOfWeek = startOfWeek.getDay();
+            const offsetToMonday = dayOfWeek === 0 ? 6 : dayOfWeek - 1;
+            startOfWeek.setDate(startOfWeek.getDate() - offsetToMonday);
+
+            // Extraer día, mes y año del primer día de la semana
+            const dia = startOfWeek.getDate();
+            const mes = startOfWeek.getMonth() + 1;
+
+            return { ano, mes, dia };
+        }
+
+        console.warn('Formato de etiqueta no soportado:', etiqueta);
+        return null;
+    };
     const handleVariableSelection = (valor, variableId) => {
         const newSelectedVariables = { ...selectedVariables };
 
@@ -362,44 +411,43 @@ const DatosSeries = () => {
         }
 
         // Verificar si el periodo ya está seleccionado
-        const isSelected = selectedPeriods[periodKey] !== undefined;
+        const isSelected = !!selectedPeriods[periodKey];
 
-        // Crear un nuevo objeto con las periodicidades seleccionadas
+        // Crear un nuevo objeto con las periodicidades seleccionadas (agregar o eliminar)
         const newSelectedPeriods = {
             ...selectedPeriods,
-            [periodKey]: isSelected ? undefined : periodObj // Almacenar siempre el objeto periodObj o eliminarlo si está seleccionado
+            [periodKey]: isSelected ? undefined : periodObj
         };
 
         // Filtrar los valores undefined que podrían haberse generado
-        const filteredSelectedPeriods = Object.fromEntries(
-            Object.entries(newSelectedPeriods).filter(([key, value]) => value !== undefined)
-        );
+        const filteredSelectedPeriods = Object.entries(newSelectedPeriods)
+            .reduce((acc, [key, value]) => {
+                if (value !== undefined) {
+                    acc[key] = value;
+                }
+                return acc;
+            }, {});
 
         // Contar cuántas categorías tienen múltiples selecciones
         let multiSelectCategoriesCount = 0;
 
         // Contar valores seleccionados por cada variable usando variableId
-        const variableSelectionCounts = {};
-        for (const selectedVal in selectedVariables) {
-            const selectedVariableId = selectedVariables[selectedVal]?.variableId;
-            if (selectedVariableId) {
-                if (!variableSelectionCounts[selectedVariableId]) {
-                    variableSelectionCounts[selectedVariableId] = 0;
-                }
-                variableSelectionCounts[selectedVariableId]++;
+        const variableSelectionCounts = Object.values(selectedVariables).reduce((acc, selectedVariable) => {
+            if (selectedVariable?.variableId) {
+                acc[selectedVariable.variableId] = (acc[selectedVariable.variableId] || 0) + 1;
             }
-        }
+            return acc;
+        }, {});
 
         // Contar cuántas variables tienen más de un valor seleccionado
-        for (const count in variableSelectionCounts) {
-            if (variableSelectionCounts[count] > 1) {
+        Object.values(variableSelectionCounts).forEach(count => {
+            if (count > 1) {
                 multiSelectCategoriesCount++;
             }
-        }
+        });
 
         // Contar las selecciones de periodicidades
-        const selectedPeriodCount = Object.keys(filteredSelectedPeriods).length;
-        if (selectedPeriodCount > 1) {
+        if (Object.keys(filteredSelectedPeriods).length > 1) {
             multiSelectCategoriesCount++;
         }
 
@@ -411,6 +459,7 @@ const DatosSeries = () => {
 
         setSelectedPeriods(filteredSelectedPeriods);
     };
+
 
 
     const chartConfig = {
@@ -1174,7 +1223,7 @@ const DatosSeries = () => {
                                 firstColumnWidth={firstColumnWidth}
                                 periodicidadesObj={periodicidadesObj}
                                 otherColumnFixedWidth={otherColumnFixedWidth}
-                                formatFecha={(ano, mes, dia) => `${dia}/${mes}/${ano}`}
+                                formatFecha={(ano, mes, dia, etiqueta) => etiqueta ? etiqueta : `${dia}/${mes}/${ano}`}
                             />
 
                             {/* Filas de la tabla */}
@@ -1262,7 +1311,9 @@ const DatosSeries = () => {
                                             checkedColor="#00695c" // Color Teal oscuro
                                         />
                                         <TextStyled className="ml-2 text-teal-800">
-                                            {`${periodicidadesObj[periodKey].dia}/${periodicidadesObj[periodKey].mes}/${periodicidadesObj[periodKey].ano}`}
+                                            {periodicidadesObj[periodKey].etiqueta
+                                                ? periodicidadesObj[periodKey].etiqueta
+                                                : `${periodicidadesObj[periodKey].dia}/${periodicidadesObj[periodKey].mes}/${periodicidadesObj[periodKey].ano}`}
                                         </TextStyled>
                                     </ViewStyled>
                                 ))}

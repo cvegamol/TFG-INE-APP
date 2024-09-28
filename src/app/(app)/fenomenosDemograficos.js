@@ -52,7 +52,7 @@ const FenomenosDemograficos = () => {
 
 
                     const nuevosDatos = [
-                         { Nombre: datosMigraciones[0].Nombre, Id: datosMigraciones[0].Id, Url: 'migraciones' },
+                         { Nombre: datosMigraciones[0].Nombre, Id: datosMigraciones[0].Id, Url: 'estadisticasMigraciones' },
 
                     ];
 

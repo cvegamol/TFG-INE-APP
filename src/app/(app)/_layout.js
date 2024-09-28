@@ -89,6 +89,40 @@ export default function Layout() {
           };
         }}
       />
+      <Stack.Screen
+        name="indicadoresDemograficos"
+        options={({ route }) => {
+          return {
+            title: route.params?.nombre || '',
+          };
+        }}
+      />
+      <Stack.Screen
+        name="tablasMortalidad"
+        options={({ route }) => {
+          return {
+            title: route.params?.nombre || '',
+          };
+        }}
+      />
+      <Stack.Screen
+        name="estimacionDefunciones"
+        options={({ route }) => {
+          return {
+            title: route.params?.nombre || '',
+          };
+        }}
+      />
+
+      <Stack.Screen
+        name="estadisticasMigraciones"
+
+        options={({ route }) => {
+          return {
+            title: route.params?.nombre || '',
+          };
+        }}
+      />
 
       <Stack.Screen
         name="residentesExtranjero"

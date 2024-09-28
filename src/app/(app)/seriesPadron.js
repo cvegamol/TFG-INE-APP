@@ -127,6 +127,7 @@ const SeriesTabla = () => {
 
     const generarPeriodicidades = (tipoPeriodicidad, anoInicio, anoFin = new Date().getFullYear()) => {
         const periodicidades = [];
+        console.log('Ano de inicio', anoInicio, 'Ano de fin', anoFin)
         const startYear = parseInt(anoInicio, 10);
         const endYear = anoFin && !isNaN(parseInt(anoFin, 10))
             ? parseInt(anoFin, 10)
@@ -136,8 +137,9 @@ const SeriesTabla = () => {
             console.error('Años de inicio o fin inválidos.');
             return [];
         }
-
+        console.log('Tipo de periodocidad', tipoPeriodicidad)
         switch (tipoPeriodicidad) {
+
             case 'A':
                 for (let year = startYear; year <= endYear; year++) {
                     periodicidades.push({
@@ -145,6 +147,18 @@ const SeriesTabla = () => {
                         mes: 1,
                         ano: year
                     });
+                }
+                break;
+            case 'W':
+                for (let year = startYear; year <= endYear; year++) {
+                    const totalWeeks = 52 + (new Date(year, 11, 31).getDay() === 4 || (year % 4 === 0 && new Date(year, 11, 31).getDay() === 3) ? 1 : 0);
+                    for (let week = 1; week <= totalWeeks; week++) {
+                        periodicidades.push({
+                            semana: week,
+                            ano: year,
+                            etiqueta: `${year}SM${week < 10 ? '0' : ''}${week}`
+                        });
+                    }
                 }
                 break;
 
@@ -277,7 +291,7 @@ const SeriesTabla = () => {
 
     const handleSelectionChangePeriodicidad = (periodo) => {
         setSeleccionesPeriodicidades(prevState => {
-            const key = `${periodo.dia}-${periodo.mes}-${periodo.ano}`;
+            const key = periodo.etiqueta ? periodo.etiqueta : `${periodo.dia}-${periodo.mes}-${periodo.ano}`;
             if (prevState[key]) {
                 const { [key]: _, ...rest } = prevState;
                 return rest;

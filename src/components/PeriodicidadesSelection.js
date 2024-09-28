@@ -30,13 +30,15 @@ const PeriodicidadSelection = ({ periodicidad, seleccionesPeriodicidades, handle
                 </ViewStyled>
                 <ScrollViewStyled className="max-h-40" nestedScrollEnabled={true}>
                     {periodicidad.map((p) => (
-                        <ViewStyled key={`${p.dia}-${p.mes}-${p.ano}`} className="flex-row items-center">
+                        <ViewStyled key={p.etiqueta ? p.etiqueta : `${p.dia}-${p.mes}-${p.ano}`} className="flex-row items-center">
                             <CheckBox
-                                checked={!!seleccionesPeriodicidades[`${p.dia}-${p.mes}-${p.ano}`]}
+                                checked={!!seleccionesPeriodicidades[p.etiqueta ? p.etiqueta : `${p.dia}-${p.mes}-${p.ano}`]}
                                 onPress={() => handleSelectionChangePeriodicidad(p)}
                                 checkedColor="#00695c"
                             />
-                            <TextStyled className="ml-2">{formatDate(p.dia, p.mes, p.ano)}</TextStyled>
+                            <TextStyled className="ml-2">
+                                {p.etiqueta ? p.etiqueta : formatDate(p.dia, p.mes, p.ano)}
+                            </TextStyled>
                         </ViewStyled>
                     ))}
                 </ScrollViewStyled>
