@@ -21,9 +21,12 @@ const ImageStyled = styled(Image);
 const ImageBackgroundStyled = styled(ImageBackground);
 const AnimatedTouchableOpacity = Animated.createAnimatedComponent(TouchableOpacityStyled);
 
-const MigracionesCambiosResidencia = () => {
+const EstadisticasAdquisiciones = () => {
      const router = useRouter();
      const { id } = useLocalSearchParams();
+     const [isExpanded, setIsExpanded] = useState(false);
+     const [isExpanded2, setIsExpanded2] = useState(false);
+
      const [operacionPadron, setOperacionPadron] = useState(null);
      const [isLoading, setIsLoading] = useState(true);
      const [scrollEnabled, setScrollEnabled] = useState(true); // Controla el scroll global
@@ -73,106 +76,93 @@ const MigracionesCambiosResidencia = () => {
                     }
                     console.log('ID', id)
                     const series = await Promise.all([
-                         obtenerDatosSerie('EM1764930'),
-                         obtenerDatosSerie('EM1764936'),
+                         obtenerDatosSerie('ANES3016'),
+                         obtenerDatosSerie('ANES56804'),
 
-                         obtenerDatosSerie('EM1764931'),
-                         obtenerDatosSerie('EM1764937'),
+                         obtenerDatosSerie('ANES3015'),
+                         obtenerDatosSerie('ANES56805'),
 
-                         obtenerDatosSerie('EM1764932'),
-                         obtenerDatosSerie('EM1764938'),
+                         obtenerDatosSerie('ANES3014'),
+                         obtenerDatosSerie('ANES56806'),
 
-                         obtenerDatosSerie('EM1764933'),
-                         obtenerDatosSerie('EM1764939'),
+                         obtenerDatosSerie('ANES3920'),
+                         obtenerDatosSerie('ANES56807'),
 
-                         obtenerDatosSerie('EM1764934'),
-                         obtenerDatosSerie('EM1764940'),
+                         obtenerDatosSerie('ANES56809'),
+                         obtenerDatosSerie('ANES56808'),
 
-                         obtenerDatosSerie('EM1764935'),
-                         obtenerDatosSerie('EM1764941'),
+
                     ]);
 
                     console.log(series);
 
                     const formattedTableData = [
                          [
-                              { label: 'Saldo migratorio exterior', value: 'Saldo migratorio exterior' },
+                              { label: 'Total', value: 'Total' },
                               {
                                    label: 'Valor',
                                    value: series[0]?.datos?.length ? formatNumber(series[0].datos[series[0].datos.length - 1]?.Valor) : 'N/A',
                                    chartData: series[0]?.datos?.length ? getDatosForChart(series[0].datos, series[0].nombreSerie) : [],
                               },
                               {
-                                   label: 'Variación anual (%)',
+                                   label: 'Variación',
                                    value: series[1]?.datos?.length ? formatNumber(series[1].datos[series[1].datos.length - 1]?.Valor) : 'N/A',
                                    chartData: series[1]?.datos?.length ? getDatosForChart(series[1].datos, series[1].nombreSerie) : [],
                               },
                          ],
                          [
-                              { label: 'Españoles', value: 'Españoles' },
+                              { label: 'Hombres', value: 'Hombres' },
                               {
                                    label: 'Valor',
                                    value: series[2]?.datos?.length ? formatNumber(series[2].datos[series[2].datos.length - 1]?.Valor) : 'N/A',
                                    chartData: series[2]?.datos?.length ? getDatosForChart(series[2].datos, series[2].nombreSerie) : [],
                               },
                               {
-                                   label: 'Variación anual (%)',
+                                   label: 'Variación',
                                    value: series[3]?.datos?.length ? formatNumber(series[3].datos[series[3].datos.length - 1]?.Valor) : 'N/A',
                                    chartData: series[3]?.datos?.length ? getDatosForChart(series[3].datos, series[3].nombreSerie) : [],
                               },
                          ],
                          [
-                              { label: 'Extranjeros', value: 'Extranjeros' },
+                              { label: 'Mujeres', value: 'Mujeres' },
                               {
                                    label: 'Valor',
                                    value: series[4]?.datos?.length ? formatNumber(series[4].datos[series[4].datos.length - 1]?.Valor) : 'N/A',
                                    chartData: series[4]?.datos?.length ? getDatosForChart(series[4].datos, series[4].nombreSerie) : [],
                               },
                               {
-                                   label: 'Variación anual (%)',
+                                   label: 'Variación',
                                    value: series[5]?.datos?.length ? formatNumber(series[5].datos[series[5].datos.length - 1]?.Valor) : 'N/A',
                                    chartData: series[5]?.datos?.length ? getDatosForChart(series[5].datos, series[5].nombreSerie) : [],
                               },
                          ],
                          [
-                              { label: 'Cambios de municipio', value: 'Cambios de municipio' },
+                              { label: 'Personas nacidas en España', value: 'Personas nacidas en España' },
                               {
                                    label: 'Valor',
                                    value: series[6]?.datos?.length ? formatNumber(series[6].datos[series[6].datos.length - 1]?.Valor) : 'N/A',
                                    chartData: series[6]?.datos?.length ? getDatosForChart(series[6].datos, series[6].nombreSerie) : [],
                               },
                               {
-                                   label: 'Variación anual (%)',
+                                   label: 'Variación',
                                    value: series[7]?.datos?.length ? formatNumber(series[7].datos[series[7].datos.length - 1]?.Valor) : 'N/A',
                                    chartData: series[7]?.datos?.length ? getDatosForChart(series[7].datos, series[7].nombreSerie) : [],
                               },
                          ],
                          [
-                              { label: 'Españoles', value: 'Españoles' },
+                              { label: 'Personas nacidas en el extranjero', value: 'Personas nacidas en el extranjero' },
                               {
                                    label: 'Valor',
                                    value: series[8]?.datos?.length ? formatNumber(series[8].datos[series[8].datos.length - 1]?.Valor) : 'N/A',
                                    chartData: series[8]?.datos?.length ? getDatosForChart(series[8].datos, series[8].nombreSerie) : [],
                               },
                               {
-                                   label: 'Variación anual (%)',
+                                   label: 'Variación',
                                    value: series[9]?.datos?.length ? formatNumber(series[9].datos[series[9].datos.length - 1]?.Valor) : 'N/A',
                                    chartData: series[9]?.datos?.length ? getDatosForChart(series[9].datos, series[9].nombreSerie) : [],
                               },
                          ],
-                         [
-                              { label: 'Extranjeros', value: 'Extranjeros' },
-                              {
-                                   label: 'Valor',
-                                   value: series[10]?.datos?.length ? formatNumber(series[10].datos[series[10].datos.length - 1]?.Valor) : 'N/A',
-                                   chartData: series[10]?.datos?.length ? getDatosForChart(series[10].datos, series[10].nombreSerie) : [],
-                              },
-                              {
-                                   label: 'Variación anual (%)',
-                                   value: series[11]?.datos?.length ? formatNumber(series[11].datos[series[11].datos.length - 1]?.Valor) : 'N/A',
-                                   chartData: series[11]?.datos?.length ? getDatosForChart(series[11].datos, series[11].nombreSerie) : [],
-                              },
-                         ],
+
                     ];
 
                     setTablaDatos(formattedTableData);
@@ -240,8 +230,36 @@ const MigracionesCambiosResidencia = () => {
                };
           });
      };
+     const handleToggleExpand2 = () => {
+          setIsExpanded2(!isExpanded2);
+     };
+     const handlePressTabla = async (id) => {
+          try {
+               const response = await fetch(
+                    `http://192.168.1.13:3000/tablas/getTableById/${id}`
+               );
 
-     const handlePressCifras = (id, nombre) => {
+               // Verifica si la respuesta es válida y tiene datos
+               if (!response.ok) {
+                    throw new Error(`Error en la solicitud: ${response.status}`);
+               }
+
+               const text = await response.json(); // Lee el contenido como JSON
+
+               // Cambiar el id dentro del objeto text[0] sin afectar el original
+               const tablaModificada = { ...text[0] }; // Aquí 'nuevoId' es el nuevo valor de ID
+
+
+               // Navegar pasando la tabla modificada
+               router.push({
+                    pathname: 'seriesPadron',
+                    params: { tabla: JSON.stringify(tablaModificada) }, // Pasar la tabla modificada
+               });
+          } catch (error) {
+               console.error('Error al obtener la tabla:', error.message);
+          }
+     };
+     const handlePress = (id, nombre) => {
           console.log('Id', id);
           router.push({
                pathname: 'operacionesPadron',
@@ -320,33 +338,9 @@ const MigracionesCambiosResidencia = () => {
      const handleTouchEnd = () => {
           setScrollEnabled(true);
      };
-     const handlePress = async (id) => {
-          try {
-               const response = await fetch(
-                    `http://192.168.1.13:3000/tablas/getTableById/${id}`
-               );
-
-               // Verifica si la respuesta es válida y tiene datos
-               if (!response.ok) {
-                    throw new Error(`Error en la solicitud: ${response.status}`);
-               }
-
-               const text = await response.json(); // Lee el contenido como JSON
-
-               // Cambiar el id dentro del objeto text[0] sin afectar el original
-               const tablaModificada = { ...text[0] }; // Aquí 'nuevoId' es el nuevo valor de ID
-
-
-               // Navegar pasando la tabla modificada
-               router.push({
-                    pathname: 'seriesPadron',
-                    params: { tabla: JSON.stringify(tablaModificada) }, // Pasar la tabla modificada
-               });
-          } catch (error) {
-               console.error('Error al obtener la tabla:', error.message);
-          }
+     const handleToggleExpand = () => {
+          setIsExpanded(!isExpanded);
      };
-
      return (
           <Plantilla>
                {/* ScrollView global */}
@@ -395,19 +389,20 @@ const MigracionesCambiosResidencia = () => {
                                    {/* Nombre de la gráfica */}
                                    <TextStyled className="text-xl font-semibold text-teal-700 mb-4 text-center">
 
-                                        Estadística de migraciones y cambios de residencia - 2021 y 2022                      </TextStyled>
+                                        Adquisiciones de nacionalidad española - Año 2023
+                                   </TextStyled>
 
+                                   {/* Introducción breve */}
                                    <TextStyled className="text-base text-gray-700 mb-4">
-                                        La tabla muestra los flujos migratorios de la población en España durante 2021 y 2022, incluyendo movimientos hacia el extranjero, migraciones interiores, y cambios de residencia a nivel municipal, provincial y de comunidad autónoma.{"\n"}
-                                        Los datos están desagregados por sexo, edad, país de nacionalidad y lugar de nacimiento, ofreciendo una visión detallada de las dinámicas migratorias.{"\n"}
-                                        Además, se incluyen gráficos que ilustran la evolución de estos flujos en los últimos años, facilitando la comprensión de las tendencias migratorias actuales.
+                                        La tabla muestra las adquisiciones de nacionalidad española en 2023, incluyendo el total de adquisiciones y las características de los nuevos ciudadanos.{"\n"}
+                                        Los datos son recopilados por el Registro Civil y publicados por el INE.
                                    </TextStyled>
                                    <ResponsiveTable
-                                        headers={['', 'Valor', 'Variación anual (%)']}
+                                        headers={['', 'Valor', 'Variación (%)']}
                                         data={tablaDatos}
                                         selectedCell={selectedCell}
                                         onCellPress={handleCellPress}
-                                        fontSize={10}
+                                        fontSize={12}
                                    />
 
                                    <LineChart
@@ -474,7 +469,284 @@ const MigracionesCambiosResidencia = () => {
                                         }}
                                    />
 
+                                   {/* Botón para consultar todas las tablas de la operación */}
+                                   <TouchableOpacityStyled
+                                        className="flex-row items-center p-4 bg-teal-600 rounded-xl shadow-lg my-3 mx-5 border-[1]"
+                                        style={{
+                                             borderColor: '#065f5b', // Color teal-600
+                                        }}
+                                        onPress={() =>
+                                             handlePress(operacionPadron[0].Id, operacionPadron[0].Nombre)
+                                        }
+                                   >
+                                        <Ionicons name="grid-outline" size={24} color="white" />
+                                        <TextStyled className="text-lg font-semibold mx-2 text-white">
+                                             Tablas de las {operacionPadron[0].Nombre}
+                                        </TextStyled>
+                                   </TouchableOpacityStyled>
 
+                                   <ViewStyled
+                                        style={{
+                                             borderBottomWidth: 2, // Ancho del borde
+                                             borderColor: '#065f5b', // Color del borde
+                                             marginVertical: 16, // Margen vertical para separar el contenido
+                                             width: '90%', // Ajuste de ancho
+                                             alignSelf: 'center', // Centra el View
+                                        }}
+                                   />
+                                   <TextStyled className="text-xl font-semibold text-teal-700 mb-4 text-center">
+                                        Tablas Más Consultadas
+                                   </TextStyled>
+
+                                   {/* Primer `TouchableOpacity` */}
+                                   <TouchableOpacityStyled
+                                        className="p-3 my-3 rounded-lg"
+                                        onPress={() => handlePressTabla(15073)}
+                                        style={{
+                                             backgroundColor: '#38b2ac', // Tono teal atractivo
+                                             shadowColor: '#000',
+                                             shadowOffset: { width: 0, height: 2 },
+                                             shadowOpacity: 0.25,
+                                             shadowRadius: 3.84,
+                                             elevation: 5, // Sombra para Android
+                                             flexDirection: 'row',
+                                             alignItems: 'center', // Alinear contenido
+                                             paddingVertical: 14, // Ajuste de padding vertical para más espacio
+                                             paddingHorizontal: 18, // Ajuste de padding horizontal para más espacio
+                                             borderRadius: 12, // Bordes redondeados suaves
+                                             transform: [{ scale: 1 }],
+                                        }}
+                                        activeOpacity={0.7}
+                                   >
+                                        <Icon name="map" size={20} color="white" style={{ marginRight: 12 }} />
+                                        <TextStyled
+                                             className="font-semibold"
+                                             style={{
+                                                  color: '#ffffff', // Texto blanco para buen contraste
+                                                  fontSize: 16, // Tamaño moderado
+                                                  fontWeight: '500',
+                                                  marginLeft: 10, // Espacio entre el ícono y el texto
+                                                  flexShrink: 1, // Evitar que el texto se corte
+                                             }}
+                                        >
+                                             Adquisiciones de nacionalidad por nacionalidad en relación al país de nacimiento
+                                        </TextStyled>
+                                   </TouchableOpacityStyled>
+
+                                   {/* Segundo `TouchableOpacity` */}
+                                   <TouchableOpacityStyled
+                                        className="p-3 my-3 rounded-lg"
+                                        onPress={handleToggleExpand}
+                                        style={{
+                                             backgroundColor: '#38b2ac', // Tono teal atractivo
+                                             shadowColor: '#000',
+                                             shadowOffset: { width: 0, height: 2 },
+                                             shadowOpacity: 0.25,
+                                             shadowRadius: 3.84,
+                                             elevation: 5, // Sombra para Android
+                                             flexDirection: 'row',
+                                             alignItems: 'center', // Alinear contenido
+                                             paddingVertical: 14, // Ajuste de padding vertical para más espacio
+                                             paddingHorizontal: 18, // Ajuste de padding horizontal para más espacio
+                                             borderRadius: 12, // Bordes redondeados suaves
+                                             transform: [{ scale: 1 }],
+                                        }}
+                                        activeOpacity={0.7}
+                                   >
+                                        <Icon name="map" size={20} color="white" style={{ marginRight: 12 }} />
+                                        <TextStyled
+                                             className="font-semibold"
+                                             style={{
+                                                  color: '#ffffff', // Texto blanco para buen contraste
+                                                  fontSize: 16, // Tamaño moderado
+                                                  fontWeight: '500',
+                                                  marginLeft: 10, // Espacio entre el ícono y el texto
+                                                  flexShrink: 1, // Evitar que el texto se corte
+                                             }}
+                                        >
+                                             Adquisiciones de nacionalidad por sexo y nacionalidad previa
+                                        </TextStyled>
+                                        <Ionicons
+                                             name={isExpanded ? "chevron-up-outline" : "chevron-down-outline"}
+                                             size={24}
+                                             color="white"
+                                             style={{ marginLeft: 'auto' }}
+                                        />
+                                   </TouchableOpacityStyled>
+
+                                   {/* Sección expandida que contiene las tablas adicionales */}
+                                   {isExpanded && (
+                                        <ViewStyled style={{ marginLeft: 20 }}>
+                                             {/* Primera tabla expandida */}
+                                             <TouchableOpacityStyled
+                                                  className="p-2 my-2 rounded-lg"
+                                                  onPress={() => handlePressTabla(15798)}
+                                                  style={{
+                                                       backgroundColor: '#4fd1c5', // Color teal más claro
+                                                       shadowColor: '#000',
+                                                       shadowOffset: { width: 0, height: 1 },
+                                                       shadowOpacity: 0.2,
+                                                       shadowRadius: 2.22,
+                                                       elevation: 3, // Sombra para Android
+                                                       flexDirection: 'row',
+                                                       alignItems: 'center',
+                                                       borderRadius: 10,
+                                                       paddingVertical: 10,
+                                                       paddingHorizontal: 15,
+                                                  }}
+                                                  activeOpacity={0.7}
+                                             >
+                                                  <Ionicons name="document-outline" size={18} color="white" style={{ marginRight: 10 }} />
+                                                  <TextStyled style={{ color: '#ffffff', fontSize: 14, fontWeight: '500' }}>
+
+                                                       Estadística de adquisiciones de nacionalidad española de residentes. Resultados por comunidades autónomas.
+                                                  </TextStyled>
+                                             </TouchableOpacityStyled>
+
+                                             {/* Segunda tabla expandida */}
+                                             <TouchableOpacityStyled
+                                                  className="p-2 my-2 rounded-lg"
+                                                  onPress={() => handlePressTabla(15071)}
+                                                  style={{
+                                                       backgroundColor: '#4fd1c5', // Color teal más claro
+                                                       shadowColor: '#000',
+                                                       shadowOffset: { width: 0, height: 1 },
+                                                       shadowOpacity: 0.2,
+                                                       shadowRadius: 2.22,
+                                                       elevation: 3, // Sombra para Android
+                                                       flexDirection: 'row',
+                                                       alignItems: 'center',
+                                                       borderRadius: 10,
+                                                       paddingVertical: 10,
+                                                       paddingHorizontal: 15,
+                                                  }}
+                                                  activeOpacity={0.7}
+                                             >
+                                                  <Ionicons name="document-outline" size={18} color="white" style={{ marginRight: 10 }} />
+                                                  <TextStyled style={{ color: '#ffffff', fontSize: 14, fontWeight: '500' }}>
+
+                                                       Estadística de adquisiciones de nacionalidad española de residentes. Resultados Nacionales.                                                  </TextStyled>
+                                             </TouchableOpacityStyled>
+                                        </ViewStyled>
+                                   )}
+
+
+
+
+                                   <TouchableOpacityStyled
+                                        className="p-3 my-3 rounded-lg"
+                                        onPress={() => handlePressTabla(15021)}
+                                        style={{
+                                             backgroundColor: '#38b2ac', // Tono teal atractivo
+                                             shadowColor: '#000',
+                                             shadowOffset: { width: 0, height: 2 },
+                                             shadowOpacity: 0.25,
+                                             shadowRadius: 3.84,
+                                             elevation: 5, // Sombra para Android
+                                             flexDirection: 'row',
+                                             alignItems: 'center', // Alinear contenido
+                                             paddingVertical: 14, // Ajuste de padding vertical para más espacio
+                                             paddingHorizontal: 18, // Ajuste de padding horizontal para más espacio
+                                             borderRadius: 12, // Bordes redondeados suaves
+                                             transform: [{ scale: 1 }],
+                                        }}
+                                        activeOpacity={0.7}
+                                   >
+                                        <Icon name="map" size={20} color="white" style={{ marginRight: 12 }} />
+                                        <TextStyled
+                                             className="font-semibold"
+                                             style={{
+                                                  color: '#ffffff', // Texto blanco para buen contraste
+                                                  fontSize: 16, // Tamaño moderado
+                                                  fontWeight: '500',
+                                                  marginLeft: 10, // Espacio entre el ícono y el texto
+                                                  flexShrink: 1, // Evitar que el texto se corte
+                                             }}
+                                        >
+                                             Adquisiciones de nacionalidad por sexo y edad
+                                        </TextStyled>
+                                   </TouchableOpacityStyled>
+
+                                   <TouchableOpacityStyled
+                                        className="p-3 my-3 rounded-lg"
+                                        onPress={() => handlePressTabla(15082)}
+                                        style={{
+                                             backgroundColor: '#38b2ac', // Tono teal atractivo
+                                             shadowColor: '#000',
+                                             shadowOffset: { width: 0, height: 2 },
+                                             shadowOpacity: 0.25,
+                                             shadowRadius: 3.84,
+                                             elevation: 5, // Sombra para Android
+                                             flexDirection: 'row',
+                                             alignItems: 'center', // Alinear contenido
+                                             paddingVertical: 14, // Ajuste de padding vertical para más espacio
+                                             paddingHorizontal: 18, // Ajuste de padding horizontal para más espacio
+                                             borderRadius: 12, // Bordes redondeados suaves
+                                             transform: [{ scale: 1 }],
+                                        }}
+                                        activeOpacity={0.7}
+                                   >
+                                        <Icon name="map" size={20} color="white" style={{ marginRight: 12 }} />
+                                        <TextStyled
+                                             className="font-semibold"
+                                             style={{
+                                                  color: '#ffffff', // Texto blanco para buen contraste
+                                                  fontSize: 16, // Tamaño moderado
+                                                  fontWeight: '500',
+                                                  marginLeft: 10, // Espacio entre el ícono y el texto
+                                                  flexShrink: 1, // Evitar que el texto se corte
+                                             }}
+                                        >
+                                             Adquisiciones de nacionalidad por sexo y grupo de edad
+                                        </TextStyled>
+                                   </TouchableOpacityStyled>
+
+                                   <TouchableOpacityStyled
+                                        className="p-3 my-3 rounded-lg"
+                                        onPress={() => handlePressTabla(15083)}
+                                        style={{
+                                             backgroundColor: '#38b2ac', // Tono teal atractivo
+                                             shadowColor: '#000',
+                                             shadowOffset: { width: 0, height: 2 },
+                                             shadowOpacity: 0.25,
+                                             shadowRadius: 3.84,
+                                             elevation: 5, // Sombra para Android
+                                             flexDirection: 'row',
+                                             alignItems: 'center', // Alinear contenido
+                                             paddingVertical: 14, // Ajuste de padding vertical para más espacio
+                                             paddingHorizontal: 18, // Ajuste de padding horizontal para más espacio
+                                             borderRadius: 12, // Bordes redondeados suaves
+                                             transform: [{ scale: 1 }],
+                                        }}
+                                        activeOpacity={0.7}
+                                   >
+                                        <Icon name="map" size={20} color="white" style={{ marginRight: 12 }} />
+                                        <TextStyled
+                                             className="font-semibold"
+                                             style={{
+                                                  color: '#ffffff', // Texto blanco para buen contraste
+                                                  fontSize: 16, // Tamaño moderado
+                                                  fontWeight: '500',
+                                                  marginLeft: 10, // Espacio entre el ícono y el texto
+                                                  flexShrink: 1, // Evitar que el texto se corte
+                                             }}
+                                        >
+                                             Adquisiciones de nacionalidad por sexo y modo de adquisición (residencia/otros)
+                                        </TextStyled>
+                                   </TouchableOpacityStyled>
+
+
+
+                                   {/* Barra de separación */}
+                                   <ViewStyled
+                                        style={{
+                                             borderBottomWidth: 2, // Ancho del borde
+                                             borderColor: '#065f5b', // Color del borde
+                                             marginVertical: 16, // Margen vertical para separar el contenido
+                                             width: '90%', // Ajuste de ancho
+                                             alignSelf: 'center', // Centra el View
+                                        }}
+                                   />
 
                                    {/* Tarjeta Volteable */}
                                    <ViewStyled className="my-6 mx-5" style={{ flex: 1 }}>
@@ -542,10 +814,11 @@ const MigracionesCambiosResidencia = () => {
                                                        onTouchEnd={handleTouchEnd} // Habilita scroll global al soltar
                                                   >
                                                        <TextStyled className="text-base text-gray-800 leading-relaxed">
-                                                            <TextStyled className="font-semibold">La Estadística de Migraciones y Cambios de Residencia</TextStyled> proporciona una aproximación estadística de los flujos migratorios en España, incluyendo cada comunidad autónoma, provincia y municipio, tanto con el extranjero como dentro del país.
+                                                            <TextStyled className="font-semibold">La Estadística de adquisiciones de nacionalidad española de residentes</TextStyled> proporciona el número de personas residentes en España que adquieren la nacionalidad española durante el año de referencia, habiendo tenido previamente otra nacionalidad o siendo apátridas.
                                                             {'\n\n'}
-                                                            Los resultados se desglosan por sexo, edad, país de nacionalidad y lugar de nacimiento del migrante, así como por el origen y destino de la migración, y mantienen total consistencia con los Censos de población. Estos datos se transmiten a nivel nacional e internacional como cifras oficiales de los flujos migratorios de España.
+                                                            Esta operación se basa en el tratamiento estadístico de las inscripciones de expedientes de nacionalidad en el Registro Civil, garantizando la consistencia entre cifras de población y sucesos demográficos, permitiendo la correcta clasificación de la información según el país de nacionalidad.
                                                        </TextStyled>
+
                                                   </ScrollView>
                                              </Animated.View>
                                         </AnimatedTouchableOpacity>
@@ -558,4 +831,4 @@ const MigracionesCambiosResidencia = () => {
      );
 };
 
-export default MigracionesCambiosResidencia;
+export default EstadisticasAdquisiciones;

@@ -81,10 +81,10 @@ const FenomenosDemograficos = () => {
      }, []);
 
      const handlePress = (id, nombre, url) => {
-          // Definir la ruta a la que se redirige según la URL
+
           router.push({
-               pathname: url,  // Usar directamente el valor de 'url' como el pathname
-               params: { id, nombre },  // Pasar 'id' y 'nombre' como parámetros
+               pathname: url,
+               params: { id, nombre },
           });
      };
 

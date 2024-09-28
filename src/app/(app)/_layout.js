@@ -57,6 +57,38 @@ export default function Layout() {
           };
         }}
       />
+      <Stack.Screen
+        name="estadisticasMatrimonios"
+        options={({ route }) => {
+          return {
+            title: route.params?.nombre || '',
+          };
+        }}
+      />
+      <Stack.Screen
+        name="estadisticasNacimientos"
+        options={({ route }) => {
+          return {
+            title: route.params?.nombre || '',
+          };
+        }}
+      />
+      <Stack.Screen
+        name="estadisticasDefunciones"
+        options={({ route }) => {
+          return {
+            title: route.params?.nombre || '',
+          };
+        }}
+      />
+      <Stack.Screen
+        name="estadisticasAdquisiciones"
+        options={({ route }) => {
+          return {
+            title: route.params?.nombre || '',
+          };
+        }}
+      />
 
       <Stack.Screen
         name="residentesExtranjero"
