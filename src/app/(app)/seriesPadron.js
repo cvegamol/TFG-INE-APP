@@ -309,16 +309,39 @@ const SeriesTabla = () => {
                 valores.map(valor => `tv=${valor.Variable.Id}:${valor.Id}`)
             )
             .join('&');
-        console.log(parametros_url)
+        console.log(parametros_url);
         const url_final = url_base + parametros_url;
-        console.log(url_final)
-        const seriesJson = await fetch(url_final);
-        const series = await seriesJson.json();
+        console.log(url_final);
 
-        router.push({
-            pathname: 'datosPadron',
-            params: { tabla: JSON.stringify(tablaObj), series: JSON.stringify(series), periodicidades: JSON.stringify(seleccionesPeriodicidades), valores: JSON.stringify(selecciones) },
-        });
+        try {
+            const seriesJson = await fetch(url_final);
+            const series = await seriesJson.json();
+
+            // Filtrar series duplicadas
+            const uniqueSeries = [];
+            const seenCodes = new Set();
+
+            for (const serie of series) {
+                if (!seenCodes.has(serie.COD)) {
+                    seenCodes.add(serie.COD);
+                    uniqueSeries.push(serie);
+                }
+            }
+
+            console.log('SeroesPadron, numero de series>', uniqueSeries.length);
+
+            router.push({
+                pathname: 'datosPadron',
+                params: {
+                    tabla: JSON.stringify(tablaObj),
+                    series: JSON.stringify(uniqueSeries),
+                    periodicidades: JSON.stringify(seleccionesPeriodicidades),
+                    valores: JSON.stringify(selecciones),
+                },
+            });
+        } catch (error) {
+            console.error('Error fetching series:', error);
+        }
     };
 
     return (

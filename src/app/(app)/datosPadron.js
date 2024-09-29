@@ -248,7 +248,7 @@ const DatosSeries = () => {
                 const data1 = JSON.parse(textResponse1);
                 console.log('Data Unidad', data1);
                 setUnidad(data1.Nombre);
-
+                console.log('Numero de series', seriesObj.length)
                 const datos = await Promise.all(
                     seriesObj.map(async (serie) => {
                         const datosSerie = await Promise.all(
@@ -300,7 +300,7 @@ const DatosSeries = () => {
                                 }
                             })
                         );
-
+                        console.log('Numero de series', serie)
                         return { serie: serie.Nombre, datos: datosSerie };
                     })
                 );
@@ -524,8 +524,25 @@ const DatosSeries = () => {
             const seriesJson = await fetch(url_final);
             const series_variables = await seriesJson.json();
 
+            // Verificar si se obtuvieron series
+            if (series_variables.length === 0) {
+                Alert.alert('Error', 'No se pueden generar gráficos porque no se encontraron series.');
+                return;
+            }
+
+            // Filtrar series duplicadas
+            const uniqueSeriesVariables = [];
+            const seenCodes = new Set();
+
+            for (const serie of series_variables) {
+                if (!seenCodes.has(serie.COD)) {
+                    seenCodes.add(serie.COD);
+                    uniqueSeriesVariables.push(serie);
+                }
+            }
+
             const datos = await Promise.all(
-                series_variables.map(async (serie) => {
+                uniqueSeriesVariables.map(async (serie) => {
                     const datosSerie = await Promise.all(
                         Object.entries(selectedPeriods).map(async ([fechaKey, dateObj]) => {
                             const { ano, mes, dia } = dateObj;
@@ -564,7 +581,15 @@ const DatosSeries = () => {
                     return { serie: serie.Nombre, datos: datosSerie };
                 })
             );
+            // Verificar si los datos obtenidos son válidos
+            const datosValidos = datos.some(serieObj =>
+                serieObj.datos.some(dato => dato.valor !== 'N/A' && dato.valor !== null && dato.valor !== undefined)
+            );
 
+            if (!datosValidos) {
+                Alert.alert('Error', 'No se pueden generar gráficos porque los datos obtenidos son inválidos.');
+                return;
+            }
             console.log('Datos finales:', JSON.stringify(datos, null, 2));
 
 
