@@ -246,9 +246,7 @@ const DatosSeries = () => {
                 const response1 = await fetch(`https://servicios.ine.es/wstempus/js/ES/UNIDAD/${fk_unidad}`);
                 const textResponse1 = await response1.text();
                 const data1 = JSON.parse(textResponse1);
-                console.log('Data Unidad', data1);
                 setUnidad(data1.Nombre);
-                console.log('Numero de series', seriesObj.length)
                 const datos = await Promise.all(
                     seriesObj.map(async (serie) => {
                         const datosSerie = await Promise.all(
@@ -273,7 +271,6 @@ const DatosSeries = () => {
 
                                 try {
                                     const response = await fetch(`https://servicios.ine.es/wstempus/js/ES/DATOS_SERIE/${serie.COD}?date=${formattedDate}&tip=M`);
-                                    console.log(formattedDate, serie.COD);
 
                                     if (!response.ok) {
                                         console.error(`Error en la solicitud para la fecha ${fechaKey}: ${response.statusText}`);
@@ -300,7 +297,6 @@ const DatosSeries = () => {
                                 }
                             })
                         );
-                        console.log('Numero de series', serie)
                         return { serie: serie.Nombre, datos: datosSerie };
                     })
                 );
@@ -399,7 +395,6 @@ const DatosSeries = () => {
             Alert.alert('Restricción', 'Solo se pueden seleccionar múltiples valores en dos categorías (variables o periodicidades).');
             return;
         }
-        console.log(newSelectedVariables);
         setSelectedVariables(newSelectedVariables);
     };
 
@@ -566,7 +561,6 @@ const DatosSeries = () => {
                                 }
 
                                 const data = JSON.parse(textResponse);
-                                console.log('asadasda', data)
                                 if (data?.Data?.length > 0) {
                                     return { fecha: formattedDate, valor: data.Data[0].Valor, variables: data.MetaData };
                                 } else {
@@ -590,7 +584,6 @@ const DatosSeries = () => {
                 Alert.alert('Error', 'No se pueden generar gráficos porque los datos obtenidos son inválidos.');
                 return;
             }
-            console.log('Datos finales:', JSON.stringify(datos, null, 2));
 
 
             let labels = [];
@@ -602,7 +595,6 @@ const DatosSeries = () => {
                     const { ano, mes, dia } = selectedPeriods[key];
                     return `${dia}/${mes}/${ano}`;
                 });
-                console.log('PPPPPP', labels);
 
                 let groupedDatasets = {};
 
@@ -618,7 +610,6 @@ const DatosSeries = () => {
 
                         // Verificar si la fecha formateada coincide con alguna de las etiquetas generadas (labels)
                         if (labels.includes(formattedDate)) {
-                            console.log(`Fecha ${formattedDate} encontrada en labels, agregando al dataset.`);
 
                             // Si existe, agrupar los datos por fecha
                             if (!groupedDatasets[formattedDate]) {
@@ -644,8 +635,7 @@ const DatosSeries = () => {
                 // Convertir el objeto a un array de datasets
                 datasets = Object.values(groupedDatasets);
                 //labels = Object.keys(groupedDatasets);
-                console.log("Final Labels (después de agrupar):", labels);
-                console.log("Final Datasets (después de agrupar):", datasets);
+
             }
 
             else {
@@ -653,12 +643,22 @@ const DatosSeries = () => {
                 labels = valoresObj[xAxis]
                     .filter(valor => selectedVariables[valor.Id])
                     .map((valor) => valor.Nombre);
-
+                console.log('Labels Prueba:', selectedVariables)
                 datasets = labels.map((label) => {
                     const dataset = datos.map(serieObj => {
-                        if (serieObj.datos.some(dato =>
-                            dato.variables.slice(0, -2).some(variable => variable.Nombre.includes(label))
-                        )) {
+
+                        if (serieObj.datos.some(dato => {
+                            // Imprimir todas las variables antes de filtrar
+                            console.log('Todas las variables:', dato.variables);
+
+                            // Filtrar las variables que están presentes en `selectedVariables`
+                            const variablesFiltradas = dato.variables.filter(variable => selectedVariables[variable.Id]);
+
+                            // Imprimir las variables filtradas para depuración
+                            console.log('Variables filtradas:', variablesFiltradas);
+
+                            return variablesFiltradas.some(variable => variable.Nombre.includes(label));
+                        })) {
                             const valoresConFecha = serieObj.datos.map(dato => ({
                                 value: dato.valor,
                                 fecha: dato.fecha,
@@ -719,7 +719,7 @@ const DatosSeries = () => {
 
 
             console.log("Final Dataset:", { labels, datasets });
-
+            console.log('DDAATTAASSEETTSS', datasets[0].data[0])
             if (chartType === 'line') {
                 // Reestructuración de datasets para el formato correcto
                 let reorganizedDatasets = [];
@@ -913,7 +913,10 @@ const DatosSeries = () => {
                 };
 
                 console.log('Datos transformados para BarChart:', chartData);
-                const scale = determineScale(chartData.datasets.flatMap(dataset => dataset.data));
+                console.log('Datos para BarChart:');
+                chartData.datasets.forEach(dataset => {
+                    console.log('Data:', dataset.data);
+                }); const scale = determineScale(chartData.datasets.flatMap(dataset => dataset.data));
                 console.log('Escala', scale);
 
                 // Configurar los datos del gráfico
