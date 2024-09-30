@@ -1,25 +1,29 @@
 import React, { useEffect, useState } from 'react';
-import { View, Text, ScrollView, Dimensions } from 'react-native';
+import { View, Text, ScrollView, Dimensions, TouchableOpacity } from 'react-native';
 import { styled } from 'nativewind';
 import Plantilla from '../../components/Plantilla';
 import ResponsiveTable from '../../components/ResponsiveTable';
-import { BarChart, LineChart } from 'react-native-chart-kit';
+import { LineChart } from 'react-native-chart-kit';
 import Loading from '../../components/Loading';
+import { useRouter } from 'expo-router';
 import {
   widthPercentageToDP as wp,
   heightPercentageToDP as hp,
 } from "react-native-responsive-screen";
+import Icon from 'react-native-vector-icons/Ionicons';
 
 const ViewStyled = styled(View);
 const TextStyled = styled(Text);
+const TouchableOpacityStyled = styled(TouchableOpacity);
 
 const Home = () => {
   const [estadisticaContinua, setEstadisticaContinua] = useState(null);
   const [chartData, setChartData] = useState([]);
   const [tablaDatos, setTablaDatos] = useState([]);
   const [selectedCell, setSelectedCell] = useState({ row: 0, col: 1 });
-  const [isLoading, setIsLoading] = useState(true); // Estado para manejar el loading
+  const [isLoading, setIsLoading] = useState(true);
 
+  const router = useRouter();
   const screenWidth = Dimensions.get('window').width;
   const chartWidth = screenWidth - 32;
 
@@ -149,21 +153,69 @@ const Home = () => {
             </ViewStyled>
           ) : (
             <>
-              {estadisticaContinua && (
-                <TextStyled className="text-xl font-bold text-teal-800">
-                  Últimos Datos: <TextStyled className='text-xl/4 text-teal-400'>
-                    {estadisticaContinua.Nombre}:
-                    {chartData && chartData.length > 0 && ` ${chartData[chartData.length - 1].label}`}
-                  </TextStyled>
+              {/* Párrafo introductorio */}
+              <ViewStyled className="mt-4">
+                <TextStyled className="text-lg text-gray-700 text-justify mx-4">
+                  Bienvenido a nuestra aplicación de estadísticas demográficas. A continuación, encontrarás información actualizada sobre las últimas tendencias poblacionales.
                 </TextStyled>
-              )}
+              </ViewStyled>
+              {/* Sección actualizada con opciones táctiles atractivas */}
+              <ViewStyled className="mt-4 w-full">
 
-              <ResponsiveTable
-                headers={['', 'Valor', 'Varianza']}
-                data={tablaDatos}
-                selectedCell={selectedCell}
-                onCellPress={handleCellPress}
-              />
+                <ViewStyled className="flex flex-row flex-wrap justify-center">
+
+
+                  <TouchableOpacityStyled
+                    onPress={() => router.replace('padron')}
+                    className="bg-white m-2 p-4 rounded-lg w-56 items-center shadow-md"
+                  >
+                    <Icon name="people-outline" size={30} color="#008080" />
+                    <TextStyled className="text-teal-800 text-center mt-2">Padrón</TextStyled>
+                  </TouchableOpacityStyled>
+
+                  <TouchableOpacityStyled
+                    onPress={() => router.replace('cifrasPoblacion')}
+                    className="bg-white m-2 p-4 rounded-lg w-56 items-center shadow-md"
+                  >
+                    <Icon name="stats-chart-outline" size={30} color="#008080" />
+                    <TextStyled className="text-teal-800 text-center mt-2">Cifras de Población</TextStyled>
+                  </TouchableOpacityStyled>
+
+                  <TouchableOpacityStyled
+                    onPress={() => router.replace('fenomenosDemograficos')}
+                    className="bg-white m-2 p-4 rounded-lg w-56 items-center shadow-md"
+                  >
+                    <Icon name="earth-outline" size={30} color="#008080" />
+                    <TextStyled className="text-teal-800 text-center mt-2">Fenómenos Demográficos</TextStyled>
+                  </TouchableOpacityStyled>
+                </ViewStyled>
+              </ViewStyled>
+              {/* Fin de la sección actualizada */}
+
+              <ViewStyled className="mt-4">
+                <TextStyled className="text-lg text-gray-700 text-justify mx-4">
+                  A continuación, puedes observar varias tablas y gráficas sobre estadísticas importantes de las temáticas mencionadas anteriormente.
+                </TextStyled>
+              </ViewStyled>
+
+              {/* Más separación con la tabla */}
+              <ViewStyled className="mt-6">
+                {estadisticaContinua && (
+                  <TextStyled className="text-xl font-bold text-teal-800">
+                    Últimos Datos: <TextStyled className='text-xl/4 text-teal-400'>
+                      {estadisticaContinua.Nombre}:
+                      {chartData && chartData.length > 0 && ` ${chartData[chartData.length - 1].label}`}
+                    </TextStyled>
+                  </TextStyled>
+                )}
+
+                <ResponsiveTable
+                  headers={['', 'Valor', 'Varianza']}
+                  data={tablaDatos}
+                  selectedCell={selectedCell}
+                  onCellPress={handleCellPress}
+                />
+              </ViewStyled>
 
               <ScrollView horizontal>
                 {chartData.length > 0 && (
@@ -208,6 +260,8 @@ const Home = () => {
                   />
                 )}
               </ScrollView>
+
+
             </>
           )}
         </ViewStyled>
