@@ -406,6 +406,7 @@ const MigracionesCambiosResidencia = () => {
                                         headers={['', 'Valor', 'Variación anual (%)']}
                                         data={tablaDatos}
                                         selectedCell={selectedCell}
+                                        responsive={true}
                                         onCellPress={handleCellPress}
                                         fontSize={10}
                                    />

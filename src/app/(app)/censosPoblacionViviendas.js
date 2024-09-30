@@ -351,7 +351,7 @@ const CensosPoblacionViviendas = () => {
                     contentContainerStyle={{ flexGrow: 1 }}
                     scrollEnabled={scrollEnabled} // Controla si se permite el scroll
                >
-                    <ViewStyled className="p-4">
+                    <ViewStyled className="p-2">
                          {isLoading ? (
                               <ViewStyled className="flex-1 justify-center items-center mt-8">
                                    <Loading size={hp(6)} />

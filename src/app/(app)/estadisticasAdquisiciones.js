@@ -400,9 +400,10 @@ const EstadisticasAdquisiciones = () => {
                                    <ResponsiveTable
                                         headers={['', 'Valor', 'Variación (%)']}
                                         data={tablaDatos}
+                                        responsive={true}
                                         selectedCell={selectedCell}
                                         onCellPress={handleCellPress}
-                                        fontSize={12}
+                                        fontSize={10}
                                    />
 
                                    <LineChart

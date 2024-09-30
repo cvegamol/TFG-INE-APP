@@ -412,9 +412,10 @@ const EstadisticasMatrimonios = () => {
                                    <ResponsiveTable
                                         headers={['', 'Valor', 'Variación']}
                                         data={tablaDatos}
+                                        responsive={true}
                                         selectedCell={selectedCell}
                                         onCellPress={handleCellPress}
-                                        fontSize={10}
+                                        fontSize={9}
                                    />
 
                                    <LineChart

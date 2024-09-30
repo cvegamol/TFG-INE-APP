@@ -14,31 +14,13 @@ const ResponsiveTable = ({ headers, data, selectedCell, onCellPress, fontSize, r
   // Calcular anchos de columna
   const availableWidth = width * 0.85 - 2 * MARGIN;
   const columnWidth = availableWidth / numColumns;
+
+  // Definir la altura de la celda, con mayor altura si es responsive
+  const cellHeight = responsive ? 50 : 40;
+
   const columnWidths = headers.map(() => columnWidth);
 
-  // Si responsive es true, recalcular los anchos basados en el contenido más ancho
-  let adjustedColumnWidths = columnWidths;
-  if (responsive) {
-    // Calcular la longitud máxima de texto por columna
-    const maxTextLengthPerColumn = headers.map(header => header.length);
-
-    data.forEach(row => {
-      row.forEach((cell, colIndex) => {
-        const textLength = String(cell.value).length;
-        if (textLength > maxTextLengthPerColumn[colIndex]) {
-          maxTextLengthPerColumn[colIndex] = textLength;
-        }
-      });
-    });
-
-    // Calcular anchos de columna basados en la longitud del texto
-    const charWidth = fontSize ? fontSize * 0.6 : 10; // Aproximar ancho de carácter
-    const padding = 20;
-
-    adjustedColumnWidths = maxTextLengthPerColumn.map(length => length * charWidth + padding);
-  }
-
-  const styles = createStyles(fontSize);
+  const styles = createStyles(fontSize, cellHeight);
 
   return (
     <ViewStyled className="items-center" style={styles.container}>
@@ -52,7 +34,7 @@ const ResponsiveTable = ({ headers, data, selectedCell, onCellPress, fontSize, r
               </Text>
             ))}
             style={styles.head}
-            widthArr={adjustedColumnWidths}
+            widthArr={columnWidths}
           />
           {/* Filas de datos */}
           {data.map((row, rowIndex) => (
@@ -62,8 +44,8 @@ const ResponsiveTable = ({ headers, data, selectedCell, onCellPress, fontSize, r
                 const isSelected = selectedCell.row === rowIndex && selectedCell.col === colIndex;
                 const cellStyle = [
                   {
-                    width: adjustedColumnWidths[colIndex],
-                    height: 40,
+                    width: columnWidths[colIndex],
+                    height: cellHeight,
                     borderRightWidth: 1,
                     borderBottomWidth: 1,
                     borderColor: '#08373b',
@@ -93,7 +75,7 @@ const ResponsiveTable = ({ headers, data, selectedCell, onCellPress, fontSize, r
                 }
               })}
               style={rowIndex % 2 === 0 ? styles.rowEven : styles.rowOdd}
-              widthArr={adjustedColumnWidths}
+              widthArr={columnWidths}
             />
           ))}
         </Table>
@@ -102,7 +84,7 @@ const ResponsiveTable = ({ headers, data, selectedCell, onCellPress, fontSize, r
   );
 };
 
-const createStyles = (fontSize) =>
+const createStyles = (fontSize, cellHeight) =>
   StyleSheet.create({
     container: {
       width: '100%',
@@ -114,12 +96,12 @@ const createStyles = (fontSize) =>
       flexDirection: 'row',
     },
     rowEven: {
-      height: 40,
+      height: cellHeight,
       flexDirection: 'row',
       backgroundColor: '#d1e7e8',
     },
     rowOdd: {
-      height: 40,
+      height: cellHeight,
       flexDirection: 'row',
       backgroundColor: '#f1f8ff',
     },
