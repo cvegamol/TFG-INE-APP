@@ -21,7 +21,7 @@ const VariableSelection = ({ variable, valoresVariables, selecciones = [], handl
             style={{ borderBottomWidth: 2, borderBottomColor: '#D1D5DB' }}>
             <ViewStyled className="flex-1">
                 <ViewStyled className="flex-row justify-between items-center mb-2">
-                    <TextStyled className="text-lg font-semibold text-gray-700">
+                    <TextStyled className="text-lg font-semibold text-gray-700 ">
                         {variable.Nombre}
                     </TextStyled>
                     <TouchableOpacity onPress={() => handleSelectAll(variable.Id)}>
@@ -41,7 +41,11 @@ const VariableSelection = ({ variable, valoresVariables, selecciones = [], handl
                                 onPress={() => handleSelectionChange(variable.Id, valor)}
                                 checkedColor="#00695c"
                             />
-                            <TextStyled className="ml-2">{valor.Nombre}</TextStyled>
+                            <TextStyled
+                                className="ml-2 flex-1 text-gray-700"
+                                numberOfLines={3}
+                                ellipsizeMode="tail"
+                            >{valor.Nombre}</TextStyled>
                         </ViewStyled>
                     ))}
                 </ScrollViewStyled>

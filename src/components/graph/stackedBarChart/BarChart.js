@@ -16,6 +16,11 @@ const barWidth = 32;
 const barSpacing = 8; // Espacio entre las barras del mismo label
 
 class BarChart extends AbstractChart {
+
+     static defaultProps = {
+
+          formatXLabel: (xLabel) => xLabel,
+     };
      getBarPercentage = () => {
           const { barPercentage = 1 } = this.props.chartConfig;
           return barPercentage;
@@ -221,9 +226,10 @@ class BarChart extends AbstractChart {
                style = {},
                withHorizontalLabels = true,
                formatYLabel = (value) => value, // Asegúrate de que se reciba la prop de formato
+               formatXLabel = (xLabel) => xLabel,
 
                withVerticalLabels = true,
-               verticalLabelRotation = 0,
+
                horizontalLabelRotation = 0,
                withInnerLines = true,
                showBarTops = true,
@@ -272,6 +278,7 @@ class BarChart extends AbstractChart {
                                              labels: data.labels,
                                              paddingRight: paddingRight,
                                              paddingTop: paddingTop,
+                                             formatXLabel,
                                              horizontalOffset: barWidth / 2
                                         })
                                         : null}

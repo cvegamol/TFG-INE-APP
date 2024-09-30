@@ -19,6 +19,7 @@ import { shareAsync } from 'expo-sharing';
 import * as XLSX from 'xlsx';
 import { AntDesign } from '@expo/vector-icons';
 import PickerSelect from '../../components/PickerSelect'; // Asegúrate de cambiar la ruta según donde lo coloques
+import { BlurView } from 'expo-blur';
 
 
 const ViewStyled = styled(View);
@@ -654,7 +655,7 @@ const DatosSeries = () => {
                             // Filtrar las variables que están presentes en `selectedVariables`
                             const variablesFiltradas = dato.variables.filter(variable => selectedVariables[variable.Id]);
 
-                            // Imprimir las variables filtradas para depuración
+                            // Imprimir las variables filtradas para depuraciónB
                             console.log('Variables filtradas:', variablesFiltradas);
 
                             return variablesFiltradas.some(variable => variable.Nombre.includes(label));
@@ -1090,16 +1091,23 @@ const DatosSeries = () => {
                 width={Dimensions.get("window").width * 0.83}
                 height={320}
                 formatYLabel={(value) => formatYLabel(value, scale)}
+                formatXLabel={(label) => truncateLabel(label)}
                 fromZero={true}
+                verticalLabelRotation={270}
                 chartConfig={{
                     backgroundGradientFrom: '#f7f7f7',
                     backgroundGradientTo: '#f7f7f7',
-                    color: (opacity = 1, index) => seriesColors[index % seriesColors.length], // Función que asigna colores en base al índice
-                    labelColor: (opacity = 1) => `rgba(0, 0, 0, ${opacity})`, // Color de las etiquetas
+                    color: (opacity = 1, index) => seriesColors[index % seriesColors.length],
+                    labelColor: (opacity = 1) => `rgba(0, 0, 0, ${opacity})`,
+                    propsForBackgroundLines: {
+                        stroke: "#e3e3e3", // Color de las líneas de fondo del eje
+                        strokeWidth: 1, // Ancho de las líneas
+                        strokeDasharray: "4 4" // Estilo de las líneas, por ejemplo, líneas discontinuas
+                    },
                     style: {
                         borderRadius: 16,
                     },
-                    decimalPlaces: 0, // Redondeo de los valores
+                    decimalPlaces: 0,
                 }}
                 style={{
                     marginVertical: 8,
@@ -1595,15 +1603,17 @@ const DatosSeries = () => {
                 visible={isChartModalVisible}
                 onRequestClose={() => setIsChartModalVisible(false)}
             >
-                <ViewStyled className="flex-1 justify-center items-center bg-black bg-opacity-50">
-                    <ViewStyled className="bg-white p-4 rounded-lg shadow-md w-11/12">
-                        <TouchableOpacity onPress={() => setIsChartModalVisible(false)}>
-                            <TextStyled className="text-right text-blue-500">Cerrar</TextStyled>
-                        </TouchableOpacity>
+                <BlurView intensity={80} tint="light" style={StyleSheet.absoluteFill}>
+                    <ViewStyled className="flex-1 justify-center items-center">
+                        <ViewStyled className="bg-white p-4 rounded-lg shadow-md w-11/12">
+                            <TouchableOpacity onPress={() => setIsChartModalVisible(false)}>
+                                <TextStyled className="text-right text-blue-500">Cerrar</TextStyled>
+                            </TouchableOpacity>
 
-                        {renderChart()}
+                            {renderChart()}
+                        </ViewStyled>
                     </ViewStyled>
-                </ViewStyled>
+                </BlurView>
             </Modal>
         </Plantilla>
     );
