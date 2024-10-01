@@ -104,7 +104,7 @@ class StackedBarChart extends AbstractChart {
 
   render() {
     const paddingTop = 15;
-    const paddingRight = 30; // Ajustamos para reducir el margen lateral
+    const paddingRight = 60; // Ajustamos para reducir el margen lateral
     const extraRightPadding = 30; // Añadimos este margen adicional al final para evitar corte
 
     const {

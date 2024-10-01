@@ -460,8 +460,8 @@ const DatosSeries = () => {
 
     const chartConfig = {
         strokeWidth: 2,
-        backgroundGradientFrom: '#f7f7f7',
-        backgroundGradientTo: '#f7f7f7',
+        backgroundGradientFrom: '#ffffff',
+        backgroundGradientTo: '#ffffff',
         propsForBackgroundLines: {
             stroke: '#000',
             strokeWidth: 1,
@@ -984,6 +984,7 @@ const DatosSeries = () => {
         return (
             <StackedBarChart
                 style={{
+                    backgroundColor: '#ffffff',
                     marginVertical: 8,
                     borderRadius: 10,
                 }}
@@ -998,19 +999,25 @@ const DatosSeries = () => {
                 formatYLabel={(value) => formatYLabel(value, scale)}
                 formatXLabel={(label) => truncateLabel(label)}
                 chartConfig={{
-                    backgroundColor: '#1cc910',
-                    backgroundGradientFrom: '#eff3ff',
-                    backgroundGradientTo: '#efefef',
-                    decimalPlaces: 0,
-                    color: (opacity = 1) => `rgba(0, 0, 0, ${opacity})`,
+                    backgroundColor: '#ffffff', // Color de fondo blanco
+                    backgroundGradientFrom: '#ffffff', // Color de fondo degradado
+                    backgroundGradientTo: '#ffffff', // Color de fondo degradado
+                    color: (opacity = 1, index) => seriesColors[index % seriesColors.length],
+                    labelColor: (opacity = 1) => `rgba(0, 0, 0, ${opacity})`,
+                    propsForBackgroundLines: {
+                        stroke: "#e3e3e3", // Color de las líneas de fondo del eje
+                        strokeWidth: 1, // Ancho de las líneas
+                        strokeDasharray: "4 4" // Estilo de las líneas, por ejemplo, líneas discontinuas
+                    },
                     style: {
                         borderRadius: 16,
                     },
+                    decimalPlaces: 0,
                     showValuesOnTopOfBars: false, // Asegúrate de que no se muestren los valores sobre las barras
                     verticalLabelRotation: 270,
-                    // Rotación de las etiquetas del eje X a 270 grados
                 }}
-                xLabelsOffset={30}
+
+                xLabelsOffset={38}
                 hideLegend={true}
                 onDataPointClick={(datum) => {
                     const { datasetIndex, index } = datum;
@@ -1056,15 +1063,22 @@ const DatosSeries = () => {
                 width={Dimensions.get("window").width * 0.83} // Ajustar al 85% del ancho de la pantalla
                 height={320}
                 chartConfig={{
-                    backgroundColor: '#1cc910',
-                    backgroundGradientFrom: '#eff3ff',
-                    backgroundGradientTo: '#efefef',
+                    backgroundColor: '#ffffff',
+                    backgroundGradientFrom: '#ffffff',
+                    backgroundGradientTo: '#ffffff',
                     color: (opacity = 1) => `rgba(0, 0, 0, ${opacity})`,  // Añade esta línea
 
                 }}
+                style={{
+                    backgroundColor: '#ffffff',
+                    marginVertical: 8,
+                    borderRadius: 10,
+                }}
+                backgroundColor={"transparent"}
+
+                center={[70, 0]}
                 onDataPointClick={handlePieSegmentClick}
-                hasLegend={false}  // Desactivar la leyenda
-                center={[Dimensions.get("window").width * 0.15, 0]}
+                hasLegend={true}  // Desactivar la leyenda
 
             />
         );
@@ -1163,12 +1177,13 @@ const DatosSeries = () => {
                         fromZero={true}
                         horizontalLabelRotation={0}
                         verticalLabelRotation={270}
-                        xLabelsOffset={30}
+                        xLabelsOffset={39}
                         formatXLabel={(label) => truncateLabel(label)}
                         style={{
                             marginVertical: 8,
                             borderRadius: 10,
                             paddingRight: 40,
+                            backgroundColor: '#ffffff',
 
 
                         }}

@@ -1,13 +1,13 @@
 import Pie from "paths-js/pie";
 import React from "react";
-import { View } from "react-native";
+import { View, ScrollView } from "react-native";
 import { G, Path, Rect, Svg, Text } from "react-native-svg";
 
 import AbstractChart from "../AbstractChart";
 
 class PieChart extends AbstractChart {
      static defaultProps = {
-          onDataPointClick: () => { },  // Añade un valor predeterminado para onDataPointClick
+          onDataPointClick: () => { }, // Añade un valor predeterminado para onDataPointClick
      };
 
      render() {
@@ -16,7 +16,7 @@ class PieChart extends AbstractChart {
                backgroundColor,
                absolute = false,
                hasLegend = true,
-               avoidFalseZero = false
+               avoidFalseZero = false,
           } = this.props;
 
           const { borderRadius = 0 } = style;
@@ -26,9 +26,9 @@ class PieChart extends AbstractChart {
                r: 0,
                R: this.props.height / 2.5,
                data: this.props.data,
-               accessor: x => {
+               accessor: (x) => {
                     return x[this.props.accessor];
-               }
+               },
           });
 
           const total = this.props.data.reduce((sum, item) => {
@@ -47,7 +47,6 @@ class PieChart extends AbstractChart {
                          const percentage = Math.round(
                               (100 / total) * c.item[this.props.accessor]
                          );
-                         value = percentage + "%";
                          if (avoidFalseZero && percentage === 0) {
                               value = "<1%";
                          } else {
@@ -68,18 +67,18 @@ class PieChart extends AbstractChart {
                                         index: i,
                                         value: c.item[this.props.accessor],
                                         label: c.item.name,
-                                        color: c.item.color
+                                        color: c.item.color,
                                    });
                               }}
                          />
                          {hasLegend ? (
                               <Rect
-                                   width="16px"
-                                   height="16px"
+                                   width="16"
+                                   height="16"
                                    fill={c.item.color}
                                    rx={8}
                                    ry={8}
-                                   x={this.props.width / 2.5 - 24}
+                                   x={this.props.width * 0.7} // Ajusta el ancho para dar más espacio
                                    y={
                                         -(this.props.height / 2.5) +
                                         ((this.props.height * 0.8) / this.props.data.length) * i +
@@ -92,7 +91,7 @@ class PieChart extends AbstractChart {
                                    fill={c.item.legendFontColor}
                                    fontSize={c.item.legendFontSize}
                                    fontFamily={c.item.legendFontFamily}
-                                   x={this.props.width / 2.5}
+                                   x={this.props.width * 0.76} // Ajusta el ancho para dar más espacio
                                    y={
                                         -(this.props.height / 2.5) +
                                         ((this.props.height * 0.8) / this.props.data.length) * i +
@@ -107,40 +106,45 @@ class PieChart extends AbstractChart {
           });
 
           return (
-               <View
-                    style={{
-                         width: this.props.width,
-                         height: this.props.height,
-                         padding: 0,
-                         ...style
-                    }}
-               >
-                    <Svg width={this.props.width} height={this.props.height}>
-                         <G>
-                              {this.renderDefs({
-                                   width: this.props.height,
-                                   height: this.props.height,
-                                   ...this.props.chartConfig
-                              })}
-                         </G>
-                         <Rect
-                              width="100%"
+               <ScrollView horizontal contentContainerStyle={{ paddingRight: 140 }}>
+                    <View
+                         style={{
+                              width: this.props.width + 220, // Añade más espacio al ancho
+                              height: this.props.height,
+                              padding: 0,
+                              ...style,
+                         }}
+                    >
+                         <Svg
+                              width={this.props.width + 240} // Añade 40 unidades al ancho total para el margen derecho
                               height={this.props.height}
-                              rx={borderRadius}
-                              ry={borderRadius}
-                              fill={backgroundColor}
-                         />
-                         <G
-                              x={
-                                   this.props.width / 2 / 2 +
-                                   Number(this.props.paddingLeft ? this.props.paddingLeft : 0)
-                              }
-                              y={this.props.height / 2}
                          >
-                              {slices}
-                         </G>
-                    </Svg>
-               </View>
+                              <G>
+                                   {this.renderDefs({
+                                        width: this.props.height,
+                                        height: this.props.height,
+                                        ...this.props.chartConfig,
+                                   })}
+                              </G>
+                              <Rect
+                                   width="100%"
+                                   height={this.props.height}
+                                   rx={borderRadius}
+                                   ry={borderRadius}
+                                   fill={backgroundColor}
+                              />
+                              <G
+                                   x={
+                                        this.props.width / 2 / 2 +
+                                        Number(this.props.paddingLeft ? this.props.paddingLeft : 0)
+                                   }
+                                   y={this.props.height / 2}
+                              >
+                                   {slices}
+                              </G>
+                         </Svg>
+                    </View>
+               </ScrollView>
           );
      }
 }
