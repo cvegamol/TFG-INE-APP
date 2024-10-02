@@ -137,7 +137,7 @@ const DatosSeries = () => {
     };
 
     const firstColumnWidth = width * 0.4;
-    const otherColumnFixedWidth = width * 0.25;  // Ajusta el ancho de las demás columnas
+    const otherColumnFixedWidth = width * 0.3;  // Ajusta el ancho de las demás columnas
     const paddingEnd = 20;
 
     const totalTableWidth = firstColumnWidth + (Object.keys(periodicidadesObj).length * otherColumnFixedWidth) + paddingEnd;
