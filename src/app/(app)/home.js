@@ -188,6 +188,14 @@ const Home = () => {
                     <Icon name="earth-outline" size={30} color="#008080" />
                     <TextStyled className="text-teal-800 text-center mt-2">Fenómenos Demográficos</TextStyled>
                   </TouchableOpacityStyled>
+
+                  <TouchableOpacityStyled
+                    onPress={() => router.replace('operacionesDisponibles')}
+                    className="bg-white m-2 p-4 rounded-lg w-56 items-center shadow-md"
+                  >
+                    <Icon name="list-outline" size={30} color="#008080" />
+                    <TextStyled className="text-teal-800 text-center mt-2">Operaciones Disponibles</TextStyled>
+                  </TouchableOpacityStyled>
                 </ViewStyled>
               </ViewStyled>
               {/* Fin de la sección actualizada */}

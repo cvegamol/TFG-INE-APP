@@ -9,6 +9,8 @@ export default function Layout() {
       <Stack.Screen name="home" options={{ title: 'Inicio' }} />
       <Stack.Screen name="padron" options={{ title: 'Padrón' }} />
       <Stack.Screen name="cifrasPoblacion" options={{ title: 'Cifras de población y Censos demográficos' }} />
+      <Stack.Screen name="operacionesDisponibles" options={{ title: 'Operaciones Disponibles' }} />
+
       <Stack.Screen
         name="operacionesPadron"
         options={({ route }) => {
