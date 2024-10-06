@@ -156,19 +156,21 @@ const DatosSeries = () => {
                 if (rowIndex % maxRowsPerPage === 0 && rowIndex !== 0) {
                     currentPageContent +=
                         `<div class="content">
-                        <table style="margin-bottom: 20px; border: 1px solid #ddd;">
-                            <tr>
-                                <th style="padding: 8px; border: 1px solid #ddd; background-color: #4CAF50; color: white;">Serie</th>
-                                ${Object.keys(periodicidadesObj).slice(colStart, colEnd).map((fechaKey) =>
+                    <table style="margin-bottom: 20px; border: 1px solid #ddd;">
+                        <tr>
+                            <th style="padding: 8px; border: 1px solid #ddd; background-color: #4CAF50; color: white;">Serie</th>
+                            ${Object.keys(periodicidadesObj).slice(colStart, colEnd).map((fechaKey) =>
                             `<th style="padding: 8px; border: 1px solid #ddd; background-color: #4CAF50; color: white;">
-                                        ${formatFecha(periodicidadesObj[fechaKey].ano, periodicidadesObj[fechaKey].mes, periodicidadesObj[fechaKey].dia)}
-                                    </th>`
+                                    ${periodicidadesObj[fechaKey].etiqueta
+                                ? periodicidadesObj[fechaKey].etiqueta
+                                : formatFecha(periodicidadesObj[fechaKey].ano, periodicidadesObj[fechaKey].mes, periodicidadesObj[fechaKey].dia)}
+                                </th>`
                         ).join('')}
-                            </tr>
-                            ${tableRows}
-                        </table>
-                    </div>
-                    <div class="page-break"></div>`;
+                        </tr>
+                        ${tableRows}
+                    </table>
+                </div>
+                <div class="page-break"></div>`;
 
                     pages.push(currentPageContent);
                     currentPageContent = '';
@@ -186,60 +188,64 @@ const DatosSeries = () => {
             if (tableRows) {
                 currentPageContent +=
                     `<div class="content">
-                    <table style="margin-bottom: 20px; border: 1px solid #ddd;">
-                        <tr>
-                            <th style="padding: 8px; border: 1px solid #ddd; background-color: #4CAF50; color: white;">Serie</th>
-                            ${Object.keys(periodicidadesObj).slice(colStart, colEnd).map((fechaKey) =>
+                <table style="margin-bottom: 20px; border: 1px solid #ddd;">
+                    <tr>
+                        <th style="padding: 8px; border: 1px solid #ddd; background-color: #4CAF50; color: white;">Serie</th>
+                        ${Object.keys(periodicidadesObj).slice(colStart, colEnd).map((fechaKey) =>
                         `<th style="padding: 8px; border: 1px solid #ddd; background-color: #4CAF50; color: white;">
-                                    ${formatFecha(periodicidadesObj[fechaKey].ano, periodicidadesObj[fechaKey].mes, periodicidadesObj[fechaKey].dia)}
-                                </th>`
+                                ${periodicidadesObj[fechaKey].etiqueta
+                            ? periodicidadesObj[fechaKey].etiqueta
+                            : formatFecha(periodicidadesObj[fechaKey].ano, periodicidadesObj[fechaKey].mes, periodicidadesObj[fechaKey].dia)}
+                            </th>`
                     ).join('')}
-                        </tr>
-                        ${tableRows}
-                    </table>
-                </div>`;
+                    </tr>
+                    ${tableRows}
+                </table>
+            </div>`;
                 pages.push(currentPageContent);
             }
         }
 
         setHtmlContent(
             `<html>
-                <head>
-                    <style>
-                        body {
-                            font-family: Arial, sans-serif;
-                            margin: 0;
-                            padding: 0;
-                        }
-                        .content {
-                            margin: 20px; 
-                            padding: 10px; 
-                        }
-                        table {
-                            width: 100%;
-                            border-collapse: collapse;
-                            border: 1px solid #ddd; 
-                        }
-                        th, td {
-                            padding: 8px;
-                            border: 1px solid #ddd;
-                            text-align: left;
-                        }
-                        .page-break {
-                            page-break-after: always;
-                        }
-                    </style>
-                </head>
-                <body>
-                    ${pages.join('')}
-                </body>
-            </html>`
+            <head>
+                <style>
+                    body {
+                        font-family: Arial, sans-serif;
+                        margin: 0;
+                        padding: 0;
+                    }
+                    .content {
+                        margin: 20px; 
+                        padding: 10px; 
+                    }
+                    table {
+                        width: 100%;
+                        border-collapse: collapse;
+                        border: 1px solid #ddd; 
+                    }
+                    th, td {
+                        padding: 8px;
+                        border: 1px solid #ddd;
+                        text-align: left;
+                    }
+                    .page-break {
+                        page-break-after: always;
+                    }
+                </style>
+            </head>
+            <body>
+                ${pages.join('')}
+            </body>
+        </html>`
         );
     };
 
+
     useEffect(() => {
         console.log('tablaobhb', tablaObj, 'esdffds', seriesObj[0])
-        const fk_unidad = seriesObj[0].FK_Unidad;
+        const fk_unidad = seriesObj.length > 0 && seriesObj[0].FK_Unidad ? seriesObj[0].FK_Unidad : null;
+
 
 
         const obtenerDatos = async () => {
@@ -1461,7 +1467,9 @@ const DatosSeries = () => {
 
         datosSeries.forEach((serieObj) => {
             serieObj.datos.forEach((datoObj) => {
-                data.push([serieObj.serie, formatFecha(periodicidadesObj[datoObj.fecha].ano, periodicidadesObj[datoObj.fecha].mes, periodicidadesObj[datoObj.fecha].dia, true), datoObj.valor !== 'N/A' ? formatNumero(datoObj.valor) : datoObj.valor]);
+                const { etiqueta, ano, mes, dia } = periodicidadesObj[datoObj.fecha];
+                const periodo = etiqueta ? etiqueta : formatFecha(ano, mes, dia, true);
+                data.push([serieObj.serie, periodo, datoObj.valor !== 'N/A' ? formatNumero(datoObj.valor) : datoObj.valor]);
             });
         });
 
@@ -1486,9 +1494,11 @@ const DatosSeries = () => {
             headers.join(delimiter),
             ...datosSeries.flatMap((serieObj) => {
                 return serieObj.datos.map((datoObj) => {
+                    const { etiqueta, ano, mes, dia } = periodicidadesObj[datoObj.fecha];
+                    const periodo = etiqueta ? etiqueta : formatFecha(ano, mes, dia, true);
                     return [
                         serieObj.serie,
-                        formatFecha(periodicidadesObj[datoObj.fecha].ano, periodicidadesObj[datoObj.fecha].mes, periodicidadesObj[datoObj.fecha].dia, true),
+                        periodo,
                         datoObj.valor !== 'N/A' ? formatNumero(datoObj.valor) : datoObj.valor
                     ].join(delimiter);
                 });
@@ -1503,9 +1513,11 @@ const DatosSeries = () => {
     const generateJson = async () => {
         const jsonContent = JSON.stringify(datosSeries.flatMap((serieObj) => {
             return serieObj.datos.map((datoObj) => {
+                const { etiqueta, ano, mes, dia } = periodicidadesObj[datoObj.fecha];
+                const periodo = etiqueta ? etiqueta : formatFecha(ano, mes, dia, true);
                 return {
                     Serie: serieObj.serie,
-                    Periodo: formatFecha(periodicidadesObj[datoObj.fecha].ano, periodicidadesObj[datoObj.fecha].mes, periodicidadesObj[datoObj.fecha].dia, true),
+                    Periodo: periodo,
                     Valor: datoObj.valor !== 'N/A' ? formatNumero(datoObj.valor) : datoObj.valor
                 };
             });
@@ -1522,9 +1534,11 @@ const DatosSeries = () => {
             headers.join(delimiter),
             ...datosSeries.flatMap((serieObj) => {
                 return serieObj.datos.map((datoObj) => {
+                    const { etiqueta, ano, mes, dia } = periodicidadesObj[datoObj.fecha];
+                    const periodo = etiqueta ? etiqueta : formatFecha(ano, mes, dia, true);
                     return [
                         serieObj.serie,
-                        formatFecha(periodicidadesObj[datoObj.fecha].ano, periodicidadesObj[datoObj.fecha].mes, periodicidadesObj[datoObj.fecha].dia, true),
+                        periodo,
                         datoObj.valor !== 'N/A' ? formatNumero(datoObj.valor) : datoObj.valor
                     ].join(delimiter);
                 });
@@ -1581,11 +1595,13 @@ const DatosSeries = () => {
             >
                 {tablaObj.Nombre}
             </TextStyled>
-            <TextStyled
-                className="text-sm font-extrabold text-center text-teal-700 mb-4"
-            >
-                Unidades: {unidad}
-            </TextStyled>
+            {unidad !== null && (
+                <TextStyled
+                    className="text-sm font-extrabold text-center text-teal-700 mb-4"
+                >
+                    Unidades: {unidad}
+                </TextStyled>
+            )}
 
 
 
