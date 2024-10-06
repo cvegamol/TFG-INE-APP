@@ -244,6 +244,7 @@ const DatosSeries = () => {
 
         const obtenerDatos = async () => {
             try {
+                console.log('Prueba PerriodicididadesObej', periodicidadesObj[0])
                 const response1 = await fetch(`https://servicios.ine.es/wstempus/js/ES/UNIDAD/${fk_unidad}`);
                 const textResponse1 = await response1.text();
                 const data1 = JSON.parse(textResponse1);
@@ -252,23 +253,18 @@ const DatosSeries = () => {
                     seriesObj.map(async (serie) => {
                         const datosSerie = await Promise.all(
                             Object.keys(periodicidadesObj).map(async (fechaKey) => {
-                                let { ano, mes, dia, etiqueta } = periodicidadesObj[fechaKey];
-
-                                // Si no se tiene el año, mes y día, calcularlos a partir de la etiqueta
-                                if (etiqueta && (!ano || !mes || !dia)) {
-                                    const fechaCalculada = calcularFechaDesdeEtiqueta(etiqueta);
-                                    if (fechaCalculada) {
-                                        ano = fechaCalculada.ano;
-                                        mes = fechaCalculada.mes;
-                                        dia = fechaCalculada.dia;
-                                    } else {
-                                        console.error(`No se pudo calcular la fecha desde la etiqueta: ${etiqueta}`);
-                                        return { fecha: fechaKey, valor: 'N/A' };
-                                    }
+                                let { ano, mes, dia, etiqueta, valor } = periodicidadesObj[fechaKey];
+                                let formattedDate;
+                                // Si tiene etiqueta ponemos el valor como fecha formateada
+                                if (etiqueta) {
+                                    formattedDate = valor;
+                                } else {
+                                    //Sino ponemos el formato de ano,mes y dia
+                                    formattedDate = `${ano}${mes.toString().padStart(2, '0')}${dia.toString().padStart(2, '0')}`;
                                 }
 
                                 // Calcular la fecha en el formato "año-mes-día"
-                                const formattedDate = `${ano}${mes.toString().padStart(2, '0')}${dia.toString().padStart(2, '0')}`;
+
 
                                 try {
                                     const response = await fetch(`https://servicios.ine.es/wstempus/js/ES/DATOS_SERIE/${serie.COD}?date=${formattedDate}&tip=M`);
@@ -319,36 +315,7 @@ const DatosSeries = () => {
     const toggleViewMode = () => {
         setViewMode(viewMode === 'table' ? 'chart' : 'table');
     };
-    // Función para obtener el primer día de una semana específica en un año específico
-    const calcularFechaDesdeEtiqueta = (etiqueta) => {
-        // Ejemplo: etiqueta "2016SM23" -> semana 23 del año 2016
-        const yearMatch = etiqueta.match(/^(\d{4})/);
-        const smMatch = etiqueta.match(/SM(\d+)/);
 
-        if (yearMatch && smMatch) {
-            const ano = parseInt(yearMatch[1], 10);
-            const semana = parseInt(smMatch[1], 10);
-
-            // Calcular el primer día de la semana (asumiendo que la semana comienza el lunes)
-            const firstDayOfYear = new Date(ano, 0, 1);
-            const daysOffset = (semana - 1) * 7;
-            const startOfWeek = new Date(firstDayOfYear.setDate(firstDayOfYear.getDate() + daysOffset));
-
-            // Ajustar para que el comienzo de la semana sea lunes
-            const dayOfWeek = startOfWeek.getDay();
-            const offsetToMonday = dayOfWeek === 0 ? 6 : dayOfWeek - 1;
-            startOfWeek.setDate(startOfWeek.getDate() - offsetToMonday);
-
-            // Extraer día, mes y año del primer día de la semana
-            const dia = startOfWeek.getDate();
-            const mes = startOfWeek.getMonth() + 1;
-
-            return { ano, mes, dia };
-        }
-
-        console.warn('Formato de etiqueta no soportado:', etiqueta);
-        return null;
-    };
     const handleVariableSelection = (valor, variableId) => {
         const newSelectedVariables = { ...selectedVariables };
 
@@ -541,13 +508,23 @@ const DatosSeries = () => {
                 uniqueSeriesVariables.map(async (serie) => {
                     const datosSerie = await Promise.all(
                         Object.entries(selectedPeriods).map(async ([fechaKey, dateObj]) => {
-                            const { ano, mes, dia } = dateObj;
-                            const formattedDate = `${ano}${mes.toString().padStart(2, '0')}${dia.toString().padStart(2, '0')}`;
-                            console.log('Fecha:', formattedDate);
+                            let { ano, mes, dia, etiqueta, valor } = periodicidadesObj[fechaKey];
+                            let formattedDate;
+                            // Si tiene etiqueta ponemos el valor como fecha formateada
+                            if (etiqueta) {
+                                formattedDate = valor;
+                            } else {
+                                //Sino ponemos el formato de ano,mes y dia
+                                formattedDate = `${ano}${mes.toString().padStart(2, '0')}${dia.toString().padStart(2, '0')}`;
+                            }
 
                             try {
                                 const response = await fetch(`https://servicios.ine.es/wstempus/js/ES/DATOS_SERIE/${serie.COD}?date=${formattedDate}&tip=M`);
                                 console.log(`Url:https://servicios.ine.es/wstempus/js/ES/DATOS_SERIE/${serie.COD}?date=${formattedDate}&tip=M`);
+
+                                if (etiqueta) {
+                                    formattedDate = etiqueta;
+                                }
 
                                 if (!response.ok) {
                                     console.error(`Error en la solicitud para la fecha ${fechaKey}: ${response.statusText}`);
@@ -593,8 +570,8 @@ const DatosSeries = () => {
             if (xAxis === 'Periodo') {
                 // Generar etiquetas basadas en los periodos seleccionados
                 labels = Object.keys(selectedPeriods).map((key) => {
-                    const { ano, mes, dia } = selectedPeriods[key];
-                    return `${dia}/${mes}/${ano}`;
+                    const { ano, mes, dia, etiqueta } = selectedPeriods[key];
+                    return etiqueta ? etiqueta : `${dia}/${mes}/${ano}`;
                 });
 
                 let groupedDatasets = {};
@@ -602,12 +579,18 @@ const DatosSeries = () => {
                 datos.forEach((serieObj) => {
                     serieObj.datos.forEach((datoObj) => {
                         // Convertir la fecha del dato al formato "d/m/yyyy"
-                        const year = datoObj.fecha.slice(0, 4);  // Extrae los primeros 4 caracteres para el año
-                        const month = parseInt(datoObj.fecha.slice(4, 6), 10); // Convierte el mes a número para evitar ceros iniciales
-                        const day = parseInt(datoObj.fecha.slice(6, 8), 10);   // Convierte el día a número para evitar ceros iniciales
 
-                        const formattedDate = `${day}/${month}/${year}`;
-                        console.log('Fecha formateada de los datos:', formattedDate);
+                        if (/^\d{4}SM\d{2}$/.test(datoObj.fecha)) {
+                            // Si la fecha está en el formato 'YYYYSMWW' (por ejemplo, '2016SM24')
+                            formattedDate = datoObj.fecha;  // Aquí puedes asignar la etiqueta directamente, ya que es un valor específico de periodicidad.
+                        } else {
+                            // Si la fecha está en el formato 'YYYYMMDD' (por ejemplo, '20160324')
+                            const year = datoObj.fecha.slice(0, 4);
+                            const month = parseInt(datoObj.fecha.slice(4, 6), 10);
+                            const day = parseInt(datoObj.fecha.slice(6, 8), 10);
+                            formattedDate = `${day}/${month}/${year}`;
+                            console.log('Fecha formateada de los datos:', formattedDate);
+                        }
 
                         // Verificar si la fecha formateada coincide con alguna de las etiquetas generadas (labels)
                         if (labels.includes(formattedDate)) {
@@ -703,11 +686,12 @@ const DatosSeries = () => {
             } else if (periodoConMasDeUnaSeleccion) {
                 leyendaArray = periodosNoEje
                     .map(([key, _]) => {
-                        const { ano, mes, dia } = selectedPeriods[key];
-                        const nombrePeriodo = `${dia}/${mes}/${ano}`;
-                        return nombrePeriodo;
+                        const { ano, mes, dia, etiqueta } = selectedPeriods[key];
+                        console.log("prueba leye", selectedPeriods[key])
+                        // Usar la etiqueta si está disponible, sino formatear la fecha
+                        return etiqueta ? etiqueta : `${dia}/${mes}/${ano}`;
                     })
-                    .filter(nombre => !labels.includes(nombre)); // Filtrar los nombres que ya están en las etiquetas
+                    .filter(nombre => !labels.includes(nombre));
             } else {
                 leyendaArray = variablesNoEje
                     .map(([_, valor]) => valor.Nombre)
@@ -716,7 +700,7 @@ const DatosSeries = () => {
 
             setLeyenda(leyendaArray);
 
-            console.log(leyenda)
+            console.log('Leyenda', leyenda)
 
 
             console.log("Final Dataset:", { labels, datasets });
@@ -809,10 +793,10 @@ const DatosSeries = () => {
                 setChartData(chartData);
 
                 const datasetSums = chartData.datasets.map(dataset =>
-                    dataset.data.reduce((sum, datum) => {
-                        const value = parseFloat(datum.value);
+                    dataset.data.reduce((sum, dato) => {
+                        const value = parseFloat(dato.value);
                         if (isNaN(value)) {
-                            console.warn(`Valor inválido encontrado: ${datum.value} en serie ${datum.serie} y fecha ${datum.fecha}`);
+                            console.warn(`Valor inválido encontrado: ${dato.value} en serie ${dato.serie} y fecha ${dato.fecha}`);
                             return sum;  // Ignorar valores no numéricos
                         }
                         return sum + value;
@@ -967,15 +951,20 @@ const DatosSeries = () => {
                 return value.toString();
         }
     };
-    const handleBarPress = (datum) => {
-        const formattedValue = new Intl.NumberFormat('es-ES').format(datum.value);
-        const formattedDate = `${datum.fecha.slice(6, 8)}/${datum.fecha.slice(4, 6)}/${datum.fecha.slice(0, 4)}`;
-
+    const handleBarPress = (dato) => {
+        const formattedValue = new Intl.NumberFormat('es-ES').format(dato.value);
+        let formattedDate;
+        if (/^\d{4}SM\d{2}$/.test(dato.fecha)) {
+            // Si la fecha está en el formato 'YYYYSMWW' (por ejemplo, '2016SM24')
+            formattedDate = dato.fecha;  // Aquí puedes asignar la etiqueta directamente, ya que es un valor específico de periodicidad.
+        } else {
+            formattedDate = `${dato.fecha.slice(6, 8)}/${dato.fecha.slice(4, 6)}/${dato.fecha.slice(0, 4)}`;
+        }
 
 
         Alert.alert(
             'Información del segmento',
-            `Serie: ${datum.serie}\nFecha: ${formattedDate}\nValor: ${formattedValue}`,
+            `Serie: ${dato.serie}\nFecha: ${formattedDate}\nValor: ${formattedValue}`,
             [{ text: 'OK' }]
         );
     };
@@ -1019,8 +1008,8 @@ const DatosSeries = () => {
 
                 xLabelsOffset={38}
                 hideLegend={true}
-                onDataPointClick={(datum) => {
-                    const { datasetIndex, index } = datum;
+                onDataPointClick={(dato) => {
+                    const { datasetIndex, index } = dato;
                     const clickedData = chartData.datasets[index].originalData[datasetIndex];
 
                     if (clickedData) {
@@ -1046,7 +1035,14 @@ const DatosSeries = () => {
         const formattedValue = new Intl.NumberFormat('es-ES').format(value);
 
         // Formatear la fecha
-        const formattedDate = `${fecha.slice(6, 8)}/${fecha.slice(4, 6)}/${fecha.slice(0, 4)}`;
+
+        let formattedDate;
+        if (/^\d{4}SM\d{2}$/.test(fecha)) {
+            // Si la fecha está en el formato 'YYYYSMWW' (por ejemplo, '2016SM24')
+            formattedDate = fecha;  // Aquí puedes asignar la etiqueta directamente, ya que es un valor específico de periodicidad.
+        } else {
+            formattedDate = `${fecha.slice(6, 8)}/${fecha.slice(4, 6)}/${fecha.slice(0, 4)}`;
+        }
 
         // Mostrar un Alert con la información completa del segmento seleccionado
         Alert.alert(
@@ -1146,7 +1142,15 @@ const DatosSeries = () => {
         const formattedValue = new Intl.NumberFormat('es-ES').format(value);
 
         // Formatear la fecha
-        const formattedDate = `${fecha.slice(6, 8)}/${fecha.slice(4, 6)}/${fecha.slice(0, 4)}`;
+
+
+        let formattedDate;
+        if (/^\d{4}SM\d{2}$/.test(fecha)) {
+            // Si la fecha está en el formato 'YYYYSMWW' (por ejemplo, '2016SM24')
+            formattedDate = fecha;  // Aquí puedes asignar la etiqueta directamente, ya que es un valor específico de periodicidad.
+        } else {
+            formattedDate = `${fecha.slice(6, 8)}/${fecha.slice(4, 6)}/${fecha.slice(0, 4)}`;
+        }
 
         console.log(pointClicked)
         // Mostrar un alert con el valor de la barra pulsada
@@ -1206,7 +1210,14 @@ const DatosSeries = () => {
                             }
 
                             const serieName = clickedData.serie;
-                            const formattedDate = `${clickedData.fecha.slice(6, 8)}/${clickedData.fecha.slice(4, 6)}/${clickedData.fecha.slice(0, 4)}`;
+                            let formattedDate;
+                            if (/^\d{4}SM\d{2}$/.test(clickedData.fecha)) {
+                                // Si la fecha está en el formato 'YYYYSMWW' (por ejemplo, '2016SM24')
+                                formattedDate = clickedData.fecha;  // Aquí puedes asignar la etiqueta directamente, ya que es un valor específico de periodicidad.
+
+                            } else {
+                                formattedDate = `${clickedData.fecha.slice(6, 8)}/${clickedData.fecha.slice(4, 6)}/${clickedData.fecha.slice(0, 4)}`;
+                            }
 
                             const formattedValue = new Intl.NumberFormat('es-ES').format(clickedData.value);
 

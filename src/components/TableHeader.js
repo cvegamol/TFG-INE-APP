@@ -20,20 +20,28 @@ const TableHeader = ({ firstColumnWidth, periodicidadesObj, otherColumnFixedWidt
             }}>
                 Serie
             </TextStyled>
-            {Object.keys(periodicidadesObj).map((fechaKey, idx) => (
-                <TextStyled key={idx} style={{
-                    width: otherColumnFixedWidth,
-                    fontWeight: 'bold',
-                    textAlign: 'center',
-                    backgroundColor: '#0c4a4e',
-                    color: '#fff',
-                    borderWidth: 1,
-                    borderColor: '#ccc',
-                    padding: 10,
-                }}>
-                    {formatFecha(periodicidadesObj[fechaKey].ano, periodicidadesObj[fechaKey].mes, periodicidadesObj[fechaKey].dia)}
-                </TextStyled>
-            ))}
+            {Object.keys(periodicidadesObj).map((fechaKey, idx) => {
+                const valorMostrado = periodicidadesObj[fechaKey].etiqueta
+                    ? periodicidadesObj[fechaKey].etiqueta
+                    : formatFecha(periodicidadesObj[fechaKey].ano, periodicidadesObj[fechaKey].mes, periodicidadesObj[fechaKey].dia);
+
+                console.log(`Valor mostrado para la clave ${fechaKey}:`, valorMostrado);
+
+                return (
+                    <TextStyled key={idx} style={{
+                        width: otherColumnFixedWidth,
+                        fontWeight: 'bold',
+                        textAlign: 'center',
+                        backgroundColor: '#0c4a4e',
+                        color: '#fff',
+                        borderWidth: 1,
+                        borderColor: '#ccc',
+                        padding: 10,
+                    }}>
+                        {valorMostrado}
+                    </TextStyled>
+                );
+            })}
         </ViewStyled>
     );
 };

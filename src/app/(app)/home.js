@@ -30,7 +30,9 @@ const Home = () => {
   useEffect(() => {
     const obtenerDatosInicio = async () => {
       try {
-        const estadisticaContinuaResponse = await fetch(`http://192.168.1.13:3000:3000/operaciones/getOperationById/450`);
+
+        const estadisticaContinuaResponse = await fetch(`http://192.168.1.13:3000/operaciones/getOperationById/450`);
+        console.log('asssssssss', estadisticaContinuaResponse)
         const estadisticaContinua = await estadisticaContinuaResponse.json();
         setEstadisticaContinua(estadisticaContinua[0]);
 

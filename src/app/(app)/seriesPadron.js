@@ -151,12 +151,25 @@ const SeriesTabla = () => {
                 break;
             case 'W':
                 for (let year = startYear; year <= endYear; year++) {
-                    const totalWeeks = 52 + (new Date(year, 11, 31).getDay() === 4 || (year % 4 === 0 && new Date(year, 11, 31).getDay() === 3) ? 1 : 0);
+                    // Determinar si el año es bisiesto
+                    const esBisiesto = (year % 4 === 0 && year % 100 !== 0) || (year % 400 === 0);
+                    const totalWeeks = 52 + (new Date(year, 11, 31).getDay() === 4 || (esBisiesto && new Date(year, 11, 31).getDay() === 3) ? 1 : 0);
+
                     for (let week = 1; week <= totalWeeks; week++) {
+                        // Calcular la fecha de inicio y fin de la semana
+                        const firstDayOfYear = new Date(year, 0, 1);
+                        const startOfWeek = new Date(firstDayOfYear.getTime() + (week - 1) * 7 * 24 * 60 * 60 * 1000);
+                        const endOfWeek = new Date(startOfWeek.getTime() + 6 * 24 * 60 * 60 * 1000);
+
+                        // Formatear las fechas como YYYYMMDD
+                        const formatFecha = (date) => `${date.getFullYear()}${String(date.getMonth() + 1).padStart(2, '0')}${String(date.getDate()).padStart(2, '0')}`;
+                        const valor = `${formatFecha(startOfWeek)}:${formatFecha(endOfWeek)}`;
+
                         periodicidades.push({
                             semana: week,
                             ano: year,
-                            etiqueta: `${year}SM${week < 10 ? '0' : ''}${week}`
+                            etiqueta: `${year}SM${week < 10 ? '0' : ''}${week}`,
+                            valor: valor
                         });
                     }
                 }
