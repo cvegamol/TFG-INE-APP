@@ -35,6 +35,7 @@ const CifrasPadron = () => {
                try {
                     const cifrasPoblacionMunicipios = await fetch(
                          `http://192.168.1.13:3000/operaciones/getOperationById/${id}`
+                         //`http://192.168.128.97:3000/operaciones/getOperationById/${id}`
                     );
                     const datosCifras = await cifrasPoblacionMunicipios.json();
                     if (isMounted) {

@@ -32,6 +32,12 @@ const CifrasPoblacion = () => {
                     const censosPoblacion = await fetch(`http://192.168.1.13:3000/operaciones/getOperationById/8`);
                     const cifrasPoblacion = await fetch(`http://192.168.1.13:3000/operaciones/getOperationById/72`);
 
+                    // const estadisticaContinuaPoblacion = await fetch(`http://192.168.128.97:3000/operaciones/getOperationById/450`);
+                    // const proyeccionesPoblacion = await fetch(`http://192.168.128.97:3000/operaciones/getOperationById/326`);
+                    // const proyeccionHogares = await fetch(`http://192.168.128.97:3000/operaciones/getOperationById/70`);
+                    // const censosPoblacion = await fetch(`http://192.168.128.97:3000/operaciones/getOperationById/8`);
+                    // const cifrasPoblacion = await fetch(`http://192.168.128.97:3000/operaciones/getOperationById/72`);
+
                     const datosEstContinuaPoblacion = await estadisticaContinuaPoblacion.json();
                     const datosProyecciones = await proyeccionesPoblacion.json();
                     const datosProyeccionHogares = await proyeccionHogares.json();

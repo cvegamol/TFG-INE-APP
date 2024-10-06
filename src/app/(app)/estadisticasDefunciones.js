@@ -69,6 +69,7 @@ const EstadisticasDefunciones = () => {
                try {
                     const estadisticaPadronContinuo = await fetch(
                          `http://192.168.1.13:3000/operaciones/getOperationById/${id}`
+                         //`http://192.168.128.97:3000/operaciones/getOperationById/${id}`
                     );
                     const datos = await estadisticaPadronContinuo.json();
                     if (isMounted) {
@@ -205,6 +206,7 @@ const EstadisticasDefunciones = () => {
           try {
                const response = await fetch(
                     `http://192.168.1.13:3000/tablas/getTableById/${id}`
+                    //`http://192.168.128.97:3000/tablas/getTableById/${id}`
                );
 
                // Verifica si la respuesta es válida y tiene datos

@@ -73,6 +73,7 @@ const ProyeccionesPoblacion = () => {
                try {
                     const operacion = await fetch(
                          `http://192.168.1.13:3000/operaciones/getOperationById/${id}`
+                         //`http://192.168.1.13:3000/operaciones/getOperationById/${id}`
                     );
                     const datos = await operacion.json();
                     if (isMounted) {
@@ -245,6 +246,7 @@ const ProyeccionesPoblacion = () => {
           try {
                const response = await fetch(
                     `http://192.168.1.13:3000/tablas/getTableById/${id}`
+                    //`http://192.168.128.97:3000/tablas/getTableById/${id}`
                );
 
                // Verifica si la respuesta es válida y tiene datos

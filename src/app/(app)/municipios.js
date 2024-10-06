@@ -24,6 +24,7 @@ const CifrasOficialesPoblacionMunicipios = () => {
           const obtenerDatos = async () => {
                try {
                     const tablasMunicipios = await fetch(`http://192.168.1.13:3000/tablas/getTableByCodeAndFkPublication/PROV-MUN/29`);
+                    //const tablasMunicipios = await fetch(`http://192.168.128.97:3000/tablas/getTableByCodeAndFkPublication/PROV-MUN/29`);
                     const data = await tablasMunicipios.json();
                     setTablas(data);
 

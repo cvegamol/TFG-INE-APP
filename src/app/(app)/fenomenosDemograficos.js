@@ -37,6 +37,17 @@ const FenomenosDemograficos = () => {
                     const estimacionNacimientos = await fetch(`http://192.168.1.13:3000/operaciones/getOperationById/424`);
                     const estadisticaMigraciones = await fetch(`http://192.168.1.13:3000/operaciones/getOperationById/71`);
 
+                    // const estadisticasMigracionesCambiosResidencia = await fetch(`http://192.168.128.97:3000/operaciones/getOperationById/455`);
+                    // const estadisticasMatrimonios = await fetch(`http://192.168.128.97:3000/operaciones/getOperationById/305`);
+                    // const estadisticasNacimientos = await fetch(`http://192.168.128.97:3000/operaciones/getOperationById/307`);
+                    // const estadisticasDefunciones = await fetch(`http://192.168.128.97:3000/operaciones/getOperationById/309`);
+                    // const estadisticasAdquisiciones = await fetch(`http://192.168.128.97:3000/operaciones/getOperationById/336`);
+                    // const indicadoresDemograficos = await fetch(`http://192.168.128.97:3000/operaciones/getOperationById/33`);
+                    // const tablasMortalidad = await fetch(`http://192.168.128.97:3000/operaciones/getOperationById/197`);
+                    // const estimacionDefunciones = await fetch(`http://192.168.128.97:3000/operaciones/getOperationById/406`);
+                    // const estimacionNacimientos = await fetch(`http://192.168.128.97:3000/operaciones/getOperationById/424`);
+                    // const estadisticaMigraciones = await fetch(`http://192.168.128.97:3000/operaciones/getOperationById/71`);
+
 
 
                     const datosMigracionesCambiosResidencia = await estadisticasMigracionesCambiosResidencia.json();

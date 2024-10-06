@@ -55,6 +55,7 @@ const OperacionesPadron = () => {
           const obtenerDatos = async () => {
                try {
                     const seriesJson = await fetch(`http://192.168.1.13:3000/series/getSerieByFkOperation/${id}`);
+                    //const seriesJson = await fetch(`http://192.168.128.97:3000/series/getSerieByFkOperation/${id}`);
                     const series = await seriesJson.json();
 
                     const tablasJson = await fetch(`https://servicios.ine.es/wstempus/js/ES/TABLAS_OPERACION/${id}`);
