@@ -28,6 +28,14 @@ export default function Layout() {
         }}
       />
       <Stack.Screen
+        name="changePassword"
+        options={({ route }) => {
+          return {
+            title: 'Cambiar Contraseña',
+          };
+        }}
+      />
+      <Stack.Screen
         name="cifrasMunicipios"
         options={({ route }) => {
           return {

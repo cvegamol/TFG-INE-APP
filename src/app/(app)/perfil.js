@@ -3,9 +3,7 @@ import { withExpoSnack } from "nativewind";
 import {
      View,
      Text,
-     Image,
      TouchableOpacity,
-     Pressable,
      Alert,
      TextInput,
      ScrollView,
@@ -16,12 +14,7 @@ import {
      heightPercentageToDP as hp,
 } from "react-native-responsive-screen";
 import { StatusBar } from "expo-status-bar";
-import {
-     AntDesign,
-     FontAwesome6,
-     MaterialIcons,
-     Octicons,
-} from "@expo/vector-icons";
+import { FontAwesome6, Octicons } from "@expo/vector-icons";
 import { useRouter } from "expo-router";
 import Loading from "../../components/Loading";
 import { useAuth } from "../../context/authContext";
@@ -32,7 +25,6 @@ const ViewStyled = styled(View);
 const TextStyled = styled(Text);
 const TextStyledInput = styled(TextInput);
 const StyledTouchableOpacity = styled(TouchableOpacity);
-const PressableStyled = styled(Pressable);
 
 const Perfil = () => {
      const router = useRouter();
@@ -44,18 +36,14 @@ const Perfil = () => {
           surname: user?.surname || "",
      });
 
-     // Cargar los datos de Firebase al montar el componente
      useEffect(() => {
           const fetchUserData = async () => {
                try {
                     setLoading(true);
-                    console.log('Usuario id', user)
                     const docRef = doc(db, "users", user.uid);
                     const docSnap = await getDoc(docRef);
-                    console.log('Usuarios', docSnap)
                     if (docSnap.exists()) {
                          const data = docSnap.data();
-                         console.log('Usuarios', data)
                          setForm({
                               email: data.email || user.email,
                               name: data.name || user.name,
@@ -63,7 +51,6 @@ const Perfil = () => {
                          });
                     }
                } catch (error) {
-                    console.error("Error al obtener los datos del usuario:", error);
                     Alert.alert("Error", "No se pudieron cargar los datos del perfil.");
                } finally {
                     setLoading(false);
@@ -71,7 +58,7 @@ const Perfil = () => {
           };
 
           fetchUserData();
-     }, [user.uid, db]);  // Ejecutar cuando el ID del usuario o la referencia a la base de datos cambie
+     }, [user.uid, db]);
 
      const handleChange = (name, value) => {
           setForm({ ...form, [name]: value });
@@ -92,7 +79,6 @@ const Perfil = () => {
                     Alert.alert("Error", result.msg || "No se pudo actualizar el perfil.");
                }
           } catch (error) {
-               console.error("Error al actualizar el perfil:", error);
                Alert.alert("Error", "Ocurrió un problema al intentar actualizar tu perfil.");
           } finally {
                setLoading(false);
@@ -133,7 +119,7 @@ const Perfil = () => {
                                                   {input.icon}
                                                   <TextStyledInput
                                                        onChangeText={(value) => handleChange(input.name, value)}
-                                                       value={form[input.name]} // Mostrar los datos existentes del usuario
+                                                       value={form[input.name]}
                                                        style={{
                                                             fontSize: hp(2),
                                                             textAlignVertical: 'center',
@@ -143,7 +129,7 @@ const Perfil = () => {
                                                        className="flex-1 font-medium text-neutral-800"
                                                        placeholder={input.placeholder}
                                                        placeholderTextColor="#172554"
-                                                       editable={input.name !== "email"} // Hacer que el campo email no sea editable
+                                                       editable={input.name !== "email"}
                                                   />
                                              </ViewStyled>
                                         ))}
@@ -168,6 +154,21 @@ const Perfil = () => {
                                                   </StyledTouchableOpacity>
                                              )}
                                         </ViewStyled>
+
+                                        {/* Botón para redirigir a la vista de cambio de contraseña */}
+                                        <StyledTouchableOpacity
+                                             onPress={() => router.push('changePassword')}
+                                             style={{ height: hp(6), marginTop: hp(2) }}
+                                             className="bg-teal-600 rounded-xl justify-center items-center mx-auto w-full max-w-md"
+                                        >
+                                             <TextStyled
+                                                  style={{ fontSize: hp(2.2) }}
+                                                  className="text-white font-bold tracking-wider"
+                                             >
+                                                  Cambiar Contraseña
+                                             </TextStyled>
+                                        </StyledTouchableOpacity>
+
                                    </ViewStyled>
                               </ViewStyled>
                          </ViewStyled>

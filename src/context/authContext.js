@@ -12,6 +12,7 @@ import { createContext, useContext, useEffect, useState } from "react";
 import { auth, db } from "../firebaseConfig";
 import { updateDoc } from "firebase/firestore";
 import { Alert } from 'react-native';
+import { updatePassword, reauthenticateWithCredential, EmailAuthProvider } from "firebase/auth";
 
 export const AuthContext = createContext();
 
@@ -60,6 +61,34 @@ export const AuthContextProvider = ({ children }) => {
     }
   };
 
+  const updateUserPassword = async (oldPassword, newPassword) => {
+    try {
+      // Verificar si el usuario está autenticado
+      if (!auth.currentUser) {
+        return { success: false, msg: "No hay un usuario autenticado." };
+      }
+
+      const user = auth.currentUser;
+
+      // Reautenticar al usuario con la contraseña actual
+      const credential = EmailAuthProvider.credential(user.email, oldPassword);
+      console.log("assdsdsdsd", credential)
+      await reauthenticateWithCredential(user, credential);
+
+      // Actualizar la contraseña del usuario
+      await updatePassword(user, newPassword);
+
+      return { success: true, msg: "Contraseña actualizada correctamente." };
+    } catch (error) {
+      let msg = error.message;
+      if (msg.includes("wrong-password")) {
+        msg = "La contraseña actual es incorrecta.";
+      } else if (msg.includes("weak-password")) {
+        msg = "La nueva contraseña es demasiado débil.";
+      }
+      return { success: false, msg: msg };
+    }
+  };
   const forgotPassword = async (Email) => {
     firebase.auth().sendPasswordResetEmail(Email)
       .then(function (user) {
@@ -152,7 +181,7 @@ export const AuthContextProvider = ({ children }) => {
 
   return (
     <AuthContext.Provider
-      value={{ user, isAuthenticated, login, logout, register, resetPassword, db, updateUser }}
+      value={{ user, isAuthenticated, login, logout, register, resetPassword, db, updateUser, updateUserPassword }}
     >
       {children}
     </AuthContext.Provider>
