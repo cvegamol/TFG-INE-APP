@@ -10,6 +10,8 @@ import {
 import { collection, doc, getDoc, getDocs, query, setDoc, where } from "firebase/firestore";
 import { createContext, useContext, useEffect, useState } from "react";
 import { auth, db } from "../firebaseConfig";
+import { updateDoc } from "firebase/firestore";
+import { Alert } from 'react-native';
 
 export const AuthContext = createContext();
 
@@ -30,17 +32,31 @@ export const AuthContextProvider = ({ children }) => {
     return unsub;
   }, []);
 
-  const updateUser = async (userId) => {
-    const docRef = doc(db, "users", userId);
-    const docSnap = await getDoc(docRef);
-    if (docSnap.exists()) {
-      let data = docSnap.data();
-      setUser({
-        ...user,
-        name: data.name,
-        surname: data.surname,
-        userId: data.userId,
+  const updateUser = async (userId, updatedData) => {
+    try {
+      const docRef = doc(db, "users", userId);
+
+      // Actualizar los datos en Firestore
+      await updateDoc(docRef, {
+        name: updatedData.name,
+        surname: updatedData.surname,
+        email: updatedData.email,
       });
+
+      // Actualizar el usuario en el estado de la aplicación
+      setUser((prevUser) => ({
+        ...prevUser,
+        name: updatedData.name,
+        surname: updatedData.surname,
+
+      }));
+
+      // Devolver un objeto indicando éxito
+      return { success: true };
+
+    } catch (error) {
+      console.error("Error al actualizar el perfil:", error);
+      return { success: false, msg: "No se pudo actualizar el perfil. Inténtalo nuevamente." };
     }
   };
 
@@ -89,8 +105,9 @@ export const AuthContextProvider = ({ children }) => {
       // setIsAuthenticated(true)
 
       await setDoc(doc(db, "users", response.user?.uid), {
-        name,
-        surname,
+        name: name,
+        surname: surname,
+        rol: 'general',
         userId: response.user?.uid,
       });
       return { success: true, data: response?.user };
@@ -104,38 +121,38 @@ export const AuthContextProvider = ({ children }) => {
     }
   };
 
-const resetPassword = async (email) => {
+  const resetPassword = async (email) => {
     try {
-        if (email.trim() === "") {
-            return { success: false, msg: "Debe introducir un correo electrónico." };
-        }
-        console.log(email)
-        // Validar el formato del correo electrónico
-        const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-        if (!emailRegex.test(email)) {
-            return { success: false, msg: "El formato del correo electrónico no es válido." };
-        }
+      if (email.trim() === "") {
+        return { success: false, msg: "Debe introducir un correo electrónico." };
+      }
+      console.log(email)
+      // Validar el formato del correo electrónico
+      const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+      if (!emailRegex.test(email)) {
+        return { success: false, msg: "El formato del correo electrónico no es válido." };
+      }
 
-        // Normalizar el correo electrónico (por si se usan mayúsculas)
-        const normalizedEmail = email.toLowerCase().trim();
-        console.log("Correo normalizado:", normalizedEmail);
+      // Normalizar el correo electrónico (por si se usan mayúsculas)
+      const normalizedEmail = email.toLowerCase().trim();
+      console.log("Correo normalizado:", normalizedEmail);
 
-        await sendPasswordResetEmail(auth,email);
-       
-       
-        return { success: true, msg: "Se ha enviado un correo para restablecer tu contraseña." };
+      await sendPasswordResetEmail(auth, email);
+
+
+      return { success: true, msg: "Se ha enviado un correo para restablecer tu contraseña." };
     } catch (e) {
-        let msg = e.message;
-        if (msg.includes("(auth/invalid-email")) msg = "Correo electrónico inválido.";
-        return { success: false, msg: msg };
+      let msg = e.message;
+      if (msg.includes("(auth/invalid-email")) msg = "Correo electrónico inválido.";
+      return { success: false, msg: msg };
     }
-};
+  };
 
 
 
   return (
     <AuthContext.Provider
-      value={{ user, isAuthenticated, login, logout, register, resetPassword }}
+      value={{ user, isAuthenticated, login, logout, register, resetPassword, db, updateUser }}
     >
       {children}
     </AuthContext.Provider>

@@ -20,6 +20,14 @@ export default function Layout() {
         }}
       />
       <Stack.Screen
+        name="perfil"
+        options={({ route }) => {
+          return {
+            title: 'Perfil',
+          };
+        }}
+      />
+      <Stack.Screen
         name="cifrasMunicipios"
         options={({ route }) => {
           return {

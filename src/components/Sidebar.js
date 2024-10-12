@@ -113,6 +113,19 @@ const Sidebar = ({ toggleSidebar }) => {
             Fenomenos Demograficos
           </Animated.Text>
         </TouchableOpacityStyled>
+
+        <TouchableOpacityStyled
+          onPress={() => router.replace('perfil')}
+          onPressIn={handleButtonPressIn}
+          onPressOut={handleButtonPressOut}
+        >
+          <Animated.Text
+            className="text-lg text-white my-2 hover:bg-teal-600 p-2 rounded transition-all duration-200 ease-in-out"
+            style={{ transform: [{ scale: buttonScale }] }}
+          >
+            Perfil
+          </Animated.Text>
+        </TouchableOpacityStyled>
       </View>
 
       {/* SignOut abajo a la izquierda */}
@@ -129,6 +142,8 @@ const Sidebar = ({ toggleSidebar }) => {
             SignOut
           </Animated.Text>
         </TouchableOpacityStyled>
+
+
       </View>
     </Animated.View>
   );
