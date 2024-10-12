@@ -86,95 +86,90 @@ const Perfil = () => {
      };
 
      return (
-          <ImageBackground
-               source={require('../../assets/images/login/back-registro.png')}
-               resizeMode="cover"
-               style={{ flex: 1, justifyContent: 'center', paddingHorizontal: wp(5) }}
-          >
-               <ScrollView contentContainerStyle={{ flexGrow: 1 }}>
-                    <ViewStyled className="flex-1 justify-center items-center">
-                         <ViewStyled className="bg-white/40 rounded-2xl p-6 mx-auto w-full max-w-md backdrop-blur-xl border-2 border-white">
-                              <StatusBar style="dark" />
-                              <ViewStyled className="flex-1 justify-center space-y-6">
-                                   <ViewStyled className="space-y-6 mx-auto w-full max-w-md">
-                                        <TextStyled
-                                             style={{ fontSize: hp(3.5) }}
-                                             className="font-bold tracking-wider text-center text-neutral-800"
+
+          <ScrollView contentContainerStyle={{ flexGrow: 1 }}>
+               <ViewStyled className="flex-1 justify-center items-center p-4">
+                    <ViewStyled className="bg-white/40 rounded-2xl p-6 mx-auto w-full max-w-md backdrop-blur-xl border-2 border-white">
+                         <StatusBar style="dark" />
+                         <ViewStyled className="flex-1 justify-center space-y-6">
+                              <ViewStyled className="space-y-6 mx-auto w-full max-w-md">
+                                   <TextStyled
+                                        style={{ fontSize: hp(3.5) }}
+                                        className="font-bold tracking-wider text-center text-neutral-800"
+                                   >
+                                        Editar Perfil
+                                   </TextStyled>
+
+                                   {[{
+                                        placeholder: "Nombre", icon: <FontAwesome6 name="circle-user" size={hp(2.5)} color="gray" />, name: "name"
+                                   }, {
+                                        placeholder: "Apellidos", icon: <FontAwesome6 name="circle-user" size={hp(2.5)} color="gray" />, name: "surname"
+                                   }, {
+                                        placeholder: "Correo Electrónico", icon: <Octicons name="mail" size={hp(2.5)} color="gray" />, name: "email"
+                                   }].map((input, index) => (
+                                        <ViewStyled
+                                             key={index}
+                                             style={{ height: hp(6), paddingVertical: hp(0.8) }}
+                                             className="flex-row gap-3 px-4 bg-gray-200 items-center rounded-2xl mx-auto w-full max-w-md"
                                         >
-                                             Editar Perfil
-                                        </TextStyled>
-
-                                        {[{
-                                             placeholder: "Nombre", icon: <FontAwesome6 name="circle-user" size={hp(2.5)} color="gray" />, name: "name"
-                                        }, {
-                                             placeholder: "Apellidos", icon: <FontAwesome6 name="circle-user" size={hp(2.5)} color="gray" />, name: "surname"
-                                        }, {
-                                             placeholder: "Correo Electrónico", icon: <Octicons name="mail" size={hp(2.5)} color="gray" />, name: "email"
-                                        }].map((input, index) => (
-                                             <ViewStyled
-                                                  key={index}
-                                                  style={{ height: hp(6), paddingVertical: hp(0.8) }}
-                                                  className="flex-row gap-3 px-4 bg-gray-200 items-center rounded-2xl mx-auto w-full max-w-md"
-                                             >
-                                                  {input.icon}
-                                                  <TextStyledInput
-                                                       onChangeText={(value) => handleChange(input.name, value)}
-                                                       value={form[input.name]}
-                                                       style={{
-                                                            fontSize: hp(2),
-                                                            textAlignVertical: 'center',
-                                                            paddingVertical: 0,
-                                                            marginTop: hp(0.3),
-                                                       }}
-                                                       className="flex-1 font-medium text-neutral-800"
-                                                       placeholder={input.placeholder}
-                                                       placeholderTextColor="#172554"
-                                                       editable={input.name !== "email"}
-                                                  />
-                                             </ViewStyled>
-                                        ))}
-
-                                        <ViewStyled>
-                                             {loading ? (
-                                                  <ViewStyled className="flex-row justify-center">
-                                                       <Loading size={hp(6)} />
-                                                  </ViewStyled>
-                                             ) : (
-                                                  <StyledTouchableOpacity
-                                                       onPress={handleUpdateProfile}
-                                                       style={{ height: hp(6) }}
-                                                       className="bg-stone-800 rounded-xl justify-center items-center mx-auto w-full max-w-md"
-                                                  >
-                                                       <TextStyled
-                                                            style={{ fontSize: hp(2.2) }}
-                                                            className="text-white font-bold tracking-wider"
-                                                       >
-                                                            Guardar Cambios
-                                                       </TextStyled>
-                                                  </StyledTouchableOpacity>
-                                             )}
+                                             {input.icon}
+                                             <TextStyledInput
+                                                  onChangeText={(value) => handleChange(input.name, value)}
+                                                  value={form[input.name]}
+                                                  style={{
+                                                       fontSize: hp(2),
+                                                       textAlignVertical: 'center',
+                                                       paddingVertical: 0,
+                                                       marginTop: hp(0.3),
+                                                  }}
+                                                  className="flex-1 font-medium text-neutral-800"
+                                                  placeholder={input.placeholder}
+                                                  placeholderTextColor="#172554"
+                                                  editable={input.name !== "email"}
+                                             />
                                         </ViewStyled>
+                                   ))}
 
-                                        {/* Botón para redirigir a la vista de cambio de contraseña */}
-                                        <StyledTouchableOpacity
-                                             onPress={() => router.push('changePassword')}
-                                             style={{ height: hp(6), marginTop: hp(2) }}
-                                             className="bg-teal-600 rounded-xl justify-center items-center mx-auto w-full max-w-md"
-                                        >
-                                             <TextStyled
-                                                  style={{ fontSize: hp(2.2) }}
-                                                  className="text-white font-bold tracking-wider"
+                                   <ViewStyled>
+                                        {loading ? (
+                                             <ViewStyled className="flex-row justify-center">
+                                                  <Loading size={hp(6)} />
+                                             </ViewStyled>
+                                        ) : (
+                                             <StyledTouchableOpacity
+                                                  onPress={handleUpdateProfile}
+                                                  style={{ height: hp(6) }}
+                                                  className="bg-stone-800 rounded-xl justify-center items-center mx-auto w-full max-w-md"
                                              >
-                                                  Cambiar Contraseña
-                                             </TextStyled>
-                                        </StyledTouchableOpacity>
-
+                                                  <TextStyled
+                                                       style={{ fontSize: hp(2.2) }}
+                                                       className="text-white font-bold tracking-wider"
+                                                  >
+                                                       Guardar Cambios
+                                                  </TextStyled>
+                                             </StyledTouchableOpacity>
+                                        )}
                                    </ViewStyled>
+
+                                   {/* Botón para redirigir a la vista de cambio de contraseña */}
+                                   <StyledTouchableOpacity
+                                        onPress={() => router.push('changePassword')}
+                                        style={{ height: hp(6), marginTop: hp(2) }}
+                                        className="bg-teal-600 rounded-xl justify-center items-center mx-auto w-full max-w-md"
+                                   >
+                                        <TextStyled
+                                             style={{ fontSize: hp(2.2) }}
+                                             className="text-white font-bold tracking-wider"
+                                        >
+                                             Cambiar Contraseña
+                                        </TextStyled>
+                                   </StyledTouchableOpacity>
+
                               </ViewStyled>
                          </ViewStyled>
                     </ViewStyled>
-               </ScrollView>
-          </ImageBackground>
+               </ViewStyled>
+          </ScrollView>
      );
 };
 

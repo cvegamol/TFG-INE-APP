@@ -64,7 +64,7 @@ const ChangePassword = () => {
 
      return (
           <ScrollView contentContainerStyle={{ flexGrow: 1 }}>
-               <ViewStyled className="flex-1 justify-center items-center">
+               <ViewStyled className="flex-1 justify-center items-center p-4">
                     <ViewStyled className="bg-white/40 rounded-2xl p-6 mx-auto w-full max-w-md backdrop-blur-xl border-2 border-white">
                          <StatusBar style="dark" />
                          <ViewStyled className="flex-1 justify-center space-y-6">
