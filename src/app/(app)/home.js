@@ -11,6 +11,7 @@ import {
   heightPercentageToDP as hp,
 } from "react-native-responsive-screen";
 import Icon from 'react-native-vector-icons/Ionicons';
+import { useAuth } from '../../context/authContext';
 
 const ViewStyled = styled(View);
 const TextStyled = styled(Text);
@@ -26,6 +27,7 @@ const Home = () => {
   const router = useRouter();
   const screenWidth = Dimensions.get('window').width;
   const chartWidth = screenWidth - 32;
+  const { rol } = useAuth();
 
   useEffect(() => {
     const obtenerDatosInicio = async () => {
@@ -196,6 +198,16 @@ const Home = () => {
                 <Icon name="list-outline" size={30} color="#ffffff" />
                 <TextStyled className="text-white text-center mt-2">Operaciones Disponibles</TextStyled>
               </TouchableOpacityStyled>
+
+              {rol === 'admin' && (
+                <TouchableOpacityStyled
+                  onPress={() => router.push('gestionUsuarios')}
+                  className="bg-teal-800 m-2 p-4 rounded-lg w-56 items-center shadow-md"
+                >
+                  <Icon name="person-circle-outline" size={30} color="#ffffff" />
+                  <TextStyled className="text-white text-center mt-2">Gestión de Usuarios</TextStyled>
+                </TouchableOpacityStyled>
+              )}
             </ViewStyled>
           </ViewStyled>
 

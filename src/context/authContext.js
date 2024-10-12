@@ -1,33 +1,40 @@
+import { createContext, useContext, useEffect, useState } from "react";
+import { auth, db } from "../firebaseConfig";
 import {
   createUserWithEmailAndPassword,
   onAuthStateChanged,
   signInWithEmailAndPassword,
   sendPasswordResetEmail,
-
   signOut,
-  checkIfEmailExists,
+  updatePassword,
+  reauthenticateWithCredential,
+  EmailAuthProvider,
 } from "firebase/auth";
-import { collection, doc, getDoc, getDocs, query, setDoc, where } from "firebase/firestore";
-import { createContext, useContext, useEffect, useState } from "react";
-import { auth, db } from "../firebaseConfig";
-import { updateDoc } from "firebase/firestore";
-import { Alert } from 'react-native';
-import { updatePassword, reauthenticateWithCredential, EmailAuthProvider } from "firebase/auth";
+import { doc, getDoc, updateDoc, setDoc } from "firebase/firestore";
 
+// Crear el AuthContext
 export const AuthContext = createContext();
 
 export const AuthContextProvider = ({ children }) => {
   const [user, setUser] = useState(null);
   const [isAuthenticated, setIsAuthenticated] = useState(undefined);
+  const [rol, setRol] = useState(null); // Nueva variable para el rol
 
   useEffect(() => {
-    const unsub = onAuthStateChanged(auth, (user) => {
+    const unsub = onAuthStateChanged(auth, async (user) => {
       if (user) {
         setIsAuthenticated(true);
         setUser(user);
+
+        // Obtener el rol del usuario desde Firestore
+        const userDoc = await getDoc(doc(db, "users", user.uid));
+        if (userDoc.exists()) {
+          setRol(userDoc.data().rol); // Guardar el rol en el estado
+        }
       } else {
         setIsAuthenticated(false);
         setUser(null);
+        setRol(null); // Limpiar el rol si no hay usuario
       }
     });
     return unsub;
@@ -44,17 +51,14 @@ export const AuthContextProvider = ({ children }) => {
         email: updatedData.email,
       });
 
-      // Actualizar el usuario en el estado de la aplicación
+      // Actualizar el usuario en el estado
       setUser((prevUser) => ({
         ...prevUser,
         name: updatedData.name,
         surname: updatedData.surname,
-
       }));
 
-      // Devolver un objeto indicando éxito
       return { success: true };
-
     } catch (error) {
       console.error("Error al actualizar el perfil:", error);
       return { success: false, msg: "No se pudo actualizar el perfil. Inténtalo nuevamente." };
@@ -63,7 +67,6 @@ export const AuthContextProvider = ({ children }) => {
 
   const updateUserPassword = async (oldPassword, newPassword) => {
     try {
-      // Verificar si el usuario está autenticado
       if (!auth.currentUser) {
         return { success: false, msg: "No hay un usuario autenticado." };
       }
@@ -72,7 +75,6 @@ export const AuthContextProvider = ({ children }) => {
 
       // Reautenticar al usuario con la contraseña actual
       const credential = EmailAuthProvider.credential(user.email, oldPassword);
-      console.log("assdsdsdsd", credential)
       await reauthenticateWithCredential(user, credential);
 
       // Actualizar la contraseña del usuario
@@ -89,31 +91,42 @@ export const AuthContextProvider = ({ children }) => {
       return { success: false, msg: msg };
     }
   };
-  const forgotPassword = async (Email) => {
-    firebase.auth().sendPasswordResetEmail(Email)
-      .then(function (user) {
-        alert('Please check your email...')
-      }).catch(function (e) {
-        console.log(e)
-      })
-  }
+
+  const forgotPassword = async (email) => {
+    try {
+      await sendPasswordResetEmail(auth, email);
+      return { success: true, msg: "Se ha enviado un correo para restablecer tu contraseña." };
+    } catch (error) {
+      let msg = error.message;
+      if (msg.includes("(auth/invalid-email")) {
+        msg = "Correo electrónico inválido.";
+      }
+      return { success: false, msg: msg };
+    }
+  };
 
   const login = async (email, password) => {
     try {
       const response = await signInWithEmailAndPassword(auth, email, password);
+      const userDoc = await getDoc(doc(db, "users", response.user.uid));
+
+      if (userDoc.exists()) {
+        setRol(userDoc.data().rol); // Guardar el rol cuando el usuario inicie sesión
+      }
+
       return { success: true };
     } catch (e) {
       let msg = e.message;
-      if (msg.includes("(auth/invalid-email")) msg = "Invalid email";
-      if (msg.includes("invalid-credential")) msg = "Credenciales Invalidas";
-      if (msg.includes("email-already")) msg = "Email already in use";
+      if (msg.includes("(auth/invalid-email")) msg = "Correo inválido";
+      if (msg.includes("invalid-credential")) msg = "Credenciales inválidas";
       return { success: false, msg: e.message };
     }
   };
 
-  const logout = async (email, password) => {
+  const logout = async () => {
     try {
       await signOut(auth);
+      setRol(null); // Limpiar el rol cuando el usuario cierre sesión
       return { success: true };
     } catch (e) {
       return { success: false, msg: e.message, error: e };
@@ -122,30 +135,24 @@ export const AuthContextProvider = ({ children }) => {
 
   const register = async (email, password, name, surname) => {
     try {
-      const response = await createUserWithEmailAndPassword(
-        auth,
-        email,
-        password
-      );
+      const response = await createUserWithEmailAndPassword(auth, email, password);
 
-      console.log("response.user", response?.user);
-
-      // setUser(response?.user)
-      // setIsAuthenticated(true)
-
-      await setDoc(doc(db, "users", response.user?.uid), {
+      await setDoc(doc(db, "users", response.user.uid), {
         name: name,
         surname: surname,
-        rol: 'general',
-        userId: response.user?.uid,
+        rol: 'general', // Asignar rol por defecto al registrar
+        userId: response.user.uid,
       });
-      return { success: true, data: response?.user };
+
+      setRol('general'); // Guardar el rol recién registrado en el estado
+
+      return { success: true, data: response.user };
     } catch (e) {
       let msg = e.message;
-      if (msg.includes("(auth/invalid-email")) msg = "Invalid email";
+      if (msg.includes("(auth/invalid-email")) msg = "Correo inválido";
       if (msg.includes("Password should be at least 6"))
-        msg = "Invalid Password is neccesary 6 characteres";
-      if (msg.includes("email-already")) msg = "Email already in use";
+        msg = "La contraseña debe tener al menos 6 caracteres";
+      if (msg.includes("email-already")) msg = "El correo ya está en uso";
       return { success: false, msg: e.message };
     }
   };
@@ -155,19 +162,14 @@ export const AuthContextProvider = ({ children }) => {
       if (email.trim() === "") {
         return { success: false, msg: "Debe introducir un correo electrónico." };
       }
-      console.log(email)
-      // Validar el formato del correo electrónico
+
       const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
       if (!emailRegex.test(email)) {
         return { success: false, msg: "El formato del correo electrónico no es válido." };
       }
 
-      // Normalizar el correo electrónico (por si se usan mayúsculas)
       const normalizedEmail = email.toLowerCase().trim();
-      console.log("Correo normalizado:", normalizedEmail);
-
-      await sendPasswordResetEmail(auth, email);
-
+      await sendPasswordResetEmail(auth, normalizedEmail);
 
       return { success: true, msg: "Se ha enviado un correo para restablecer tu contraseña." };
     } catch (e) {
@@ -177,21 +179,32 @@ export const AuthContextProvider = ({ children }) => {
     }
   };
 
-
-
   return (
     <AuthContext.Provider
-      value={{ user, isAuthenticated, login, logout, register, resetPassword, db, updateUser, updateUserPassword }}
+      value={{
+        user,
+        isAuthenticated,
+        rol, // Exponer el rol en el contexto
+        login,
+        logout,
+        register,
+        resetPassword,
+        updateUser,
+        updateUserPassword,
+        forgotPassword,
+        db
+      }}
     >
       {children}
     </AuthContext.Provider>
   );
 };
 
+// Hook personalizado para usar el contexto de autenticación
 export const useAuth = () => {
-  const value = useContext(AuthContext);
-  if (!value) {
-    throw new Error("useAuth must be wrapped inside AuthContextProvider");
+  const context = useContext(AuthContext);
+  if (!context) {
+    throw new Error("useAuth debe ser utilizado dentro de un AuthContextProvider");
   }
-  return value;
+  return context;
 };

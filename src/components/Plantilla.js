@@ -4,6 +4,7 @@ import { withExpoSnack } from "nativewind";
 import { styled } from "nativewind";
 import Header from "../components/Header";
 import Sidebar from "../components/Sidebar";
+import { doc, getDoc } from "firebase/firestore"; // Asegúrate de importar esto si no lo has hecho
 
 // Definición correcta de StyledView y TextStyled
 const StyledView = styled(View);

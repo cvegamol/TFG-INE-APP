@@ -39,6 +39,8 @@ const Perfil = () => {
      useEffect(() => {
           const fetchUserData = async () => {
                try {
+                    console.log(db); // Verifica si el db es correcto
+
                     setLoading(true);
                     const docRef = doc(db, "users", user.uid);
                     const docSnap = await getDoc(docRef);
@@ -49,6 +51,7 @@ const Perfil = () => {
                               name: data.name || user.name,
                               surname: data.surname || user.surname,
                          });
+                         console.log("Datos Prueba", data);
                     }
                } catch (error) {
                     Alert.alert("Error", "No se pudieron cargar los datos del perfil.");

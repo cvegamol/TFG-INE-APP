@@ -36,6 +36,14 @@ export default function Layout() {
         }}
       />
       <Stack.Screen
+        name="gestionUsuarios"
+        options={({ route }) => {
+          return {
+            title: 'Gestión de Usuarios',
+          };
+        }}
+      />
+      <Stack.Screen
         name="cifrasMunicipios"
         options={({ route }) => {
           return {
@@ -201,6 +209,15 @@ export default function Layout() {
       <Stack.Screen
         name="datosPadron"
         options={{ title: 'Datos ' }}
+      />
+      <Stack.Screen
+        name="verMas/[userId]"
+        options={{ title: 'Ver más detalles' }}
+      />
+
+      <Stack.Screen
+        name="modificar/[userId]"
+        options={{ title: 'Modificar Usuario' }}
       />
     </Stack>
   );

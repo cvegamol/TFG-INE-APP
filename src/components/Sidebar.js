@@ -10,13 +10,14 @@ const TextStyled = styled(Text);
 const TouchableOpacityStyled = styled(TouchableOpacity);
 
 const Sidebar = ({ toggleSidebar }) => {
-  const { logout } = useAuth();
+  const { logout, rol } = useAuth();
   const router = useRouter();
   const [sidebarAnim] = useState(new Animated.Value(-250)); // Posición inicial fuera de pantalla
   const [buttonScale] = useState(new Animated.Value(1)); // Escala inicial de los botones
 
   useEffect(() => {
-    // Animación de entrada del sidebar
+    // Animación de entrada del sidebarç
+    console.log("Usuario rol", rol)
     Animated.spring(sidebarAnim, {
       toValue: 0, // Posición dentro de la pantalla
       useNativeDriver: true,
@@ -130,6 +131,28 @@ const Sidebar = ({ toggleSidebar }) => {
             Fenomenos Demograficos
           </Animated.Text>
         </TouchableOpacityStyled>
+
+        {rol === 'admin' && (
+          <TouchableOpacityStyled
+            onPress={() => {
+              router.push('home');  // Navegar primero a home
+              setTimeout(() => {
+                router.push('gestionUsuarios'); // Después ir a Perfil
+              }, 100);  // Retraso mínimo para asegurar la navegación
+            }}
+
+            onPressIn={handleButtonPressIn}
+            onPressOut={handleButtonPressOut}
+          >
+            <Animated.Text
+              className="text-lg text-white my-2 hover:bg-teal-600 p-2 rounded transition-all duration-200 ease-in-out"
+              style={{ transform: [{ scale: buttonScale }] }}
+            >
+              Gestión de Usuarios
+            </Animated.Text>
+          </TouchableOpacityStyled>
+        )}
+
 
         <TouchableOpacityStyled
           onPress={() => {
