@@ -1,9 +1,9 @@
-import React, { useEffect, useState } from 'react';
+import React, { useState } from 'react';
 import { ScrollView, View, Text, Alert, TouchableOpacity, TextInput } from 'react-native';
 import { styled } from 'nativewind';
-import { useLocalSearchParams, useRouter, useSearchParams } from 'expo-router';
-import { doc, getDoc, updateDoc } from 'firebase/firestore';
-import { useAuth } from '../../../context/authContext';
+import { useRouter } from 'expo-router';
+import { collection, addDoc } from 'firebase/firestore';
+import { useAuth } from '../../context/authContext';
 import { FontAwesome6 } from '@expo/vector-icons';
 import { Picker } from '@react-native-picker/picker';
 
@@ -12,56 +12,33 @@ const TextStyled = styled(Text);
 const StyledTouchableOpacity = styled(TouchableOpacity);
 const TextStyledInput = styled(TextInput);
 
-const ModifyUser = () => {
+const AddUser = () => {
      const { db } = useAuth();
-     const { userId } = useLocalSearchParams();
      const [user, setUser] = useState({ name: '', surname: '', email: '', rol: 'general' });
-     const [loading, setLoading] = useState(true);
+     const [loading, setLoading] = useState(false);
      const router = useRouter();
-
-     const fetchUserDetails = async () => {
-          setLoading(true);
-          try {
-               const userDoc = await getDoc(doc(db, 'users', userId));
-               if (userDoc.exists()) {
-                    setUser(userDoc.data());
-               } else {
-                    Alert.alert('Error', 'Usuario no encontrado.');
-                    router.back();
-               }
-          } catch (error) {
-               Alert.alert('Error', 'No se pudo cargar la información del usuario.');
-          } finally {
-               setLoading(false);
-          }
-     };
-
-     useEffect(() => {
-          if (userId) {
-               fetchUserDetails();
-          }
-     }, [userId]);
 
      const handleChange = (field, value) => {
           setUser({ ...user, [field]: value });
      };
 
-     const handleUpdateUser = async () => {
+     const handleAddUser = async () => {
           setLoading(true);
           try {
-               await updateDoc(doc(db, 'users', userId), user);
-               Alert.alert('Éxito', 'El perfil ha sido actualizado correctamente.');
+               if (!user.name || !user.surname || !user.email) {
+                    Alert.alert('Error', 'Todos los campos son obligatorios.');
+                    setLoading(false);
+                    return;
+               }
+               await addDoc(collection(db, 'users'), user);
+               Alert.alert('Éxito', 'El usuario ha sido añadido correctamente.');
                router.push('gestionUsuarios');
           } catch (error) {
-               Alert.alert('Error', 'No se pudo actualizar el perfil.');
+               Alert.alert('Error', 'No se pudo añadir el usuario.');
           } finally {
                setLoading(false);
           }
      };
-
-     if (loading) {
-          return <TextStyled>Cargando información del usuario...</TextStyled>;
-     }
 
      return (
           <ScrollView contentContainerStyle={{ flexGrow: 1 }}>
@@ -70,7 +47,7 @@ const ModifyUser = () => {
                          <ViewStyled className="flex-1 justify-center space-y-6">
                               <ViewStyled className="space-y-6 mx-auto w-full max-w-md">
                                    <TextStyled className="font-bold tracking-wider text-center text-neutral-800 text-2xl">
-                                        Editar Perfil del Usuario
+                                        Añadir Nuevo Usuario
                                    </TextStyled>
 
                                    {/* Input de Nombre */}
@@ -103,12 +80,12 @@ const ModifyUser = () => {
                                    <ViewStyled className="flex-row gap-3 px-4 bg-gray-200 items-center rounded-2xl mx-auto w-full max-w-md">
                                         <FontAwesome6 name="envelope" size={20} color="gray" />
                                         <TextStyledInput
+                                             onChangeText={(value) => handleChange('email', value)}
                                              value={user.email}
                                              style={{ flex: 1 }}
                                              className="font-medium text-neutral-800"
                                              placeholder="Correo Electrónico"
                                              placeholderTextColor="#172554"
-                                             editable={false}
                                         />
                                    </ViewStyled>
 
@@ -125,7 +102,7 @@ const ModifyUser = () => {
                                         </Picker>
                                    </ViewStyled>
 
-                                   {/* Botón para guardar cambios */}
+                                   {/* Botón para añadir usuario */}
                                    <ViewStyled>
                                         {loading ? (
                                              <ViewStyled className="flex-row justify-center">
@@ -133,11 +110,11 @@ const ModifyUser = () => {
                                              </ViewStyled>
                                         ) : (
                                              <StyledTouchableOpacity
-                                                  onPress={handleUpdateUser}
+                                                  onPress={handleAddUser}
                                                   className="bg-stone-800 rounded-xl justify-center items-center mx-auto w-full max-w-md p-3"
                                              >
                                                   <TextStyled className="text-white font-bold tracking-wider">
-                                                       Guardar Cambios
+                                                       Añadir Usuario
                                                   </TextStyled>
                                              </StyledTouchableOpacity>
                                         )}
@@ -150,4 +127,4 @@ const ModifyUser = () => {
      );
 };
 
-export default ModifyUser;
+export default AddUser;

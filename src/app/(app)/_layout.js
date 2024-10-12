@@ -219,6 +219,11 @@ export default function Layout() {
         name="modificar/[userId]"
         options={{ title: 'Modificar Usuario' }}
       />
+
+      <Stack.Screen
+        name="addUsuario"
+        options={{ title: 'Añadir Usuario' }}
+      />
     </Stack>
   );
 }

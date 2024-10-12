@@ -130,6 +130,12 @@ const UserList = () => {
                               </Table>
                          </ViewStyled>
                     </ScrollView>
+                    <StyledTouchableOpacity
+                         onPress={() => router.push('addUsuario')}
+                         className="bg-teal-600 p-4 rounded-xl mt-6 mx-auto w-full max-w-md"
+                    >
+                         <TextStyled className="text-white text-center font-bold text-lg">Añadir Usuario</TextStyled>
+                    </StyledTouchableOpacity>
                </ViewStyled>
           </ScrollView>
      );

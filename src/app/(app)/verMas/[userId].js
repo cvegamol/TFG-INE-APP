@@ -25,7 +25,7 @@ const UserDetail = () => {
                     setUser(userDoc.data());
                } else {
                     Alert.alert('Error', 'Usuario no encontrado.');
-                    router.back();
+                    router.push('gestionUsuarios');
                }
           } catch (error) {
                Alert.alert('Error', 'No se pudo cargar la información del usuario.');
