@@ -166,7 +166,7 @@ const Home = () => {
           <ViewStyled className="mt-4 w-full">
             <ViewStyled className="flex flex-row flex-wrap justify-center">
               <TouchableOpacityStyled
-                onPress={() => router.replace('padron')}
+                onPress={() => router.push('padron')}
                 className="bg-teal-800 m-2 p-4 rounded-lg w-56 items-center shadow-md"
               >
                 <Icon name="people-outline" size={30} color="#ffffff" />
@@ -174,7 +174,7 @@ const Home = () => {
               </TouchableOpacityStyled>
 
               <TouchableOpacityStyled
-                onPress={() => router.replace('cifrasPoblacion')}
+                onPress={() => router.push('cifrasPoblacion')}
                 className="bg-teal-800 m-2 p-4 rounded-lg w-56 items-center shadow-md"
               >
                 <Icon name="stats-chart-outline" size={30} color="#ffffff" />
@@ -182,7 +182,7 @@ const Home = () => {
               </TouchableOpacityStyled>
 
               <TouchableOpacityStyled
-                onPress={() => router.replace('fenomenosDemograficos')}
+                onPress={() => router.push('fenomenosDemograficos')}
                 className="bg-teal-800 m-2 p-4 rounded-lg w-56 items-center shadow-md"
               >
                 <Icon name="earth-outline" size={30} color="#ffffff" />
@@ -190,7 +190,7 @@ const Home = () => {
               </TouchableOpacityStyled>
 
               <TouchableOpacityStyled
-                onPress={() => router.replace('operacionesDisponibles')}
+                onPress={() => router.push('operacionesDisponibles')}
                 className="bg-teal-800 m-2 p-4 rounded-lg w-56 items-center shadow-md"
               >
                 <Icon name="list-outline" size={30} color="#ffffff" />

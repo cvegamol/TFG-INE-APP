@@ -6,10 +6,10 @@ export default function Layout() {
 
   return (
     <Stack>
-      <Stack.Screen name="home" options={{ title: 'Inicio' }} />
-      <Stack.Screen name="padron" options={{ title: 'Padrón' }} />
-      <Stack.Screen name="cifrasPoblacion" options={{ title: 'Cifras de población y Censos demográficos' }} />
-      <Stack.Screen name="operacionesDisponibles" options={{ title: 'Operaciones Disponibles' }} />
+      <Stack.Screen name="home" options={{ title: 'Inicio', headerBackVisible: false }} />
+      <Stack.Screen name="padron" options={{ title: 'Padrón', headerBackVisible: true }} />
+      <Stack.Screen name="cifrasPoblacion" options={{ title: 'Cifras de población y Censos demográficos', headerBackVisible: true }} />
+      <Stack.Screen name="operacionesDisponibles" options={{ title: 'Operaciones Disponibles', headerBackVisible: true, }} />
 
       <Stack.Screen
         name="operacionesPadron"

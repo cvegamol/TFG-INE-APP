@@ -78,7 +78,12 @@ const Sidebar = ({ toggleSidebar }) => {
           </Animated.Text>
         </TouchableOpacityStyled>
         <TouchableOpacityStyled
-          onPress={() => router.replace('padron')}
+          onPress={() => {
+            router.push('home');  // Siempre ir al home primero
+            setTimeout(() => {
+              router.push('padron');  // Después ir al padrón (o a la pantalla deseada)
+            }, 100);  // Un pequeño retraso para asegurarse de que el home se renderice antes de la siguiente navegación
+          }}
           onPressIn={handleButtonPressIn}
           onPressOut={handleButtonPressOut}
         >
@@ -86,11 +91,17 @@ const Sidebar = ({ toggleSidebar }) => {
             className="text-lg text-white my-2 hover:bg-teal-600 p-2 rounded transition-all duration-200 ease-in-out"
             style={{ transform: [{ scale: buttonScale }] }}
           >
-            Padron
+            Padrón
           </Animated.Text>
         </TouchableOpacityStyled>
+
         <TouchableOpacityStyled
-          onPress={() => router.replace('cifrasPoblacion')}
+          onPress={() => {
+            router.push('home');  // Primero ir al home
+            setTimeout(() => {
+              router.push('cifrasPoblacion');  // Después ir a Cifras de población
+            }, 100);  // Retraso mínimo para asegurar la navegación
+          }}
           onPressIn={handleButtonPressIn}
           onPressOut={handleButtonPressOut}
         >
@@ -101,8 +112,14 @@ const Sidebar = ({ toggleSidebar }) => {
             Cifras de población y Censos demográficos
           </Animated.Text>
         </TouchableOpacityStyled>
+
         <TouchableOpacityStyled
-          onPress={() => router.replace('fenomenosDemograficos')}
+          onPress={() => {
+            router.push('home');  // Navegar primero a home
+            setTimeout(() => {
+              router.push('fenomenosDemograficos');  // Después ir a Fenómenos Demográficos
+            }, 100);  // Retraso mínimo para asegurar la navegación
+          }}
           onPressIn={handleButtonPressIn}
           onPressOut={handleButtonPressOut}
         >
@@ -115,7 +132,12 @@ const Sidebar = ({ toggleSidebar }) => {
         </TouchableOpacityStyled>
 
         <TouchableOpacityStyled
-          onPress={() => router.replace('perfil')}
+          onPress={() => {
+            router.push('home');  // Navegar primero a home
+            setTimeout(() => {
+              router.push('perfil');  // Después ir a Perfil
+            }, 100);  // Retraso mínimo para asegurar la navegación
+          }}
           onPressIn={handleButtonPressIn}
           onPressOut={handleButtonPressOut}
         >
