@@ -1,4 +1,4 @@
-import React, { useEffect, useState, useMemo } from 'react';
+import React, { useEffect, useState, useMemo, useRef } from 'react';
 import { ScrollView, View, Text, Dimensions, Alert, Platform, Modal, TouchableOpacity, StyleSheet } from 'react-native';
 import { styled } from 'nativewind';
 import StackedBarChart from '../../components/graph/stackedBarChart/StackedBarChart';
@@ -20,6 +20,7 @@ import * as XLSX from 'xlsx';
 import { AntDesign } from '@expo/vector-icons';
 import PickerSelect from '../../components/PickerSelect'; // Asegúrate de cambiar la ruta según donde lo coloques
 import { BlurView } from 'expo-blur';
+import { captureRef } from 'react-native-view-shot';
 
 
 const ViewStyled = styled(View);
@@ -29,6 +30,8 @@ const ScrollViewStyled = styled(ScrollView);
 const { width } = Dimensions.get('window');
 
 const DatosSeries = () => {
+    const chartRef = useRef(null);
+
     const [viewMode, setViewMode] = useState('table'); // 'table' or 'chart'
     const [selectedVariables, setSelectedVariables] = useState({});
     const [selectedPeriods, setSelectedPeriods] = useState({});
@@ -41,6 +44,7 @@ const DatosSeries = () => {
     const [unidad, setUnidad] = useState('');
     const [modalVisible, setModalVisible] = useState(false);
     const [chartData, setChartData] = useState(null); // Para almacenar los datos del gráfico
+    const [chartDataPdf, setChartDataPdf] = useState(null);
     const [isChartModalVisible, setIsChartModalVisible] = useState(false); // Para controlar la visibilidad del modal de gráficos
     const { tabla, series, periodicidades, valores } = useLocalSearchParams();
     const [scale, setScale] = useState(1)
@@ -75,9 +79,9 @@ const DatosSeries = () => {
     const chartTypeOptions = [
         { label: 'Líneas', value: 'line' },
         { label: 'Barras verticales', value: 'bar' },
-        { label: 'Barras horizontales', value: 'horizontalBar' },
+
         { label: 'Barras Apiladas', value: 'stackedBar' },
-        { label: 'Barras Horizontales Apiladas', value: 'stackedHorizontalBar' },
+
         { label: 'Circular', value: 'pie' },
     ];
     // Contar cuántas variables tienen múltiples valores seleccionados (incluyendo periodicidad)
@@ -118,6 +122,173 @@ const DatosSeries = () => {
         'rgba(255, 159, 64, 0.8)',  // Naranja
         'rgba(255, 205, 86, 0.8)',  // Amarillo
     ];
+    const shareChartAsPDF = async () => {
+        try {
+            if (!chartDataPdf) {
+                Alert.alert('Error', 'No hay datos disponibles para generar la gráfica.');
+                return;
+            }
+            console.log(chartType);
+            let chartConfig;
+            if (chartType === 'line') {
+                console.log("HOla");
+                chartConfig = {
+                    type: 'line',
+                    data: {
+                        labels: chartDataPdf.labels,
+                        datasets: chartDataPdf.datasets.map((dataset, index) => ({
+                            label: `Serie ${index + 1}`, // Puedes ajustar el label según tus necesidades
+                            data: dataset.data.map((value) => parseFloat(value)),
+                            backgroundColor: seriesColors[index % seriesColors.length],
+                        })),
+                    },
+                    options: {
+                        scales: {
+                            yAxes: [{
+                                ticks: {
+                                    beginAtZero: true,
+                                },
+                            }],
+                        },
+                    },
+                };
+
+
+            } else if (chartType === 'bar') {
+                console.log("HOla");
+                const p = chartData.datasets.map((dataset, index) => {
+                    const parsedData = dataset.data.map((value) => parseFloat(value));
+
+                    // Mostrar el console log de cada dataset
+                    console.log(`Dataset ${index + 1}:`, dataset);
+
+                    return {
+                        label: `Serie ${index + 1}`, // Puedes ajustar el label según tus necesidades
+                        data: parsedData,
+                        backgroundColor: seriesColors[index % seriesColors.length],
+                    };
+                });
+                chartConfig = {
+                    type: 'bar',
+                    data: {
+                        labels: chartDataPdf.labels,
+                        datasets: chartDataPdf.datasets.map((dataset, index) => ({
+                            label: chartDataPdf.leyenda[index], // Puedes ajustar el label según tus necesidades
+                            data: dataset.data.map((value) => parseFloat(value)),
+                            backgroundColor: seriesColors[index % seriesColors.length],
+                        })),
+                    },
+                    options: {
+                        xAxes: [
+                            {
+                                stacked: true,
+                            },
+                        ],
+                        scales: {
+                            yAxes: [{
+                                ticks: {
+                                    beginAtZero: true,
+                                },
+                            }],
+                        },
+                    },
+                };
+            }
+            else if (chartType === 'pie') {
+                chartConfig = {
+                    type: 'outlabeledPie',
+                    data: {
+                        datasets: [
+                            {
+                                data: chartDataPdf.datasets[0].data.map((value) => parseFloat(value)),
+                                backgroundColor: seriesColors.slice(0, chartDataPdf.datasets[0].data.length), // Asegúrate de que los colores coincidan con los datos
+
+                            },
+                        ],
+                        labels: chartDataPdf.labels, // Etiquetas para cada sector de la gráfica
+                    },
+                    "options": {
+                        "plugins": {
+                            "legend": false,
+                            "outlabels": {
+                                "text": "%l %p",
+                                "color": "white",
+                                "stretch": 35,
+                                "font": {
+                                    "resizable": true,
+                                    "minSize": 12,
+                                    "maxSize": 18
+                                }
+                            }
+                        }
+                    }
+                };
+            } else if (chartType === 'stackedBar') {
+
+                chartConfig = {
+                    type: 'bar',
+                    data: {
+                        labels: chartDataPdf.labels,
+                        datasets: chartDataPdf.datasets.map((dataset, index) => ({
+                            label: `Serie ${index + 1}`, // Puedes ajustar el label según tus necesidades
+                            data: dataset.data.map((value) => parseFloat(value)),
+                            backgroundColor: seriesColors[index % seriesColors.length],
+                        })),
+                    },
+                    options: {
+
+                        scales: {
+                            xAxes: [
+                                {
+                                    stacked: true,
+                                },
+                            ],
+                            yAxes: [
+                                {
+                                    stacked: true,
+                                },
+                            ],
+                        },
+                    },
+                };
+
+
+            }
+
+            // Generar la configuración de la gráfica para QuickChart.io
+
+
+            // Construir la URL de QuickChart.io
+            const chartUrl = `https://quickchart.io/chart?c=${encodeURIComponent(
+                JSON.stringify(chartConfig)
+            )}&w=800&h=600`;
+
+            // Contenido HTML para el PDF
+            const htmlContent = `
+      <html>
+        <body style="margin:0;padding:0;">
+          <img src="${chartUrl}" style="width:100%;height:auto;"/>
+        </body>
+      </html>
+    `;
+
+            // Generar el PDF
+            const { uri: pdfUri } = await Print.printToFileAsync({
+                html: htmlContent,
+                fileName: 'grafica_personalizada.pdf' // Especificar el nombre del archivo PDF
+            });
+
+            // Compartir el PDF
+            await shareAsync(pdfUri, {
+                mimeType: 'application/pdf',
+                dialogTitle: 'Compartir Gráfica',
+                UTI: 'com.adobe.pdf',
+            });
+        } catch (error) {
+            console.error('Error al compartir la gráfica en PDF:', error);
+            Alert.alert('Error', 'Hubo un problema al compartir la gráfica.');
+        }
+    };
 
     const formatFecha = (ano, mes, dia, exportFormat = false) => {
         if (exportFormat) {
@@ -683,34 +854,126 @@ const DatosSeries = () => {
 
             const variableConMasDeUnaSeleccion = variablesNoEje.find(([, valor]) => valor.length > 1);
             const periodoConMasDeUnaSeleccion = periodosNoEje.length > 1;
-
+            console.log("Variables con m,as de una seleccion", variablesNoEje)
             if (!periodoConMasDeUnaSeleccion && variableConMasDeUnaSeleccion) {
-                // Filtrar valores que ya están en las etiquetas (labels)
-                leyendaArray = variablesNoEje
-                    .map(([_, valor]) => valor.Nombre)
-                    .filter(nombre => !labels.includes(nombre));
+                if (variablesNoEje.length > 0) {
+                    let variableConMasValores = variablesNoEje.reduce((maxVar, currentVar) => {
+                        return (currentVar[1].Valores.length > maxVar[1].Valores.length) ? currentVar : maxVar;
+                    });
+                    console.log("Vcaribla e e e e", variableConMasValores)
+                    leyendaArray = [variableConMasValores[1].Nombre].filter(nombre => !labels.includes(nombre));
+                } else {
+                    leyendaArray = [];
+                }
             } else if (periodoConMasDeUnaSeleccion) {
+                // Tu código existente para manejar periodos con más de una selección
                 leyendaArray = periodosNoEje
                     .map(([key, _]) => {
                         const { ano, mes, dia, etiqueta } = selectedPeriods[key];
-                        console.log("prueba leye", selectedPeriods[key])
-                        // Usar la etiqueta si está disponible, sino formatear la fecha
+                        console.log("prueba leye", selectedPeriods[key]);
                         return etiqueta ? etiqueta : `${dia}/${mes}/${ano}`;
                     })
                     .filter(nombre => !labels.includes(nombre));
             } else {
-                leyendaArray = variablesNoEje
-                    .map(([_, valor]) => valor.Nombre)
-                    .filter(nombre => !labels.includes(nombre)); // Filtrar los nombres que ya están en las etiquetas
+                console.log("variablesNoEje", variablesNoEje);
+
+
+                const gruposPorVariableId = variablesNoEje.reduce((acc, [key, valor]) => {
+                    const { variableId, Nombre } = valor;
+
+                    if (labels.includes(Nombre)) {
+                        return acc; // Si el nombre ya está en labels, no lo añadimos
+                    }
+
+                    if (!acc[variableId]) {
+                        acc[variableId] = [];
+                    }
+
+                    acc[variableId].push([key, valor]);
+
+                    return acc;
+                }, {});
+
+                // Luego encontramos el grupo con más valores (después de descartar los nombres que están en labels)
+                const grupoConMasValores = Object.values(gruposPorVariableId).reduce((maxGrupo, grupoActual) => {
+                    return grupoActual.length > maxGrupo.length ? grupoActual : maxGrupo;
+                }, []);
+
+                // Ahora solo nos quedamos con ese grupo
+                console.log(grupoConMasValores);
+                leyendaArray = grupoConMasValores.map(([_, valor]) => valor.Nombre);
+
+                console.log(leyendaArray);
+                // Ahora solo nos quedamos con ese grupo
+                console.log("Gerupos ", grupoConMasValores);
             }
+
+
 
             setLeyenda(leyendaArray);
 
-            console.log('Leyenda', leyenda)
+            console.log('Leyenda a aaa', leyenda)
 
 
-            console.log("Final Dataset:", { labels, datasets });
-            console.log('DDAATTAASSEETTSS', datasets[0].data[0])
+            let leyendaArray1 = datasets.map((dataset, datasetIndex) => {
+                if (dataset.data && dataset.data[0] && dataset.data[0].serie) {
+                    return dataset.data[0].serie;
+                } else {
+                    return dataset.label || `Serie ${datasetIndex + 1}`;
+                }
+            });
+            console.log("Leyenda Array:", leyendaArray1)
+
+
+            // Reestructuración de datasets para el formato correcto
+            let reorganizedDatasets1 = [];
+
+            if (datasets.length > 0) {
+                // Determinamos la longitud de los datos de la primera serie
+                const dataLength = datasets[0].data.length;
+
+                for (let i = 0; i < dataLength; i++) {
+                    let newDataArray = datasets.map((dataset, datasetIndex) => ({
+                        value: dataset.data[i].value, // Extraer el valor
+                        fecha: dataset.data[i].fecha, // Mantener la fecha formateada
+                        serie: dataset.data[i].serie, // Mantener el nombre de la serie
+                        color: seriesColors[datasetIndex % seriesColors.length], // Asignar color basado en el índice
+                    }));
+
+                    reorganizedDatasets1.push({
+                        data: newDataArray, // Guardar el array completo con objetos
+                    });
+                }
+            }
+            console.log("Leyenda Array:", leyendaArray)
+            // let l;
+            // let Leyenda111 = reorganizedDatasets1.map((dataset, datasetIndex) => {
+            //     // Imprimir en consola cada dataset
+            //     dataset.data.map((item, index) => {
+            //         console.log("Data", data)
+            //     });
+
+            //     // Si no necesitas devolver nada, simplemente no retornes nada.
+            //     // Si quieres devolver algo para que el map siga creando un array, hazlo aquí:
+            //     return dataset; // Esto solo devolverá el dataset tal cual, por ejemplo
+            // });
+
+            // Configuramos el chartData con los datasets reorganizados
+            const chartDataPdf = {
+                leyenda: leyendaArray,
+                labels: labels,
+                datasets: reorganizedDatasets1.map((dataset, datasetIndex) => ({
+                    data: dataset.data.map(item => item.value), // Extraer solo los valores para el gráfico
+                    originalData: dataset.data, // Guardar los objetos completos para acceder a ellos en el click
+                    color: (opacity = 1, index) => {
+                        const color = dataset.data[index] && dataset.data[index].color;
+                        return color ? color : seriesColors[datasetIndex % seriesColors.length]; // Usar el color del dataset o un color por defecto
+                    },
+                })),
+            };
+
+            setChartDataPdf(chartDataPdf);
+
             if (chartType === 'line') {
                 // Reestructuración de datasets para el formato correcto
                 let reorganizedDatasets = [];
@@ -1647,10 +1910,31 @@ const DatosSeries = () => {
             >
                 <BlurView intensity={80} tint="light" style={StyleSheet.absoluteFill}>
                     <ViewStyled className="flex-1 justify-center items-center">
-                        <ViewStyled className="bg-white p-4 rounded-lg shadow-md w-11/12">
+                        <ViewStyled ref={chartRef} className="bg-white p-4 rounded-lg shadow-md w-11/12">
                             <TouchableOpacity onPress={() => setIsChartModalVisible(false)}>
                                 <TextStyled className="text-right text-blue-500">Cerrar</TextStyled>
                             </TouchableOpacity>
+
+                            {/* Botón de compartir solo en Android */}
+                            {Platform.OS === 'android' && (
+                                <Button
+                                    icon={<AntDesign name="sharealt" size={24} color="white" />}
+                                    title=" Compartir"
+                                    onPress={shareChartAsPDF}
+                                    buttonStyle={{
+                                        backgroundColor: '#2c7a7b',
+                                        paddingHorizontal: 15,
+                                        paddingVertical: 10,
+                                        borderRadius: 8,
+                                        marginTop: 10,
+                                    }}
+                                    titleStyle={{
+                                        color: '#ffffff',
+                                        fontWeight: 'bold',
+                                        fontSize: 16,
+                                    }}
+                                />
+                            )}
 
                             {renderChart()}
                         </ViewStyled>
