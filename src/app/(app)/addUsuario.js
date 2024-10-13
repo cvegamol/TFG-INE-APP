@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { ScrollView, View, Text, Alert, TouchableOpacity, TextInput } from 'react-native';
 import { styled } from 'nativewind';
 import { useRouter } from 'expo-router';
-import { createUserWithEmailAndPassword } from 'firebase/auth';
+import { createUserWithEmailAndPassword, getAuth, updateCurrentUser } from 'firebase/auth';
 import { doc, setDoc } from 'firebase/firestore';
 import { FontAwesome6 } from '@expo/vector-icons';
 import { Picker } from '@react-native-picker/picker';
@@ -26,6 +26,8 @@ const AddUser = () => {
 
      const handleAddUser = async () => {
           setLoading(true);
+          const currentUser = auth.currentUser; // Usuario actualmente autenticado (administrador)
+
           try {
                // Validación de campos
                if (!user.name || !user.surname || !user.email || !user.password) {
@@ -38,7 +40,7 @@ const AddUser = () => {
                console.log("Usuario", user);
 
                // Registrar usuario con email y contraseña
-               const response = await createUserWithEmailAndPassword(auth, user.email, user.password);
+               const response = await createUserWithEmailAndPassword(getAuth(), user.email, user.password);
                console.log("Usuario registrado:", response.user);
 
                const timestamp = new Date(); // Fecha actual para las entradas de tiempo
@@ -56,6 +58,10 @@ const AddUser = () => {
                });
 
                console.log("Datos adicionales guardados en Firestore.");
+
+               // Restaurar sesión del administrador
+               await updateCurrentUser(auth, currentUser);
+
                Alert.alert('Éxito', 'El usuario ha sido añadido correctamente.');
                router.push('gestionUsuarios');
           } catch (error) {
@@ -65,7 +71,6 @@ const AddUser = () => {
                setLoading(false);
           }
      };
-
 
      return (
           <ScrollView contentContainerStyle={{ flexGrow: 1 }}>
@@ -148,7 +153,6 @@ const AddUser = () => {
                                         {loading ? (
                                              <ViewStyled className="flex-row justify-center">
                                                   <Loading size={50} />
-
                                                   <TextStyled>Cargando...</TextStyled>
                                              </ViewStyled>
                                         ) : (
