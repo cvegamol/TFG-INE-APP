@@ -6,6 +6,7 @@ import { doc, getDoc, updateDoc } from 'firebase/firestore';
 import { useAuth } from '../../../context/authContext';
 import { FontAwesome6 } from '@expo/vector-icons';
 import { Picker } from '@react-native-picker/picker';
+import Loading from '../../../components/Loading';
 
 const ViewStyled = styled(View);
 const TextStyled = styled(Text);
@@ -60,7 +61,12 @@ const ModifyUser = () => {
      };
 
      if (loading) {
-          return <TextStyled>Cargando información del usuario...</TextStyled>;
+          return (
+               <ViewStyled className="flex-1 justify-center items-center">
+                    <Loading size={50} />
+                    <TextStyled className="text-lg text-gray-500 mt-2">Cargando...</TextStyled>
+               </ViewStyled>
+          );
      }
 
      return (

@@ -6,6 +6,7 @@ import { styled } from 'nativewind';
 import { useLocalSearchParams, useRouter, useSearchParams } from 'expo-router';
 import { doc, getDoc } from 'firebase/firestore';
 import { useAuth } from '../../../context/authContext';
+import Loading from '../../../components/Loading';
 
 const ViewStyled = styled(View);
 const TextStyled = styled(Text);
@@ -41,7 +42,12 @@ const UserDetail = () => {
      }, [userId]);
 
      if (loading) {
-          return <TextStyled>Cargando información del usuario...</TextStyled>;
+          return (
+               <ViewStyled className="flex-1 justify-center items-center">
+                    <Loading size={50} />
+                    <TextStyled className="text-lg text-gray-500 mt-2">Cargando...</TextStyled>
+               </ViewStyled>
+          );
      }
 
      if (!user) {

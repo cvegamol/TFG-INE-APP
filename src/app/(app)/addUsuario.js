@@ -2,10 +2,12 @@ import React, { useState } from 'react';
 import { ScrollView, View, Text, Alert, TouchableOpacity, TextInput } from 'react-native';
 import { styled } from 'nativewind';
 import { useRouter } from 'expo-router';
-import { collection, addDoc } from 'firebase/firestore';
-import { useAuth } from '../../context/authContext';
+import { createUserWithEmailAndPassword } from 'firebase/auth';
+import { doc, setDoc } from 'firebase/firestore';
 import { FontAwesome6 } from '@expo/vector-icons';
 import { Picker } from '@react-native-picker/picker';
+import { useAuth } from '../../context/authContext';
+import Loading from '../../components/Loading';
 
 const ViewStyled = styled(View);
 const TextStyled = styled(Text);
@@ -13,8 +15,8 @@ const StyledTouchableOpacity = styled(TouchableOpacity);
 const TextStyledInput = styled(TextInput);
 
 const AddUser = () => {
-     const { db } = useAuth();
-     const [user, setUser] = useState({ name: '', surname: '', email: '', rol: 'general' });
+     const { db, auth } = useAuth(); // Asegúrate de tener el auth en el contexto
+     const [user, setUser] = useState({ name: '', surname: '', email: '', password: '', rol: 'general' });
      const [loading, setLoading] = useState(false);
      const router = useRouter();
 
@@ -25,20 +27,45 @@ const AddUser = () => {
      const handleAddUser = async () => {
           setLoading(true);
           try {
-               if (!user.name || !user.surname || !user.email) {
+               // Validación de campos
+               if (!user.name || !user.surname || !user.email || !user.password) {
                     Alert.alert('Error', 'Todos los campos son obligatorios.');
                     setLoading(false);
                     return;
                }
-               await addDoc(collection(db, 'users'), user);
+
+               console.log("Iniciando registro de usuario...");
+               console.log("Usuario", user);
+
+               // Registrar usuario con email y contraseña
+               const response = await createUserWithEmailAndPassword(auth, user.email, user.password);
+               console.log("Usuario registrado:", response.user);
+
+               const timestamp = new Date(); // Fecha actual para las entradas de tiempo
+
+               // Guardar información adicional en Firestore
+               await setDoc(doc(db, 'users', response.user.uid), {
+                    name: user.name,
+                    surname: user.surname,
+                    email: user.email,
+                    rol: user.rol,
+                    userId: response.user.uid,
+                    isOnline: false, // Marcar como en línea al crear
+                    lastActive: timestamp, // Guardar la última vez activo
+                    createdAt: timestamp, // Guardar la fecha de creación del usuario
+               });
+
+               console.log("Datos adicionales guardados en Firestore.");
                Alert.alert('Éxito', 'El usuario ha sido añadido correctamente.');
                router.push('gestionUsuarios');
           } catch (error) {
-               Alert.alert('Error', 'No se pudo añadir el usuario.');
+               console.log('Error al añadir el usuario:', error); // Mostrar el error en consola
+               Alert.alert('Error', `No se pudo añadir el usuario: ${error.message}`);
           } finally {
                setLoading(false);
           }
      };
+
 
      return (
           <ScrollView contentContainerStyle={{ flexGrow: 1 }}>
@@ -89,6 +116,20 @@ const AddUser = () => {
                                         />
                                    </ViewStyled>
 
+                                   {/* Input de Contraseña */}
+                                   <ViewStyled className="flex-row gap-3 px-4 bg-gray-200 items-center rounded-2xl mx-auto w-full max-w-md">
+                                        <FontAwesome6 name="lock" size={20} color="gray" />
+                                        <TextStyledInput
+                                             onChangeText={(value) => handleChange('password', value)}
+                                             value={user.password}
+                                             style={{ flex: 1 }}
+                                             className="font-medium text-neutral-800"
+                                             placeholder="Contraseña"
+                                             secureTextEntry
+                                             placeholderTextColor="#172554"
+                                        />
+                                   </ViewStyled>
+
                                    {/* Selector de Rol */}
                                    <ViewStyled className="flex-row gap-3 px-4 bg-gray-200 items-center rounded-2xl mx-auto w-full max-w-md">
                                         <FontAwesome6 name="user-shield" size={20} color="gray" />
@@ -106,6 +147,8 @@ const AddUser = () => {
                                    <ViewStyled>
                                         {loading ? (
                                              <ViewStyled className="flex-row justify-center">
+                                                  <Loading size={50} />
+
                                                   <TextStyled>Cargando...</TextStyled>
                                              </ViewStyled>
                                         ) : (
@@ -113,9 +156,7 @@ const AddUser = () => {
                                                   onPress={handleAddUser}
                                                   className="bg-stone-800 rounded-xl justify-center items-center mx-auto w-full max-w-md p-3"
                                              >
-                                                  <TextStyled className="text-white font-bold tracking-wider">
-                                                       Añadir Usuario
-                                                  </TextStyled>
+                                                  <TextStyled className="text-white font-bold tracking-wider">Añadir Usuario</TextStyled>
                                              </StyledTouchableOpacity>
                                         )}
                                    </ViewStyled>

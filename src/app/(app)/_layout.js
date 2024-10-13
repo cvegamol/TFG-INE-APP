@@ -224,6 +224,10 @@ export default function Layout() {
         name="addUsuario"
         options={{ title: 'Añadir Usuario' }}
       />
+      <Stack.Screen
+        name="informesUsuarios"
+        options={{ title: 'Informes de la Aplicación' }}
+      />
     </Stack>
   );
 }

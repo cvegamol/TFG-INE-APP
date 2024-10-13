@@ -26,6 +26,8 @@ const Sidebar = ({ toggleSidebar }) => {
 
   const handleLogOut = async () => {
     await logout();
+    router.push("welcome");
+
   };
 
   const panResponder = useRef(

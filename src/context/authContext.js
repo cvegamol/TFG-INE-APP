@@ -125,6 +125,13 @@ export const AuthContextProvider = ({ children }) => {
 
   const logout = async () => {
     try {
+      if (user) {
+        await updateDoc(doc(db, "users", user.uid), {
+          isOnline: false,
+          lastActive: new Date(),
+        });
+      }
+
       await signOut(auth);
       setRol(null); // Limpiar el rol cuando el usuario cierre sesión
       return { success: true };
@@ -136,12 +143,17 @@ export const AuthContextProvider = ({ children }) => {
   const register = async (email, password, name, surname) => {
     try {
       const response = await createUserWithEmailAndPassword(auth, email, password);
+      const timestamp = new Date(); // Fecha de creación actual
 
       await setDoc(doc(db, "users", response.user.uid), {
         name: name,
         surname: surname,
+        email: email, // Asegúrate de guardar el email
         rol: 'general', // Asignar rol por defecto al registrar
         userId: response.user.uid,
+        isOnline: true, // Usuario está en línea después de registrarse
+        lastActive: timestamp, // Hora actual como la última vez activo
+        createdAt: timestamp // Guardar la fecha de creación
       });
 
       setRol('general'); // Guardar el rol recién registrado en el estado
@@ -192,7 +204,8 @@ export const AuthContextProvider = ({ children }) => {
         updateUser,
         updateUserPassword,
         forgotPassword,
-        db
+        db,
+        auth
       }}
     >
       {children}

@@ -6,6 +6,7 @@ import { useRouter } from 'expo-router';
 import { collection, getDocs, deleteDoc, doc } from 'firebase/firestore';
 import { useAuth } from '../../context/authContext';
 import { Table, Row } from 'react-native-table-component';
+import Loading from '../../components/Loading';
 
 const ViewStyled = styled(View);
 const TextStyled = styled(Text);
@@ -70,7 +71,12 @@ const UserList = () => {
      };
 
      if (loading) {
-          return <TextStyled>Cargando usuarios...</TextStyled>;
+          return (
+               <ViewStyled className="flex-1 justify-center items-center">
+                    <Loading size={50} />
+                    <TextStyled className="text-lg text-gray-500 mt-2">Cargando...</TextStyled>
+               </ViewStyled>
+          );
      }
 
      return (
@@ -135,6 +141,13 @@ const UserList = () => {
                          className="bg-teal-600 p-4 rounded-xl mt-6 mx-auto w-full max-w-md"
                     >
                          <TextStyled className="text-white text-center font-bold text-lg">Añadir Usuario</TextStyled>
+                    </StyledTouchableOpacity>
+
+                    <StyledTouchableOpacity
+                         onPress={() => router.push('informesUsuarios')}
+                         className="bg-purple-600 p-4 rounded-xl mt-4 mx-auto w-full max-w-md"
+                    >
+                         <TextStyled className="text-white text-center font-bold text-lg">Obtener Informes de Usuarios</TextStyled>
                     </StyledTouchableOpacity>
                </ViewStyled>
           </ScrollView>
