@@ -17,7 +17,7 @@ const UserReports = () => {
      const [lifetimeUsers, setLifetimeUsers] = useState(0);
 
      // Cabecera de la tabla
-     const tableHead = ['Nombre', 'Apellido', 'Rol', 'Correo', 'Creado', 'Última Conexión'];
+     const tableHead = ['Nombre', 'Apellido', 'Rol', 'Correo', 'Fecha de Creación', 'Última Conexión'];
      const widthArr = [Dimensions.get('window').width * 0.25, Dimensions.get('window').width * 0.25, Dimensions.get('window').width * 0.25, Dimensions.get('window').width * 0.4, Dimensions.get('window').width * 0.4, Dimensions.get('window').width * 0.44];
 
      // Función para obtener los datos de usuarios desde Firestore
