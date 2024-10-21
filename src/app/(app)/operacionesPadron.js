@@ -3,7 +3,6 @@ import { ScrollView, Animated, Text, TouchableOpacity, TextInput, View } from 'r
 import { styled } from 'nativewind';
 import Plantilla from '../../components/Plantilla';
 import { useLocalSearchParams, useRouter } from 'expo-router';
-import Loading from '../../components/Loading';
 import Icon from 'react-native-vector-icons/Ionicons'; // Importar íconos
 import {
      widthPercentageToDP as wp,
@@ -188,7 +187,11 @@ const OperacionesPadron = () => {
 
                               {/* Mostrar el ícono de cancelar solo cuando haya texto */}
                               {searchText !== '' && (
-                                   <TouchableOpacityStyled onPress={clearSearch} style={{ position: 'absolute', right: 10, top: 10 }}>
+                                   <TouchableOpacityStyled
+                                        onPress={clearSearch}
+                                        style={{ position: 'absolute', right: 10, top: 10 }}
+                                        testID="clear-search-button"
+                                   >
                                         <Icon name="close-circle" size={24} color="gray" />
                                    </TouchableOpacityStyled>
                               )}
@@ -197,7 +200,6 @@ const OperacionesPadron = () => {
                          {/* Botón para limpiar búsqueda */}
                          {isLoading ? (
                               <AnimatedViewStyled className="flex-1 justify-center items-center">
-                                   <Loading size={hp(6)} />
                                    <TextStyled className="text-lg text-teal-500 mt-2">Cargando...</TextStyled>
                               </AnimatedViewStyled>
                          ) : (

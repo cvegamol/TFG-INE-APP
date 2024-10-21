@@ -3,12 +3,10 @@ import { render, fireEvent, waitFor } from '@testing-library/react-native';
 import Padron from './padron';
 import { useRouter } from 'expo-router';
 
-// Mock de useRouter
 jest.mock('expo-router', () => ({
      useRouter: jest.fn(),
 }));
 
-// Mock de fetch para simular los datos
 global.fetch = jest.fn((url) => {
      if (url.includes('getOperationById/188')) {
           return Promise.resolve({
@@ -48,7 +46,6 @@ describe('Padron Component', () => {
      it('debe mostrar las operaciones estadísticas sin periodicidad establecida', async () => {
           const { getByText } = render(<Padron />);
 
-          // Esperar a que se cargue el texto del título de la sección
           await waitFor(() => {
                expect(getByText('Operaciones estadísticas sin periodicidad establecida')).toBeTruthy();
           });
@@ -57,7 +54,6 @@ describe('Padron Component', () => {
      it('debe mostrar las operaciones estadísticas elaboradas de forma periódica', async () => {
           const { getByText } = render(<Padron />);
 
-          // Esperar a que se cargue el texto del título de la sección
           await waitFor(() => {
                expect(getByText('Operaciones estadísticas elaboradas de forma periódica')).toBeTruthy();
           });

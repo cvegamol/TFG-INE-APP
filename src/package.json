@@ -9,15 +9,18 @@
     "web": "expo start --web",
     "test": "jest --watchAll"
   },
- "jest": {
+"jest": {
   "preset": "jest-expo",
   "setupFilesAfterEnv": [
     "@testing-library/jest-native/extend-expect",
     "jest-fetch-mock",
     "./jestSetup.js"
   ],
+  "transform": {
+    "^.+\\.(js|jsx|ts|tsx)$": "babel-jest"
+  },
   "transformIgnorePatterns": [
-    "node_modules/(?!(react-native|@react-native|expo(nent)?|@expo(nent)?/.*|@expo-google-fonts/.*|@react-navigation/.*|firebase|@firebase/.*|nativewind|expo-modules-core|react-native-responsive-screen|@expo/vector-icons|expo-font)/)"
+    "node_modules/(?!(react-native|@react-native|expo(nent)?|@expo(nent)?/.*|@expo-router|@expo-google-fonts/.*|@react-navigation/.*|firebase|@firebase/.*|nativewind|expo-modules-core|react-native-responsive-screen|@expo/vector-icons|expo-font)/)"
   ]
 },
   "dependencies": {
