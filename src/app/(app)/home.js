@@ -4,12 +4,8 @@ import { styled } from 'nativewind';
 import Plantilla from '../../components/Plantilla';
 import ResponsiveTable from '../../components/ResponsiveTable';
 import { LineChart } from 'react-native-chart-kit';
-import Loading from '../../components/Loading';
 import { useRouter } from 'expo-router';
-import {
-  widthPercentageToDP as wp,
-  heightPercentageToDP as hp,
-} from "react-native-responsive-screen";
+
 import Icon from 'react-native-vector-icons/Ionicons';
 import { useAuth } from '../../context/authContext';
 
@@ -32,9 +28,7 @@ const Home = () => {
   useEffect(() => {
     const obtenerDatosInicio = async () => {
       try {
-
         const estadisticaContinuaResponse = await fetch(`http://192.168.1.13:3000/operaciones/getOperationById/450`);
-        console.log('asssssssss', estadisticaContinuaResponse)
         const estadisticaContinua = await estadisticaContinuaResponse.json();
         setEstadisticaContinua(estadisticaContinua[0]);
 
@@ -147,7 +141,6 @@ const Home = () => {
   if (isLoading) {
     return (
       <ViewStyled className="flex-1 justify-center items-center">
-        <Loading size={hp(6)} />
         <TextStyled className="text-lg text-gray-500 mt-2">Cargando...</TextStyled>
       </ViewStyled>
     );
@@ -168,6 +161,7 @@ const Home = () => {
           <ViewStyled className="mt-4 w-full">
             <ViewStyled className="flex flex-row flex-wrap justify-center">
               <TouchableOpacityStyled
+                testID="padronButton"  // Añadido testID
                 onPress={() => router.push('padron')}
                 className="bg-teal-800 m-2 p-4 rounded-lg w-56 items-center shadow-md"
               >
@@ -176,6 +170,7 @@ const Home = () => {
               </TouchableOpacityStyled>
 
               <TouchableOpacityStyled
+                testID="cifrasPoblacionButton"  // Añadido testID
                 onPress={() => router.push('cifrasPoblacion')}
                 className="bg-teal-800 m-2 p-4 rounded-lg w-56 items-center shadow-md"
               >
@@ -184,6 +179,7 @@ const Home = () => {
               </TouchableOpacityStyled>
 
               <TouchableOpacityStyled
+                testID="fenomenosDemograficosButton"  // Añadido testID
                 onPress={() => router.push('fenomenosDemograficos')}
                 className="bg-teal-800 m-2 p-4 rounded-lg w-56 items-center shadow-md"
               >
@@ -192,6 +188,7 @@ const Home = () => {
               </TouchableOpacityStyled>
 
               <TouchableOpacityStyled
+                testID="operacionesDisponiblesButton"  // Añadido testID
                 onPress={() => router.push('operacionesDisponibles')}
                 className="bg-teal-800 m-2 p-4 rounded-lg w-56 items-center shadow-md"
               >
@@ -201,6 +198,7 @@ const Home = () => {
 
               {rol === 'admin' && (
                 <TouchableOpacityStyled
+                  testID="gestionUsuariosButton"  // Añadido testID
                   onPress={() => router.push('gestionUsuarios')}
                   className="bg-teal-800 m-2 p-4 rounded-lg w-56 items-center shadow-md"
                 >

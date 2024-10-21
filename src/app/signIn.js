@@ -18,10 +18,8 @@ import {
   widthPercentageToDP as wp,
   heightPercentageToDP as hp,
 } from "react-native-responsive-screen";
-import { StatusBar } from "expo-status-bar";
 import { MaterialIcons, Octicons } from "@expo/vector-icons";
 import { useRouter } from "expo-router";
-import Loading from "../components/Loading";
 import { useAuth } from "../context/authContext";
 
 const ViewStyled = styled(View);
@@ -49,7 +47,7 @@ const SignIn = () => {
       return;
     }
     setLoading(true);
-    
+
     const response = await login(email, password);
 
     setLoading(false);
@@ -66,12 +64,11 @@ const SignIn = () => {
       <ImageBackground
         source={require('../assets/images/login/back-login.png')}
         resizeMode="cover"
-        style={{ flex: 1, justifyContent: 'center', paddingHorizontal: wp(5) }}  
+        style={{ flex: 1, justifyContent: 'center', paddingHorizontal: wp(5) }}
       >
         <ScrollView contentContainerStyle={{ flexGrow: 1 }}>
           <ViewStyled className="flex-1 justify-center items-center">
             <ViewStyled className="bg-white/30 rounded-2xl p-6 mx-auto w-full max-w-md backdrop-blur-xl border-2 border-white ">
-              <StatusBar style="dark" />
               <ViewStyled className="flex-1 justify-center space-y-6">
 
 
@@ -79,6 +76,7 @@ const SignIn = () => {
                   <TextStyled
                     style={{ fontSize: hp(3.5) }}
                     className="font-bold tracking-wider text-center text-neutral-800"
+                    testID="signin-title"
                   >
                     Iniciar Sesión
                   </TextStyled>
@@ -114,34 +112,34 @@ const SignIn = () => {
                     </ViewStyled>
                     <ViewStyled className="flex-row justify-end">
                       <TextStyled
-                      style={{ fontSize: hp(1.6) }}
-                      className="font-semibold text-right bg-darkBlue"
-                    >
-                      ¿Olvidaste tu contraseña?
-                    </TextStyled>
-                     <PressableStyled onPress={() => router.push("resetPassword")}>
-                      <TextStyled
                         style={{ fontSize: hp(1.6) }}
-                        className="font-semibold text-violet-950 ml-2"
+                        className="font-semibold text-right bg-darkBlue"
                       >
-                        Recuperala
+                        ¿Olvidaste tu contraseña?
                       </TextStyled>
-                    </PressableStyled>
+                      <PressableStyled onPress={() => router.push("resetPassword")}>
+                        <TextStyled
+                          style={{ fontSize: hp(1.6) }}
+                          className="font-semibold text-violet-950 ml-2"
+                        >
+                          Recuperala
+                        </TextStyled>
+                      </PressableStyled>
                     </ViewStyled>
-                    
+
                   </ViewStyled>
 
                   {/* Submit button Login */}
                   <ViewStyled>
                     {loading ? (
                       <ViewStyled className="flex-row justify-center">
-                        <Loading size={hp(6)} />
                       </ViewStyled>
                     ) : (
                       <StyledTouchableOpacity
                         onPress={handleLogin}
                         style={{ height: hp(6) }}
                         className="bg-stone-800 rounded-xl justify-center items-center mx-auto w-full max-w-md"
+                        testID="signin-button"
                       >
                         <TextStyled
                           style={{ fontSize: hp(2.2) }}

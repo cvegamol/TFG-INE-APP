@@ -15,15 +15,14 @@ import {
   widthPercentageToDP as wp,
   heightPercentageToDP as hp,
 } from "react-native-responsive-screen";
-import { StatusBar } from "expo-status-bar";
 import {
-  AntDesign,
+
+
   FontAwesome6,
   MaterialIcons,
   Octicons,
 } from "@expo/vector-icons";
 import { useRouter } from "expo-router";
-import Loading from "../components/Loading";
 import { useAuth } from "../context/authContext";
 import { ImageBackground } from "react-native";
 
@@ -68,13 +67,12 @@ const SignUp = () => {
     <ImageBackground
       source={require('../assets/images/login/back-registro.png')}
       resizeMode="cover"
-      style={{ flex: 1, justifyContent: 'center', paddingHorizontal: wp(5) }} 
+      style={{ flex: 1, justifyContent: 'center', paddingHorizontal: wp(5) }}
     >
       <ScrollView contentContainerStyle={{ flexGrow: 1 }}>
         <ViewStyled className="flex-1 justify-center items-center">
           <ViewStyled className="bg-white/40 rounded-2xl p-6 mx-auto w-full max-w-md backdrop-blur-xl border-2 border-white">
 
-            <StatusBar style="dark" />
             <ViewStyled className="flex-1 justify-center space-y-6">
 
 
@@ -118,7 +116,6 @@ const SignUp = () => {
                 <ViewStyled>
                   {loading ? (
                     <ViewStyled className="flex-row justify-center">
-                      <Loading size={hp(6)} />
                     </ViewStyled>
                   ) : (
                     <StyledTouchableOpacity
