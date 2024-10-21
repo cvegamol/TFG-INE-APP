@@ -157,6 +157,7 @@ const Padron = () => {
               scrollEnabled={false} // Deshabilitar el scroll del SectionList
               renderItem={({ item, index }) => (
                 <TouchableOpacityStyled
+                  testID={`button-${item.Id}`} // Agrega testID aquí
                   className={`p-4 ${cardColors[index % cardColors.length]} rounded-md shadow-md my-2 mx-4 hover:bg-teal-100 active:bg-teal-200`}
                   onPress={() => handlePress(item.Id, item.Nombre, item.Url)}
                   activeOpacity={0.6}

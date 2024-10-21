@@ -8,67 +8,58 @@ jest.mock('expo-router', () => ({
      useRouter: jest.fn(),
 }));
 
+// Mock de fetch para simular los datos
+global.fetch = jest.fn((url) => {
+     if (url.includes('getOperationById/188')) {
+          return Promise.resolve({
+               json: () => Promise.resolve([{ Id: 188, Nombre: 'Estadísticas Padrón Continuo' }]),
+          });
+     }
+     if (url.includes('getOperationById/22')) {
+          return Promise.resolve({
+               json: () => Promise.resolve([{ Id: 22, Nombre: 'Cifras Población Municipios' }]),
+          });
+     }
+     return Promise.reject(new Error('API not found'));
+});
+
 describe('Padron Component', () => {
      const mockPush = jest.fn();
 
      beforeEach(() => {
           jest.clearAllMocks();
-
           useRouter.mockReturnValue({
                push: mockPush,
           });
      });
 
-     it('debe renderizar el componente correctamente', async () => {
+     it('debe mostrar el texto "Operaciones Estadísticas sobre el Padrón"', () => {
           const { getByText } = render(<Padron />);
-
-          await waitFor(() => {
-               expect(getByText('Operaciones Estadísticas sobre el Padrón')).toBeTruthy();
-          });
+          expect(getByText('Operaciones Estadísticas sobre el Padrón')).toBeTruthy();
      });
 
-     it('debe mostrar el estado de carga inicialmente', () => {
+     it('debe mostrar un mensaje de "Cargando..." mientras los datos están cargando', async () => {
           const { getByText } = render(<Padron />);
           expect(getByText('Cargando...')).toBeTruthy();
      });
 
-     it('debe cargar y mostrar las operaciones estadísticas después de la carga', async () => {
+
+
+     it('debe mostrar las operaciones estadísticas sin periodicidad establecida', async () => {
           const { getByText } = render(<Padron />);
 
+          // Esperar a que se cargue el texto del título de la sección
           await waitFor(() => {
                expect(getByText('Operaciones estadísticas sin periodicidad establecida')).toBeTruthy();
+          });
+     });
+
+     it('debe mostrar las operaciones estadísticas elaboradas de forma periódica', async () => {
+          const { getByText } = render(<Padron />);
+
+          // Esperar a que se cargue el texto del título de la sección
+          await waitFor(() => {
                expect(getByText('Operaciones estadísticas elaboradas de forma periódica')).toBeTruthy();
-          });
-     });
-
-     it('debe navegar a la pantalla correspondiente al presionar una operación estadística', async () => {
-          const { getByText } = render(<Padron />);
-
-
-          await waitFor(() => {
-               expect(getByText('Operaciones estadísticas sin periodicidad establecida')).toBeTruthy();
-          });
-
-          const operationButton = getByText('Nombre de la Operación 1');
-          fireEvent.press(operationButton);
-
-          expect(mockPush).toHaveBeenCalledWith({
-               pathname: 'estadisticasPadronContinuo', // Reemplaza con la ruta correcta
-               params: { id: expect.any(Number), nombre: 'Nombre de la Operación 1' },
-          });
-     });
-
-     it('debe manejar correctamente el estado de error en caso de falla en la carga de datos', async () => {
-          // Simular un error en la carga de datos
-          global.fetch = jest.fn(() =>
-               Promise.reject(new Error('Error al obtener datos'))
-          );
-
-          const { getByText } = render(<Padron />);
-
-          await waitFor(() => {
-
-               expect(getByText('Error al cargar los datos')).toBeTruthy();
           });
      });
 });

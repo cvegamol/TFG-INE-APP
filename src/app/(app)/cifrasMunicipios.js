@@ -3,12 +3,10 @@ import { ScrollView, View, Text, TouchableOpacity, Image, Animated, ImageBackgro
 import { styled } from 'nativewind';
 import Plantilla from '../../components/Plantilla';
 import { useLocalSearchParams, useRouter } from 'expo-router';
-import Loading from '../../components/Loading';
 import {
      widthPercentageToDP as wp,
      heightPercentageToDP as hp,
 } from 'react-native-responsive-screen';
-import { Ionicons } from '@expo/vector-icons';
 
 const ViewStyled = styled(View);
 const TextStyled = styled(Text);
@@ -132,7 +130,6 @@ const CifrasPadron = () => {
                     <ViewStyled className="p-4 bg-white">
                          {isLoading ? (
                               <ViewStyled className="flex-1 justify-center items-center mt-8">
-                                   <Loading size={hp(6)} />
                                    <TextStyled className="text-lg text-teal-500 mt-4">
                                         Cargando...
                                    </TextStyled>
@@ -167,7 +164,6 @@ const CifrasPadron = () => {
                                                        )
                                                   }
                                              >
-                                                  <Ionicons name="people-circle-outline" size={24} color="white" />
                                                   <TextStyled className="text-lg text-white font-semibold ml-2">
                                                        Cifras oficiales de población de los municipios
                                                   </TextStyled>
@@ -190,7 +186,6 @@ const CifrasPadron = () => {
                                                        )
                                                   }
                                              >
-                                                  <Ionicons name="stats-chart-outline" size={24} color="#065f5b" />
                                                   <TextStyled className="text-lg font-semibold ml-2" style={{ color: '#065f5b' }}>
                                                        Tablas de las Cifras oficiales de población
                                                   </TextStyled>
@@ -238,7 +233,6 @@ const CifrasPadron = () => {
                                                             }}
                                                        >
                                                             <ViewStyled className="flex-row items-center mb-4">
-                                                                 <Ionicons name="information-circle-outline" size={28} color="#ffffff" />
                                                                  <TextStyled className="text-lg font-semibold ml-2" style={{ color: '#ffffff' }}>
                                                                       ¿Sabías que...?
                                                                  </TextStyled>
