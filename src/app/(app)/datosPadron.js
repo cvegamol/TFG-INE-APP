@@ -172,11 +172,21 @@ const DatosSeries = () => {
                     type: 'bar',
                     data: {
                         labels: chartDataPdf.labels,
-                        datasets: chartDataPdf.datasets.map((dataset, index) => ({
-                            label: chartDataPdf.leyenda[index], // Puedes ajustar el label según tus necesidades
-                            data: dataset.data.map((value) => parseFloat(value)),
-                            backgroundColor: seriesColors[index % seriesColors.length],
-                        })),
+                        datasets: chartDataPdf.datasets.map((dataset) => {
+                            // Encontrar el índice correcto en la leyenda que coincide con el dataset.serie
+                            const matchingLeyenda = chartDataPdf.leyenda.find((leyenda) =>
+                                dataset.originalData.some((item) => item.serie.includes(leyenda))
+                            );
+
+                            console.log("Serie del dataset:", dataset.originalData.map(item => item.serie)); // Para depurar
+                            console.log("Leyenda correspondiente:", matchingLeyenda); // Para depurar
+
+                            return {
+                                label: matchingLeyenda || `Serie sin leyenda`, // Usar la leyenda encontrada o un valor por defecto
+                                data: dataset.data.map((value) => parseFloat(value)), // Convertir los valores a float
+                                backgroundColor: seriesColors[chartDataPdf.leyenda.indexOf(matchingLeyenda) % seriesColors.length], // Asignar color usando el índice de la leyenda
+                            };
+                        }),
                     },
                     options: {
                         xAxes: [
