@@ -1,16 +1,14 @@
 import React from 'react';
 import { render, fireEvent, waitFor } from '@testing-library/react-native';
-import SignUp from './signUp'; // Asegúrate de que la ruta es correcta
+import SignUp from './signUp';
 import { useAuth } from '../context/authContext';
 import { useRouter } from 'expo-router';
 import { Alert } from 'react-native';
 
-// Mock de useAuth
 jest.mock('../context/authContext', () => ({
      useAuth: jest.fn(),
 }));
 
-// Mock de useRouter
 jest.mock('expo-router', () => ({
      useRouter: jest.fn(),
 }));
@@ -20,10 +18,8 @@ describe('SignUp Component', () => {
      const mockPush = jest.fn();
 
      beforeEach(() => {
-          // Resetear los mocks antes de cada prueba
           jest.clearAllMocks();
 
-          // Configurar los mocks
           useAuth.mockReturnValue({
                register: mockRegister,
           });

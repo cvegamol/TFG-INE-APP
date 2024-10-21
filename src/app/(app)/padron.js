@@ -3,8 +3,6 @@ import { Animated, SectionList, View, Text, TouchableOpacity, ScrollView } from 
 import { styled } from 'nativewind';
 import Plantilla from '../../components/Plantilla';
 import { useRouter } from 'expo-router';
-import Loading from '../../components/Loading';
-import { widthPercentageToDP as wp, heightPercentageToDP as hp } from "react-native-responsive-screen";
 
 const ViewStyled = styled(View);
 const TextStyled = styled(Text);
@@ -147,7 +145,6 @@ const Padron = () => {
 
         {isLoading ? (
           <ViewStyled className="flex-1 justify-center items-center">
-            <Loading size={hp(6)} />
             <TextStyled className="text-lg text-teal-500 mt-2">Cargando...</TextStyled>
           </ViewStyled>
         ) : (

@@ -4,12 +4,10 @@ import Home from './home';
 import { useAuth } from '../../context/authContext';
 import { useRouter } from 'expo-router';
 
-// Mock de useAuth
 jest.mock('../../context/authContext', () => ({
      useAuth: jest.fn(),
 }));
 
-// Mock de useRouter
 jest.mock('expo-router', () => ({
      useRouter: jest.fn(),
 }));
