@@ -4,13 +4,6 @@ import { styled } from 'nativewind';
 import Plantilla from '../../components/Plantilla';
 
 import { useLocalSearchParams, useRouter } from 'expo-router';
-import Loading from '../../components/Loading';
-import { Button, CheckBox } from 'react-native-elements';
-import Icon from 'react-native-vector-icons/Ionicons';
-import {
-    widthPercentageToDP as wp,
-    heightPercentageToDP as hp,
-} from "react-native-responsive-screen";
 import VariableSelection from '../../components/VariableSelection';
 import PeriodicidadSelection from '../../components/PeriodicidadesSelection';
 
@@ -364,7 +357,6 @@ const SeriesTabla = () => {
 
                     <Animated.View style={{ opacity: fadeAnim }}>
                         <TextStyled className="text-2xl text-teal-700 mb-6 font-bold flex items-center">
-                            <Icon name="list-circle-outline" size={24} color="teal" />
                             Tabla: {tablaObj.Nombre}
                         </TextStyled>
                     </Animated.View>
@@ -387,7 +379,6 @@ const SeriesTabla = () => {
 
                     {isLoading ? (
                         <ViewStyled className="flex-1 justify-center items-center mt-4">
-                            <Loading size={hp(6)} />
                             <TextStyled className="text-lg text-teal-500 mt-2">
                                 Cargando...
                             </TextStyled>
@@ -442,7 +433,6 @@ const SeriesTabla = () => {
                                 <TextStyled className="text-white font-bold">
                                     Consultar Selección
                                 </TextStyled>
-                                <Icon name="checkmark-circle-outline" size={20} color="white" style={{ marginLeft: 10 }} />
                             </TouchableOpacity>
                         </>
                     )}

@@ -4,7 +4,7 @@ import { styled } from 'nativewind';
 
 
 
-import { Button, CheckBox } from 'react-native-elements';
+import { CheckBox } from 'react-native-elements';
 import Icon from 'react-native-vector-icons/Ionicons';
 
 

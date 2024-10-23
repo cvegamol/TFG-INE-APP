@@ -3,3 +3,6 @@ import mockAsyncStorage from '@react-native-async-storage/async-storage/jest/asy
 
 jest.mock('@react-native-async-storage/async-storage', () => mockAsyncStorage);
 jest.mock('react-native/Libraries/Animated/NativeAnimatedHelper');
+
+import fetchMock from 'jest-fetch-mock';
+fetchMock.enableMocks();
