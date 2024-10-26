@@ -12,19 +12,15 @@ const ViewStyled = styled(View);
 const TextStyled = styled(Text);
 const StyledTouchableOpacity = styled(TouchableOpacity);
 
-const UserList = () => {
+const GestionUsuarios = () => {
      const { db } = useAuth();
      const [users, setUsers] = useState([]);
      const [loading, setLoading] = useState(true);
      const router = useRouter();
 
-     // Cabecera de la tabla
      const tableHead = ['Correo', 'Rol', 'Ver más', 'Modificar', 'Eliminar'];
-
-     // Anchos para cada columna
      const widthArr = [Dimensions.get('window').width * 0.55, Dimensions.get('window').width * 0.2, Dimensions.get('window').width * 0.3, Dimensions.get('window').width * 0.25, Dimensions.get('window').width * 0.2];
 
-     // Función para obtener usuarios desde Firebase
      const fetchUsers = async () => {
           setLoading(true);
           try {
@@ -42,7 +38,6 @@ const UserList = () => {
           fetchUsers();
      }, []);
 
-     // Función para confirmar la eliminación de un usuario
      const confirmDeleteUser = (userId) => {
           Alert.alert(
                'Eliminar usuario',
@@ -59,12 +54,11 @@ const UserList = () => {
           );
      };
 
-     // Función para eliminar un usuario
      const handleDeleteUser = async (userId) => {
           try {
                await deleteDoc(doc(db, 'users', userId));
                Alert.alert('Usuario eliminado', 'El usuario ha sido eliminado correctamente.');
-               fetchUsers(); // Recargar la lista después de eliminar
+               fetchUsers();
           } catch (error) {
                Alert.alert('Error', 'No se pudo eliminar el usuario.');
           }
@@ -82,76 +76,75 @@ const UserList = () => {
      return (
           <ScrollView>
                <ViewStyled className="p-4">
-                    <TextStyled className="text-2xl font-bold text-center mb-4">Listado de Usuarios</TextStyled>
-
+                    <TextStyled className="text-2xl font-bold text-center mb-4 text-teal-700">Listado de Usuarios</TextStyled>
+                    <TextStyled className="text-center text-black-600 mb-4">
+                         Aquí se encuentra un listado de usuarios que se han registrado en la aplicación.
+                    </TextStyled>
                     <ScrollView horizontal={true}>
-                         {/* Añade un Scroll horizontal para que las columnas no se corten */}
                          <ViewStyled className="bg-gray-100 p-4 rounded-xl shadow-md">
-                              <Table borderStyle={{ borderWidth: 1, borderColor: '#ccc' }}>
-                                   {/* Cabecera de la tabla */}
+                              <Table borderStyle={{ borderWidth: 1, borderColor: '#0c4a4e' }}>
                                    <Row
                                         data={tableHead}
                                         widthArr={widthArr}
-                                        style={{ height: 50, backgroundColor: '#f1f8ff' }}
-                                        textStyle={{ fontWeight: 'bold', textAlign: 'center' }}
+                                        style={{ height: 50, backgroundColor: '#0c4a4e' }}
+                                        textStyle={{ fontWeight: 'bold', textAlign: 'center', color: '#ffffff' }}
                                    />
 
-                                   {/* Listado de usuarios */}
-                                   {users.map((user, index) => {
-                                        console.log(user);
-                                        return (
-                                             <Row
-                                                  key={user.id}
-                                                  data={[
-                                                       user.email,
-                                                       user.rol || 'Sin rol', // Mostramos el rol del usuario o 'Sin rol' si no está definido
-                                                       <StyledTouchableOpacity
-                                                            onPress={() => router.push(`verMas/${user.id}`)}
-                                                            className="bg-blue-600 p-2 rounded-xl mx-auto"
-                                                            style={{ width: 80, alignSelf: 'center' }}
-                                                       >
-                                                            <TextStyled className="text-white text-center">Ver más</TextStyled>
-                                                       </StyledTouchableOpacity>,
-                                                       <StyledTouchableOpacity
-                                                            onPress={() => router.push(`modificar/${user.id}`)}
-                                                            className="bg-green-600 p-2 rounded-xl mx-auto"
-                                                            style={{ width: 50, alignSelf: 'center' }}
-                                                       >
-                                                            <FontAwesome6 name="edit" size={20} color="white" style={{ alignSelf: 'center' }} />
-                                                       </StyledTouchableOpacity>,
-                                                       <StyledTouchableOpacity
-                                                            onPress={() => confirmDeleteUser(user.id)}
-                                                            className="bg-red-600 p-2 rounded-xl mx-auto"
-                                                            style={{ width: 50, alignSelf: 'center' }}
-                                                       >
-                                                            <FontAwesome6 name="trash" size={20} color="white" style={{ alignSelf: 'center' }} />
-                                                       </StyledTouchableOpacity>,
-                                                  ]}
-                                                  widthArr={widthArr}
-                                                  style={{ height: 50, backgroundColor: index % 2 === 0 ? '#f9f9f9' : '#fff' }}
-                                                  textStyle={{ textAlign: 'center' }}
-                                             />
-                                        );
-                                   })}
+                                   {users.map((user, index) => (
+                                        <Row
+                                             key={user.id}
+                                             data={[
+                                                  user.email,
+                                                  user.rol || 'Sin rol',
+                                                  <StyledTouchableOpacity
+                                                       onPress={() => router.push(`verMas/${user.id}`)}
+                                                       className="bg-teal-700 p-2 rounded-xl mx-auto"
+                                                       style={{ width: 80, alignSelf: 'center' }}
+                                                  >
+                                                       <TextStyled className="text-white text-center">Ver más</TextStyled>
+                                                  </StyledTouchableOpacity>,
+                                                  <StyledTouchableOpacity
+                                                       onPress={() => router.push(`modificar/${user.id}`)}
+                                                       className="bg-teal-600 p-2 rounded-xl mx-auto"
+                                                       style={{ width: 50, alignSelf: 'center' }}
+                                                  >
+                                                       <FontAwesome6 name="edit" size={20} color="white" style={{ alignSelf: 'center' }} />
+                                                  </StyledTouchableOpacity>,
+                                                  <StyledTouchableOpacity
+                                                       onPress={() => confirmDeleteUser(user.id)}
+                                                       className="bg-red-600 p-2 rounded-xl mx-auto"
+                                                       style={{ width: 50, alignSelf: 'center' }}
+                                                  >
+                                                       <FontAwesome6 name="trash" size={20} color="white" style={{ alignSelf: 'center' }} />
+                                                  </StyledTouchableOpacity>,
+                                             ]}
+                                             widthArr={widthArr}
+                                             style={{ height: 50, backgroundColor: index % 2 === 0 ? '#f0f9fa' : '#e0f7f7' }}
+                                             textStyle={{ textAlign: 'center', color: 'black' }}
+                                        />
+                                   ))}
                               </Table>
                          </ViewStyled>
                     </ScrollView>
+
                     <StyledTouchableOpacity
                          onPress={() => router.push('addUsuario')}
-                         className="bg-teal-600 p-4 rounded-xl mt-6 mx-auto w-full max-w-md"
+                         className="bg-teal-700 flex-row items-center justify-center p-3 rounded-lg mt-6 mx-auto w-48"
                     >
-                         <TextStyled className="text-white text-center font-bold text-lg">Añadir Usuario</TextStyled>
+                         <FontAwesome6 name="user-plus" size={18} color="white" style={{ marginRight: 8 }} />
+                         <TextStyled className="text-white font-bold text-sm">Añadir Usuario</TextStyled>
                     </StyledTouchableOpacity>
 
                     <StyledTouchableOpacity
                          onPress={() => router.push('informesUsuarios')}
-                         className="bg-purple-600 p-4 rounded-xl mt-4 mx-auto w-full max-w-md"
+                         className="bg-teal-600 flex-row items-center justify-center p-3 rounded-lg mt-4 mx-auto w-48"
                     >
-                         <TextStyled className="text-white text-center font-bold text-lg">Obtener Informes de Usuarios</TextStyled>
+                         <FontAwesome6 name="file-alt" size={18} color="white" style={{ marginRight: 8 }} />
+                         <TextStyled className="text-white font-bold text-sm">Obtener Informes</TextStyled>
                     </StyledTouchableOpacity>
                </ViewStyled>
           </ScrollView>
      );
 };
 
-export default UserList;
+export default GestionUsuarios;
