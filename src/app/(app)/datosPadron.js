@@ -1595,14 +1595,16 @@ const DatosSeries = () => {
                 <ScrollViewStyled contentContainerStyle={styles.container}>
 
                     {Object.keys(valoresObj).map((variableId) => (
-                        <ViewStyled key={variableId} className="mb-4 p-4 bg-teal-100 rounded-lg shadow-lg">
+                        <ViewStyled
+                            key={variableId}
+                            className="mb-4 p-4 bg-teal-100 rounded-lg shadow-lg"
+                            style={{ borderBottomWidth: 2, borderBottomColor: '#D1D5DB' }} // Añadido
+                        >
                             <ViewStyled className="flex-1">
-                                <ViewStyled style={{
-                                    borderBottomColor: '#38b2ac',
-                                    borderBottomWidth: 2,
-                                    marginVertical: 0,
-                                }} className="flex-row justify-between items-center mb-2">
-                                    {/* Asegurarse de que el texto esté dentro de un componente <TextStyled> */}
+                                <ViewStyled
+                                    className="flex-row justify-between items-center mb-2"
+                                    style={{ marginVertical: 0 }}
+                                >
                                     <TextStyled className="text-lg font-semibold text-teal-900">
                                         {valoresObj[variableId][0]?.Variable?.Nombre || 'Nombre no disponible'}
                                     </TextStyled>
@@ -1616,7 +1618,6 @@ const DatosSeries = () => {
                                                 onPress={() => handleVariableSelection(valor, variableId)}
                                                 checkedColor="#2c7a7b"
                                             />
-                                            {/* Asegurarse de que el texto esté dentro de un componente <TextStyled> */}
                                             <TextStyled className="ml-2 text-teal-800">
                                                 {valor.Nombre}
                                             </TextStyled>
@@ -1625,7 +1626,6 @@ const DatosSeries = () => {
                                 </ScrollViewStyled>
                             </ViewStyled>
                         </ViewStyled>
-
                     ))}
 
 
