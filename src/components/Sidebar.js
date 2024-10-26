@@ -4,6 +4,7 @@ import { View, Text, TouchableOpacity, Animated, PanResponder } from 'react-nati
 import { styled } from 'nativewind';
 import { useAuth } from '../context/authContext';
 import { useRouter } from 'expo-router';
+import { Ionicons, FontAwesome5 } from '@expo/vector-icons';
 
 const ViewStyled = styled(View);
 const TextStyled = styled(Text);
@@ -12,14 +13,12 @@ const TouchableOpacityStyled = styled(TouchableOpacity);
 const Sidebar = ({ toggleSidebar }) => {
   const { logout, rol } = useAuth();
   const router = useRouter();
-  const [sidebarAnim] = useState(new Animated.Value(-250)); // Posición inicial fuera de pantalla
-  const [buttonScale] = useState(new Animated.Value(1)); // Escala inicial de los botones
+  const [sidebarAnim] = useState(new Animated.Value(-250));
+  const [buttonScale] = useState(new Animated.Value(1));
 
   useEffect(() => {
-    // Animación de entrada del sidebarç
-    console.log("Usuario rol", rol)
     Animated.spring(sidebarAnim, {
-      toValue: 0, // Posición dentro de la pantalla
+      toValue: 0,
       useNativeDriver: true,
     }).start();
   }, []);
@@ -27,18 +26,15 @@ const Sidebar = ({ toggleSidebar }) => {
   const handleLogOut = async () => {
     await logout();
     router.push("welcome");
-
   };
 
   const panResponder = useRef(
     PanResponder.create({
-      onMoveShouldSetPanResponder: (evt, gestureState) => {
-        return Math.abs(gestureState.dx) > 20 && gestureState.dx < 0;
-      },
+      onMoveShouldSetPanResponder: (evt, gestureState) => Math.abs(gestureState.dx) > 20 && gestureState.dx < 0,
       onPanResponderRelease: (evt, gestureState) => {
         if (gestureState.dx < -50) {
           Animated.timing(sidebarAnim, {
-            toValue: -250, // Oculta el sidebar
+            toValue: -250,
             duration: 300,
             useNativeDriver: true,
           }).start(() => toggleSidebar());
@@ -48,23 +44,17 @@ const Sidebar = ({ toggleSidebar }) => {
   ).current;
 
   const handleButtonPressIn = () => {
-    Animated.spring(buttonScale, {
-      toValue: 1.1, // Escala ligeramente mayor al hacer presión
-      useNativeDriver: true,
-    }).start();
+    Animated.spring(buttonScale, { toValue: 1.1, useNativeDriver: true }).start();
   };
 
   const handleButtonPressOut = () => {
-    Animated.spring(buttonScale, {
-      toValue: 1, // Vuelve a la escala original
-      useNativeDriver: true,
-    }).start();
+    Animated.spring(buttonScale, { toValue: 1, useNativeDriver: true }).start();
   };
 
   return (
     <Animated.View
-      className="w-64 h-full bg-teal-800 pt-12 pl-4 flex justify-between"
-      style={{ transform: [{ translateX: sidebarAnim }] }} // Sidebar se desliza desde la izquierda
+      className="w-64 h-full bg-teal-800 pt-12 pl-4 pr-4 flex justify-between"
+      style={{ transform: [{ translateX: sidebarAnim }] }}
       {...panResponder.panHandlers}
     >
       <View className="flex-1">
@@ -72,125 +62,78 @@ const Sidebar = ({ toggleSidebar }) => {
           onPress={() => router.replace('home')}
           onPressIn={handleButtonPressIn}
           onPressOut={handleButtonPressOut}
+          className="flex-row items-center"
         >
-          <Animated.Text
-            className="text-lg text-white my-2 hover:bg-teal-600 p-2 rounded transition-all duration-200 ease-in-out"
-            style={{ transform: [{ scale: buttonScale }] }} // Animación de escala en botones
-          >
-            Home
-          </Animated.Text>
-        </TouchableOpacityStyled>
-        <TouchableOpacityStyled
-          onPress={() => {
-            router.push('home');  // Siempre ir al home primero
-            setTimeout(() => {
-              router.push('padron');  // Después ir al padrón (o a la pantalla deseada)
-            }, 100);  // Un pequeño retraso para asegurarse de que el home se renderice antes de la siguiente navegación
-          }}
-          onPressIn={handleButtonPressIn}
-          onPressOut={handleButtonPressOut}
-        >
-          <Animated.Text
-            className="text-lg text-white my-2 hover:bg-teal-600 p-2 rounded transition-all duration-200 ease-in-out"
-            style={{ transform: [{ scale: buttonScale }] }}
-          >
-            Padrón
-          </Animated.Text>
+          <Ionicons name="home-outline" size={20} color="white" style={{ marginRight: 8 }} />
+          <Animated.Text className="text-base text-white my-2">Home</Animated.Text>
         </TouchableOpacityStyled>
 
         <TouchableOpacityStyled
-          onPress={() => {
-            router.push('home');  // Primero ir al home
-            setTimeout(() => {
-              router.push('cifrasPoblacion');  // Después ir a Cifras de población
-            }, 100);  // Retraso mínimo para asegurar la navegación
-          }}
+          onPress={() => { router.push('home'); setTimeout(() => router.push('padron'), 100); }}
           onPressIn={handleButtonPressIn}
           onPressOut={handleButtonPressOut}
+          className="flex-row items-center"
         >
-          <Animated.Text
-            className="text-lg text-white my-2 hover:bg-teal-600 p-2 rounded transition-all duration-200 ease-in-out"
-            style={{ transform: [{ scale: buttonScale }] }}
-          >
-            Cifras de población y Censos demográficos
-          </Animated.Text>
+          <FontAwesome5 name="users" size={18} color="white" style={{ marginRight: 8 }} />
+          <Animated.Text className="text-base text-white my-2">Padrón</Animated.Text>
         </TouchableOpacityStyled>
 
         <TouchableOpacityStyled
-          onPress={() => {
-            router.push('home');  // Navegar primero a home
-            setTimeout(() => {
-              router.push('fenomenosDemograficos');  // Después ir a Fenómenos Demográficos
-            }, 100);  // Retraso mínimo para asegurar la navegación
-          }}
+          onPress={() => { router.push('home'); setTimeout(() => router.push('cifrasPoblacion'), 100); }}
           onPressIn={handleButtonPressIn}
           onPressOut={handleButtonPressOut}
+          className="flex-row items-center"
         >
-          <Animated.Text
-            className="text-lg text-white my-2 hover:bg-teal-600 p-2 rounded transition-all duration-200 ease-in-out"
-            style={{ transform: [{ scale: buttonScale }] }}
-          >
-            Fenomenos Demograficos
-          </Animated.Text>
+          <Ionicons name="stats-chart" size={20} color="white" style={{ marginRight: 8 }} />
+          <Animated.Text className="text-base text-white my-2">Cifras de población</Animated.Text>
+        </TouchableOpacityStyled>
+
+        <TouchableOpacityStyled
+          onPress={() => { router.push('home'); setTimeout(() => router.push('fenomenosDemograficos'), 100); }}
+          onPressIn={handleButtonPressIn}
+          onPressOut={handleButtonPressOut}
+          className="flex-row items-center"
+        >
+          <FontAwesome5 name="chart-bar" size={18} color="white" style={{ marginRight: 8 }} />
+          <Animated.Text className="text-base text-white my-2">Fenómenos Demográficos</Animated.Text>
+        </TouchableOpacityStyled>
+
+
+
+        <TouchableOpacityStyled
+          onPress={() => { router.push('home'); setTimeout(() => router.push('perfil'), 100); }}
+          onPressIn={handleButtonPressIn}
+          onPressOut={handleButtonPressOut}
+          className="flex-row items-center"
+        >
+          <Ionicons name="person-outline" size={20} color="white" style={{ marginRight: 8 }} />
+          <Animated.Text className="text-base text-white my-2">Perfil</Animated.Text>
         </TouchableOpacityStyled>
 
         {rol === 'admin' && (
           <TouchableOpacityStyled
-            onPress={() => {
-              router.push('home');  // Navegar primero a home
-              setTimeout(() => {
-                router.push('gestionUsuarios'); // Después ir a Perfil
-              }, 100);  // Retraso mínimo para asegurar la navegación
-            }}
-
+            onPress={() => { router.push('home'); setTimeout(() => router.push('gestionUsuarios'), 100); }}
             onPressIn={handleButtonPressIn}
             onPressOut={handleButtonPressOut}
+            className="flex-row items-center"
           >
-            <Animated.Text
-              className="text-lg text-white my-2 hover:bg-teal-600 p-2 rounded transition-all duration-200 ease-in-out"
-              style={{ transform: [{ scale: buttonScale }] }}
-            >
-              Gestión de Usuarios
-            </Animated.Text>
+            <Ionicons name="settings" size={20} color="white" style={{ marginRight: 8 }} />
+            <Animated.Text className="text-base text-white my-2">Gestión de Usuarios</Animated.Text>
           </TouchableOpacityStyled>
         )}
-
-
-        <TouchableOpacityStyled
-          onPress={() => {
-            router.push('home');  // Navegar primero a home
-            setTimeout(() => {
-              router.push('perfil');  // Después ir a Perfil
-            }, 100);  // Retraso mínimo para asegurar la navegación
-          }}
-          onPressIn={handleButtonPressIn}
-          onPressOut={handleButtonPressOut}
-        >
-          <Animated.Text
-            className="text-lg text-white my-2 hover:bg-teal-600 p-2 rounded transition-all duration-200 ease-in-out"
-            style={{ transform: [{ scale: buttonScale }] }}
-          >
-            Perfil
-          </Animated.Text>
-        </TouchableOpacityStyled>
       </View>
 
-      {/* SignOut abajo a la izquierda */}
-      <View className="mb-6">
+
+
+      {/* SignOut alineado a la derecha */}
+      <View className="mb-6 flex items-end pr-4">
         <TouchableOpacityStyled
           onPress={handleLogOut}
           onPressIn={handleButtonPressIn}
           onPressOut={handleButtonPressOut}
         >
-          <Animated.Text
-            className="text-lg text-white my-2 hover:bg-red-600 p-2 rounded transition-all duration-200 ease-in-out"
-            style={{ transform: [{ scale: buttonScale }] }}
-          >
-            SignOut
-          </Animated.Text>
+          <Ionicons name="log-out-outline" size={28} color="white" />
         </TouchableOpacityStyled>
-
-
       </View>
     </Animated.View>
   );
