@@ -33,7 +33,12 @@ const ModalComponent = ({ modalVisible, setModalVisible, handleFormatSelection }
                             </TouchableOpacity>
                         ))}
                     </ScrollView>
-                    <Button title="Cancelar" onPress={() => setModalVisible(false)} buttonStyle={{ marginTop: 10 }} />
+                    <Button
+                        title="Cancelar"
+                        onPress={() => setModalVisible(false)}
+                        buttonStyle={{ marginTop: 10, backgroundColor: '#2c7a7b' }} // bg-teal-200
+                    />
+
                 </View>
             </View>
         </Modal>
