@@ -1531,32 +1531,24 @@ const DatosSeries = () => {
 
                 <ScrollViewStyled horizontal contentContainerStyle={{ width: Math.max(totalTableWidth, width) }}>
                     <ViewStyled>
-                        {/* Botón compartir solo en Android */}
-                        {Platform.OS === 'android' && (
-                            <ViewStyled style={{
-                                marginBottom: 14,
-                                justifyContent: 'flex-start',
-                                alignItems: 'flex-start',
-                                marginLeft: 8
-                            }}>
-                                <Button
-                                    icon={<AntDesign name="sharealt" size={24} color="white" />}
-                                    title=" Compartir"
-                                    onPress={onSharePress}
-                                    buttonStyle={{
-                                        backgroundColor: '#2c7a7b',
-                                        paddingHorizontal: 15,
-                                        paddingVertical: 10,
-                                        borderRadius: 8,
-                                    }}
-                                    titleStyle={{
-                                        color: '#ffffff',
-                                        fontWeight: 'bold',
-                                        fontSize: 16,
-                                    }}
-                                />
-                            </ViewStyled>
-                        )}
+                        {/* Contenedor para el botón de compartir */}
+                        <ViewStyled
+                            style={{
+                                flexDirection: 'row',
+                                alignItems: 'center',
+                                marginBottom: 10, // Ajusta el espacio debajo del botón si es necesario
+                                paddingHorizontal: 8, // Ajusta el espacio horizontal si es necesario
+                            }}
+                        >
+                            {/* Botón de compartir solo en Android */}
+                            {Platform.OS === 'android' && (
+                                <TouchableOpacity onPress={onSharePress} style={{ padding: 8 }}>
+                                    <AntDesign name="sharealt" size={24} color="#2c7a7b" />
+                                </TouchableOpacity>
+                            )}
+
+                            {/* Puedes agregar aquí otros elementos si lo deseas */}
+                        </ViewStyled>
 
                         <ScrollViewStyled contentContainerStyle={styles.tableContainer}>
                             {/* Encabezado de la tabla */}
@@ -1564,7 +1556,9 @@ const DatosSeries = () => {
                                 firstColumnWidth={firstColumnWidth}
                                 periodicidadesObj={periodicidadesObj}
                                 otherColumnFixedWidth={otherColumnFixedWidth}
-                                formatFecha={(ano, mes, dia, etiqueta) => etiqueta ? etiqueta : `${dia}/${mes}/${ano}`}
+                                formatFecha={(ano, mes, dia, etiqueta) =>
+                                    etiqueta ? etiqueta : `${dia}/${mes}/${ano}`
+                                }
                             />
 
                             {/* Filas de la tabla */}
@@ -1585,6 +1579,7 @@ const DatosSeries = () => {
                         </ScrollViewStyled>
                     </ViewStyled>
                 </ScrollViewStyled>
+
 
 
 
