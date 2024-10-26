@@ -72,7 +72,7 @@ const UserReports = () => {
 
                     <ViewStyled style={{ backgroundColor: '#E6FFFA', padding: 16, borderRadius: 12, marginBottom: 16, borderColor: '#B2F5EA', borderWidth: 1 }}>
                          <TextStyled style={{ fontSize: 18, fontWeight: 'bold', color: '#319795' }}>
-                              Usuarios Activos por Vida: {lifetimeUsers}
+                              Usuarios Registrados: {lifetimeUsers}
                          </TextStyled>
                     </ViewStyled>
 
