@@ -63,7 +63,7 @@ const Sidebar = ({ toggleSidebar }) => {
 
   return (
     <Animated.View
-      className="w-64 h-full bg-teal-700 pt-12 pl-4 flex justify-between"
+      className="w-64 h-full bg-teal-800 pt-12 pl-4 flex justify-between"
       style={{ transform: [{ translateX: sidebarAnim }] }} // Sidebar se desliza desde la izquierda
       {...panResponder.panHandlers}
     >
