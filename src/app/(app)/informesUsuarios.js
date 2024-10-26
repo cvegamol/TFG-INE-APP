@@ -16,22 +16,21 @@ const UserReports = () => {
      const [onlineUsers, setOnlineUsers] = useState(0);
      const [lifetimeUsers, setLifetimeUsers] = useState(0);
 
-     // Cabecera de la tabla
      const tableHead = ['Nombre', 'Apellido', 'Rol', 'Correo', 'Fecha de Creación', 'Última Conexión'];
-     const widthArr = [Dimensions.get('window').width * 0.25, Dimensions.get('window').width * 0.25, Dimensions.get('window').width * 0.25, Dimensions.get('window').width * 0.4, Dimensions.get('window').width * 0.4, Dimensions.get('window').width * 0.44];
+     const widthArr = [
+          Dimensions.get('window').width * 0.25,
+          Dimensions.get('window').width * 0.25,
+          Dimensions.get('window').width * 0.25,
+          Dimensions.get('window').width * 0.4,
+          Dimensions.get('window').width * 0.4,
+          Dimensions.get('window').width * 0.44
+     ];
 
-     // Función para obtener los datos de usuarios desde Firestore
      const fetchUsers = async () => {
           setLoading(true);
           try {
                const querySnapshot = await getDocs(collection(db, 'users'));
-               console.log("Usuarios:", querySnapshot.docs)
-               const usersData = querySnapshot.docs.map(doc => {
-                    const userData = { ...doc.data(), id: doc.id };
-                    console.log('Usuario:', userData); // Aquí haces el console.log de cada usuario
-                    return userData;
-               });
-               // Contar usuarios en línea y usuarios totales
+               const usersData = querySnapshot.docs.map(doc => ({ ...doc.data(), id: doc.id }));
                const onlineUsersCount = usersData.filter(user => user.isOnline).length;
                const totalUsersCount = usersData.length;
 
@@ -53,32 +52,38 @@ const UserReports = () => {
           return (
                <ViewStyled className="flex-1 justify-center items-center">
                     <Loading size={50} />
-                    <TextStyled className="text-lg text-gray-500 mt-2">Cargando...</TextStyled>
+                    <TextStyled className="text-lg text-teal-700 mt-2">Cargando...</TextStyled>
                </ViewStyled>
           );
      }
 
      return (
           <ScrollView>
-               <ViewStyled className="p-4">
-                    <TextStyled className="text-2xl font-bold text-center mb-4">Informes de Usuarios</TextStyled>
+               <ViewStyled style={{ padding: 16 }}>
+                    <TextStyled style={{ fontSize: 24, fontWeight: 'bold', textAlign: 'center', marginBottom: 16, color: '#065f46' }}>
+                         Informes de Usuarios
+                    </TextStyled>
 
-                    <ViewStyled className="bg-gray-100 p-6 rounded-xl shadow-md mb-4">
-                         <TextStyled className="text-lg font-bold">Usuarios en Línea: {onlineUsers}</TextStyled>
+                    <ViewStyled style={{ backgroundColor: '#E6FFFA', padding: 16, borderRadius: 12, marginBottom: 16, borderColor: '#B2F5EA', borderWidth: 1 }}>
+                         <TextStyled style={{ fontSize: 18, fontWeight: 'bold', color: '#319795' }}>
+                              Usuarios en Línea: {onlineUsers}
+                         </TextStyled>
                     </ViewStyled>
 
-                    <ViewStyled className="bg-gray-100 p-6 rounded-xl shadow-md mb-4">
-                         <TextStyled className="text-lg font-bold">Usuarios Activos por Vida: {lifetimeUsers}</TextStyled>
+                    <ViewStyled style={{ backgroundColor: '#E6FFFA', padding: 16, borderRadius: 12, marginBottom: 16, borderColor: '#B2F5EA', borderWidth: 1 }}>
+                         <TextStyled style={{ fontSize: 18, fontWeight: 'bold', color: '#319795' }}>
+                              Usuarios Activos por Vida: {lifetimeUsers}
+                         </TextStyled>
                     </ViewStyled>
 
                     <ScrollView horizontal={true}>
-                         <ViewStyled className="bg-gray-100 p-4 rounded-xl shadow-md">
-                              <Table borderStyle={{ borderWidth: 1, borderColor: '#ccc' }}>
+                         <ViewStyled style={{ backgroundColor: '#E6FFFA', padding: 16, borderRadius: 12, borderColor: '#B2F5EA', borderWidth: 1 }}>
+                              <Table borderStyle={{ borderWidth: 1, borderColor: '#0c4a4e' }}>
                                    <Row
                                         data={tableHead}
                                         widthArr={widthArr}
-                                        style={{ height: 50, backgroundColor: '#f1f8ff' }}
-                                        textStyle={{ fontWeight: 'bold', textAlign: 'center' }}
+                                        style={{ height: 50, backgroundColor: '#0c4a4e' }}
+                                        textStyle={{ fontWeight: 'bold', textAlign: 'center', color: '#fff' }}
                                    />
                                    {users.map((user, index) => (
                                         <Row
@@ -92,8 +97,8 @@ const UserReports = () => {
                                                   user.lastActive?.toDate().toLocaleString() || 'Nunca'
                                              ]}
                                              widthArr={widthArr}
-                                             style={{ height: 50, backgroundColor: index % 2 === 0 ? '#f9f9f9' : '#fff' }}
-                                             textStyle={{ textAlign: 'center' }}
+                                             style={{ height: 50, backgroundColor: index % 2 === 0 ? '#e0f2f1' : '#f0fdfa' }}
+                                             textStyle={{ textAlign: 'center', color: '#0c4a4e' }}
                                         />
                                    ))}
                               </Table>
