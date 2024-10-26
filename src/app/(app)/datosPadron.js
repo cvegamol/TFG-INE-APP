@@ -1921,36 +1921,34 @@ const DatosSeries = () => {
                 <BlurView intensity={80} tint="light" style={StyleSheet.absoluteFill}>
                     <ViewStyled className="flex-1 justify-center items-center">
                         <ViewStyled ref={chartRef} className="bg-white p-4 rounded-lg shadow-md w-11/12">
-                            <TouchableOpacity onPress={() => setIsChartModalVisible(false)}>
-                                <TextStyled className="text-right text-blue-500">Cerrar</TextStyled>
-                            </TouchableOpacity>
+                            <ViewStyled
+                                style={{
+                                    flexDirection: 'row',
+                                    justifyContent: 'space-between',
+                                    alignItems: 'center',
+                                    marginBottom: 10,
+                                }}
+                            >
+                                {/* Botón de compartir */}
+                                {Platform.OS === 'android' && (
+                                    <TouchableOpacity onPress={shareChartAsPDF} style={{ padding: 8 }}>
+                                        <AntDesign name="sharealt" size={24} color="#2c7a7b" />
+                                    </TouchableOpacity>
+                                )}
 
-                            {/* Botón de compartir solo en Android */}
-                            {Platform.OS === 'android' && (
-                                <Button
-                                    icon={<AntDesign name="sharealt" size={24} color="white" />}
-                                    title=" Compartir"
-                                    onPress={shareChartAsPDF}
-                                    buttonStyle={{
-                                        backgroundColor: '#2c7a7b',
-                                        paddingHorizontal: 15,
-                                        paddingVertical: 10,
-                                        borderRadius: 8,
-                                        marginTop: 10,
-                                    }}
-                                    titleStyle={{
-                                        color: '#ffffff',
-                                        fontWeight: 'bold',
-                                        fontSize: 16,
-                                    }}
-                                />
-                            )}
+                                {/* Botón de cerrar */}
+                                <TouchableOpacity onPress={() => setIsChartModalVisible(false)} style={{ padding: 8 }}>
+                                    <AntDesign name="close" size={24} color="#2c7a7b" />
+                                </TouchableOpacity>
+                            </ViewStyled>
 
+                            {/* Renderiza el gráfico */}
                             {renderChart()}
                         </ViewStyled>
                     </ViewStyled>
                 </BlurView>
             </Modal>
+
         </Plantilla>
     );
 };
