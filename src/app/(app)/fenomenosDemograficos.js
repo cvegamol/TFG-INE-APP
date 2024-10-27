@@ -26,16 +26,16 @@ const FenomenosDemograficos = () => {
 
           const obtenerDatosOperaciones = async () => {
                try {
-                    const estadisticasMigracionesCambiosResidencia = await fetch(`http://192.168.1.13:3000/operaciones/getOperationById/455`);
-                    const estadisticasMatrimonios = await fetch(`http://192.168.1.13:3000/operaciones/getOperationById/305`);
-                    const estadisticasNacimientos = await fetch(`http://192.168.1.13:3000/operaciones/getOperationById/307`);
-                    const estadisticasDefunciones = await fetch(`http://192.168.1.13:3000/operaciones/getOperationById/309`);
-                    const estadisticasAdquisiciones = await fetch(`http://192.168.1.13:3000/operaciones/getOperationById/336`);
-                    const indicadoresDemograficos = await fetch(`http://192.168.1.13:3000/operaciones/getOperationById/33`);
-                    const tablasMortalidad = await fetch(`http://192.168.1.13:3000/operaciones/getOperationById/197`);
-                    const estimacionDefunciones = await fetch(`http://192.168.1.13:3000/operaciones/getOperationById/406`);
-                    const estimacionNacimientos = await fetch(`http://192.168.1.13:3000/operaciones/getOperationById/424`);
-                    const estadisticaMigraciones = await fetch(`http://192.168.1.13:3000/operaciones/getOperationById/71`);
+                    const estadisticasMigracionesCambiosResidencia = await fetch(`https://deploy-app-production-5893.up.railway.app/operaciones/getOperationById/455`);
+                    const estadisticasMatrimonios = await fetch(`https://deploy-app-production-5893.up.railway.app/operaciones/getOperationById/305`);
+                    const estadisticasNacimientos = await fetch(`https://deploy-app-production-5893.up.railway.app/operaciones/getOperationById/307`);
+                    const estadisticasDefunciones = await fetch(`https://deploy-app-production-5893.up.railway.app/operaciones/getOperationById/309`);
+                    const estadisticasAdquisiciones = await fetch(`https://deploy-app-production-5893.up.railway.app/operaciones/getOperationById/336`);
+                    const indicadoresDemograficos = await fetch(`https://deploy-app-production-5893.up.railway.app/operaciones/getOperationById/33`);
+                    const tablasMortalidad = await fetch(`https://deploy-app-production-5893.up.railway.app/operaciones/getOperationById/197`);
+                    const estimacionDefunciones = await fetch(`https://deploy-app-production-5893.up.railway.app/operaciones/getOperationById/406`);
+                    const estimacionNacimientos = await fetch(`https://deploy-app-production-5893.up.railway.app/operaciones/getOperationById/424`);
+                    const estadisticaMigraciones = await fetch(`https://deploy-app-production-5893.up.railway.app/operaciones/getOperationById/71`);
 
                     // const estadisticasMigracionesCambiosResidencia = await fetch(`http://192.168.128.97:3000/operaciones/getOperationById/455`);
                     // const estadisticasMatrimonios = await fetch(`http://192.168.128.97:3000/operaciones/getOperationById/305`);
@@ -68,15 +68,15 @@ const FenomenosDemograficos = () => {
                     ];
 
                     const datosPeriodicos = [
-                         { Nombre: datosMigracionesCambiosResidencia[0].Nombre, Id: datosMigracionesCambiosResidencia[0].Id, Url: 'estadisticasMigracionesCambiosResidencia' },
-                         { Nombre: datosMatrimonios[0].Nombre, Id: datosMatrimonios[0].Id, Url: 'estadisticasMatrimonios' },
-                         { Nombre: datosNacimientos[0].Nombre, Id: datosNacimientos[0].Id, Url: 'estadisticasNacimientos' },
-                         { Nombre: datosDefunciones[0].Nombre, Id: datosDefunciones[0].Id, Url: 'estadisticasDefunciones' },
-                         { Nombre: datosAdquisiciones[0].Nombre, Id: datosAdquisiciones[0].Id, Url: 'estadisticasAdquisiciones' },
-                         { Nombre: datosIndicadores[0].Nombre, Id: datosIndicadores[0].Id, Url: 'indicadoresDemograficos' },
-                         { Nombre: datosTablasMortalidad[0].Nombre, Id: datosTablasMortalidad[0].Id, Url: 'tablasMortalidad' },
-                         { Nombre: datosEstimacionDefunciones[0].Nombre, Id: datosEstimacionDefunciones[0].Id, Url: 'estimacionDefunciones' },
-                         { Nombre: datosEstimacionNacimientos[0].Nombre, Id: datosEstimacionNacimientos[0].Id, Url: 'estimacionNacimientos' },
+                         { Nombre: datosMigracionesCambiosResidencia[0][0].Nombre, Id: datosMigracionesCambiosResidencia[0][0].Id, Url: 'estadisticasMigracionesCambiosResidencia' },
+                         { Nombre: datosMatrimonios[0][0].Nombre, Id: datosMatrimonios[0][0].Id, Url: 'estadisticasMatrimonios' },
+                         { Nombre: datosNacimientos[0][0].Nombre, Id: datosNacimientos[0][0].Id, Url: 'estadisticasNacimientos' },
+                         { Nombre: datosDefunciones[0][0].Nombre, Id: datosDefunciones[0][0].Id, Url: 'estadisticasDefunciones' },
+                         { Nombre: datosAdquisiciones[0][0].Nombre, Id: datosAdquisiciones[0][0].Id, Url: 'estadisticasAdquisiciones' },
+                         { Nombre: datosIndicadores[0][0].Nombre, Id: datosIndicadores[0][0].Id, Url: 'indicadoresDemograficos' },
+                         { Nombre: datosTablasMortalidad[0][0].Nombre, Id: datosTablasMortalidad[0][0].Id, Url: 'tablasMortalidad' },
+                         { Nombre: datosEstimacionDefunciones[0][0].Nombre, Id: datosEstimacionDefunciones[0][0].Id, Url: 'estimacionDefunciones' },
+                         { Nombre: datosEstimacionNacimientos[0][0].Nombre, Id: datosEstimacionNacimientos[0][0].Id, Url: 'estimacionNacimientos' },
                     ];
 
                     setDataPeriodica(datosPeriodicos);

@@ -26,11 +26,11 @@ const CifrasPoblacion = () => {
 
           const obtenerDatosOperaciones = async () => {
                try {
-                    const estadisticaContinuaPoblacion = await fetch(`http://192.168.1.13:3000/operaciones/getOperationById/450`);
-                    const proyeccionesPoblacion = await fetch(`http://192.168.1.13:3000/operaciones/getOperationById/326`);
-                    const proyeccionHogares = await fetch(`http://192.168.1.13:3000/operaciones/getOperationById/70`);
-                    const censosPoblacion = await fetch(`http://192.168.1.13:3000/operaciones/getOperationById/8`);
-                    const cifrasPoblacion = await fetch(`http://192.168.1.13:3000/operaciones/getOperationById/72`);
+                    const estadisticaContinuaPoblacion = await fetch(`https://deploy-app-production-5893.up.railway.app/operaciones/getOperationById/450`);
+                    const proyeccionesPoblacion = await fetch(`https://deploy-app-production-5893.up.railway.app/operaciones/getOperationById/326`);
+                    const proyeccionHogares = await fetch(`https://deploy-app-production-5893.up.railway.app/operaciones/getOperationById/70`);
+                    const censosPoblacion = await fetch(`https://deploy-app-production-5893.up.railway.app/operaciones/getOperationById/8`);
+                    const cifrasPoblacion = await fetch(`https://deploy-app-production-5893.up.railway.app/operaciones/getOperationById/72`);
 
                     // const estadisticaContinuaPoblacion = await fetch(`http://192.168.128.97:3000/operaciones/getOperationById/450`);
                     // const proyeccionesPoblacion = await fetch(`http://192.168.128.97:3000/operaciones/getOperationById/326`);
@@ -45,14 +45,14 @@ const CifrasPoblacion = () => {
                     const datosCifrasPoblacion = await cifrasPoblacion.json();
 
                     const nuevosDatos = [
-                         { Nombre: datosCifrasPoblacion[0].Nombre, Id: datosCifrasPoblacion[0].Id, Url: 'cifrasP' },
+                         { Nombre: datosCifrasPoblacion[0][0].Nombre, Id: datosCifrasPoblacion[0][0].Id, Url: 'cifrasP' },
                     ];
 
                     const datosPeriodicos = [
-                         { Nombre: datosEstContinuaPoblacion[0].Nombre, Id: datosEstContinuaPoblacion[0].Id, Url: 'estadisticasContinuaPoblacion' },
-                         { Nombre: datosProyecciones[0].Nombre, Id: datosProyecciones[0].Id, Url: 'proyeccionesPoblacion' },
-                         { Nombre: datosProyeccionHogares[0].Nombre, Id: datosProyeccionHogares[0].Id, Url: 'proyeccionesHogares' },
-                         { Nombre: datosCensosPoblacion[0].Nombre, Id: datosCensosPoblacion[0].Id, Url: 'censosPoblacionViviendas' }
+                         { Nombre: datosEstContinuaPoblacion[0][0].Nombre, Id: datosEstContinuaPoblacion[0][0].Id, Url: 'estadisticasContinuaPoblacion' },
+                         { Nombre: datosProyecciones[0][0].Nombre, Id: datosProyecciones[0][0].Id, Url: 'proyeccionesPoblacion' },
+                         { Nombre: datosProyeccionHogares[0][0].Nombre, Id: datosProyeccionHogares[0][0].Id, Url: 'proyeccionesHogares' },
+                         { Nombre: datosCensosPoblacion[0][0].Nombre, Id: datosCensosPoblacion[0][0].Id, Url: 'censosPoblacionViviendas' }
                     ];
 
                     setDataPeriodica(datosPeriodicos);

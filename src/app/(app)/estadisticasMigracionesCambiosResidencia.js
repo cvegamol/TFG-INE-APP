@@ -65,12 +65,12 @@ const MigracionesCambiosResidencia = () => {
           const obtenerDatos = async () => {
                try {
                     const estadisticaPadronContinuo = await fetch(
-                         `http://192.168.1.13:3000/operaciones/getOperationById/${id}`
+                         `https://deploy-app-production-5893.up.railway.app/operaciones/getOperationById/${id}`
                          //`http://192.168.128.97:3000/operaciones/getOperationById/${id}`
                     );
                     const datos = await estadisticaPadronContinuo.json();
                     if (isMounted) {
-                         setOperacionPadron(datos);
+                         setOperacionPadron(datos[0]);
                     }
                     console.log('ID', id)
                     const series = await Promise.all([
@@ -324,7 +324,7 @@ const MigracionesCambiosResidencia = () => {
      const handlePress = async (id) => {
           try {
                const response = await fetch(
-                    `http://192.168.1.13:3000/tablas/getTableById/${id}`
+                    `https://deploy-app-production-5893.up.railway.app/tablas/getTableById/${id}`
                     //`http://192.168.128.97:3000/tablas/getTableById/${id}`
                );
 
@@ -336,7 +336,7 @@ const MigracionesCambiosResidencia = () => {
                const text = await response.json(); // Lee el contenido como JSON
 
                // Cambiar el id dentro del objeto text[0] sin afectar el original
-               const tablaModificada = { ...text[0] }; // Aquí 'nuevoId' es el nuevo valor de ID
+               const tablaModificada = { ...text[0][0] }; // Aquí 'nuevoId' es el nuevo valor de ID
 
 
                // Navegar pasando la tabla modificada

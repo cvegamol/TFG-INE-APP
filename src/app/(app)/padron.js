@@ -32,10 +32,10 @@ const Padron = () => {
 
     const obtenerDatosOperaciones = async () => {
       try {
-        const estadisticaPadronContinuoNP = await fetch(`http://192.168.1.13:3000/operaciones/getOperationById/188`);
-        const cifrasPoblacionMunicipios = await fetch(`http://192.168.1.13:3000/operaciones/getOperationById/22`);
-        const residentesEspaExtranjeros = await fetch(`http://192.168.1.13:3000/operaciones/getOperationById/230`);
-        const variacionesResidenciales = await fetch(`http://192.168.1.13:3000/operaciones/getOperationById/202`);
+        const estadisticaPadronContinuoNP = await fetch(`https://deploy-app-production-5893.up.railway.app/operaciones/getOperationById/188`);
+        const cifrasPoblacionMunicipios = await fetch(`https://deploy-app-production-5893.up.railway.app/operaciones/getOperationById/22`);
+        const residentesEspaExtranjeros = await fetch(`https://deploy-app-production-5893.up.railway.app/operaciones/getOperationById/230`);
+        const variacionesResidenciales = await fetch(`https://deploy-app-production-5893.up.railway.app/operaciones/getOperationById/202`);
 
         // const estadisticaPadronContinuoNP = await fetch(`http://192.168.128.97:3000/operaciones/getOperationById/188`);
         // const cifrasPoblacionMunicipios = await fetch(`http://192.168.128.97:3000/operaciones/getOperationById/22`);
@@ -50,13 +50,13 @@ const Padron = () => {
         const datosVariaciones = await variacionesResidenciales.json();
 
         const nuevosDatos = [
-          { Nombre: datosPadron[0].Nombre, Id: datosPadron[0].Id, Url: 'estadisticasPadronContinuo' },
-          { Nombre: datosVariaciones[0].Nombre, Id: datosVariaciones[0].Id, Url: 'variacionesResidenciales' },
+          { Nombre: datosPadron[0][0].Nombre, Id: datosPadron[0][0].Id, Url: 'estadisticasPadronContinuo' },
+          { Nombre: datosVariaciones[0][0].Nombre, Id: datosVariaciones[0][0].Id, Url: 'variacionesResidenciales' },
         ];
 
         const datosPeriodicos = [
-          { Nombre: datosCifras[0].Nombre, Id: datosCifras[0].Id, Url: 'datosCifras' },
-          { Nombre: datosResidentes[0].Nombre, Id: datosResidentes[0].Id, Url: 'residentesExtranjero' },
+          { Nombre: datosCifras[0][0].Nombre, Id: datosCifras[0][0].Id, Url: 'datosCifras' },
+          { Nombre: datosResidentes[0][0].Nombre, Id: datosResidentes[0][0].Id, Url: 'residentesExtranjero' },
         ];
 
         setDataPeriodica(datosPeriodicos);

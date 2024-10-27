@@ -33,10 +33,11 @@ const Home = () => {
     const obtenerDatosInicio = async () => {
       try {
 
-        const estadisticaContinuaResponse = await fetch(`http://192.168.1.13:3000/operaciones/getOperationById/450`);
-        console.log('asssssssss', estadisticaContinuaResponse)
+        const estadisticaContinuaResponse = await fetch(`https://deploy-app-production-5893.up.railway.app/operaciones/getOperationById/450`);
+
         const estadisticaContinua = await estadisticaContinuaResponse.json();
-        setEstadisticaContinua(estadisticaContinua[0]);
+        setEstadisticaContinua(estadisticaContinua[0][0]);
+        console.log("Prueba", estadisticaContinua[0])
 
         const series = await Promise.all([
           obtenerDatosSerie('ECP320'),

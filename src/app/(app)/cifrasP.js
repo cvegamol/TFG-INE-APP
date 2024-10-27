@@ -72,7 +72,7 @@ const CifrasP = () => {
           const obtenerDatos = async () => {
                try {
                     const operacion = await fetch(
-                         `http://192.168.1.13:3000/operaciones/getOperationById/${id}`
+                         `https://deploy-app-production-5893.up.railway.app/operaciones/getOperationById/${id}`
                     );
                     const datos = await operacion.json();
                     if (isMounted) {

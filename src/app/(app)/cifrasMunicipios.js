@@ -34,12 +34,12 @@ const CifrasPadron = () => {
           const obtenerDatos = async () => {
                try {
                     const cifrasPoblacionMunicipios = await fetch(
-                         `http://192.168.1.13:3000/operaciones/getOperationById/${id}`
+                         `https://deploy-app-production-5893.up.railway.app/operaciones/getOperationById/${id}`
                          //`http://192.168.128.97:3000/operaciones/getOperationById/${id}`
                     );
                     const datosCifras = await cifrasPoblacionMunicipios.json();
                     if (isMounted) {
-                         setOperacionCifras(datosCifras);
+                         setOperacionCifras(datosCifras[0]);
                     }
                } catch (error) {
                     console.error('Error al obtener las variables:', error.message);

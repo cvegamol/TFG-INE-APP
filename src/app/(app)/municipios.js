@@ -23,10 +23,10 @@ const CifrasOficialesPoblacionMunicipios = () => {
      useEffect(() => {
           const obtenerDatos = async () => {
                try {
-                    const tablasMunicipios = await fetch(`http://192.168.1.13:3000/tablas/getTableByCodeAndFkPublication/PROV-MUN/29`);
+                    const tablasMunicipios = await fetch(`https://deploy-app-production-5893.up.railway.app/tablas/getTableByCodeAndFkPublication/PROV-MUN/29`);
                     //const tablasMunicipios = await fetch(`http://192.168.128.97:3000/tablas/getTableByCodeAndFkPublication/PROV-MUN/29`);
                     const data = await tablasMunicipios.json();
-                    setTablas(data);
+                    setTablas(data[0]);
 
                     // Iniciar la animación de fade-in
                     Animated.timing(fadeAnim, {

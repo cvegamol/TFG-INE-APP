@@ -63,12 +63,12 @@ const ProyeccionesHogares = () => {
           const obtenerDatos = async () => {
                try {
                     const operacion = await fetch(
-                         `http://192.168.1.13:3000/operaciones/getOperationById/${id}`
+                         `https://deploy-app-production-5893.up.railway.app/operaciones/getOperationById/${id}`
                          //`http://192.168.128.97:3000/operaciones/getOperationById/${id}`
                     );
                     const datos = await operacion.json();
                     if (isMounted) {
-                         setOperacion(datos);
+                         setOperacion(datos[0]);
                     }
                     console.log('ID', id)
 
@@ -234,7 +234,7 @@ const ProyeccionesHogares = () => {
      const handlePress = async (id, fechaFin) => {
           try {
                const response = await fetch(
-                    `http://192.168.1.13:3000/tablas/getTableById/${id}`
+                    `https://deploy-app-production-5893.up.railway.app/tablas/getTableById/${id}`
                     //`http://192.168.128.97:3000/tablas/getTableById/${id}`
                );
 
@@ -246,7 +246,7 @@ const ProyeccionesHogares = () => {
                const text = await response.json(); // Lee el contenido como JSON
 
                // Cambiar el id dentro del objeto text[0] sin afectar el original
-               const tablaModificada = { ...text[0], FechaRef_fin: fechaFin }; // Aquí 'nuevoId' es el nuevo valor de ID
+               const tablaModificada = { ...text[0][0], FechaRef_fin: fechaFin }; // Aquí 'nuevoId' es el nuevo valor de ID
 
 
                // Navegar pasando la tabla modificada

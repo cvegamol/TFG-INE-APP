@@ -54,14 +54,14 @@ const OperacionesPadron = () => {
      useEffect(() => {
           const obtenerDatos = async () => {
                try {
-                    const seriesJson = await fetch(`http://192.168.1.13:3000/series/getSerieByFkOperation/${id}`);
+                    const seriesJson = await fetch(`https://deploy-app-production-5893.up.railway.app/series/getSerieByFkOperation/${id}`);
                     //const seriesJson = await fetch(`http://192.168.128.97:3000/series/getSerieByFkOperation/${id}`);
                     const series = await seriesJson.json();
 
                     const tablasJson = await fetch(`https://servicios.ine.es/wstempus/js/ES/TABLAS_OPERACION/${id}`);
                     const tablas = await tablasJson.json();
-                    setTablas(tablas);
-                    setFilteredTablas(tablas); // Inicializar filteredTablas con todas las tablas
+                    setTablas(tablas[0]);
+                    setFilteredTablas(tablas[0]); // Inicializar filteredTablas con todas las tablas
 
                     if (tablas && tablas.length > 0) {
                          const id_t = tablas[0].Id;
@@ -72,7 +72,7 @@ const OperacionesPadron = () => {
                          console.log('No hay tablas disponibles.');
                     }
 
-                    setSeries(series);
+                    setSeries(series[0]);
                } catch (error) {
                     console.error('Error al obtener las series:', error);
                } finally {

@@ -69,12 +69,12 @@ const PadronContinuo = () => {
                try {
 
                     const operacion = await fetch(
-                         `http://192.168.1.13:3000/operaciones/getOperationById/${id}`
+                         `https://deploy-app-production-5893.up.railway.app/operaciones/getOperationById/${id}`
                          //`http://192.168.128.97:3000/operaciones/getOperationById/${id}`
                     );
                     const datos = await operacion.json();
                     if (isMounted) {
-                         setOperacion(datos);
+                         setOperacion(datos[0]);
                     }
                     console.log('ID', id)
                     const series = await Promise.all([
