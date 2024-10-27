@@ -60,8 +60,8 @@ const OperacionesPadron = () => {
 
                     const tablasJson = await fetch(`https://servicios.ine.es/wstempus/js/ES/TABLAS_OPERACION/${id}`);
                     const tablas = await tablasJson.json();
-                    setTablas(tablas[0]);
-                    setFilteredTablas(tablas[0]); // Inicializar filteredTablas con todas las tablas
+                    setTablas(tablas);
+                    setFilteredTablas(tablas); // Inicializar filteredTablas con todas las tablas
 
                     if (tablas && tablas.length > 0) {
                          const id_t = tablas[0].Id;
