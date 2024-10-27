@@ -178,7 +178,7 @@ const OperacionesDisponibles = () => {
                                    scrollEnabled={false} // Deshabilitar el scroll del SectionList
                                    renderItem={({ item, index }) => (
                                         <TouchableOpacityStyled
-                                             className={`p-4 ${cardColors[index % cardColors.length]} rounded-md shadow-md my-2 mx-4 hover:bg-teal-100 active:bg-teal-200`}
+                                             className="p-4 bg-teal-100 rounded-lg shadow-md mb-4 mx-4 hover:bg-teal-300 hover:shadow-lg transition duration-300 ease-in-out"
                                              onPress={() => handlePress(item.Id, item.Nombre)}
                                              activeOpacity={0.6}
                                         >
