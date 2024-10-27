@@ -18,13 +18,15 @@
         "UIFileSharingEnabled": true,
         "LSSupportsOpeningDocumentsInPlace": true,
         "NSPhotoLibraryUsageDescription": "Esta aplicación necesita acceso a tu biblioteca de fotos para compartir archivos."
-      }
+      },
+      "bundleIdentifier": "com.cvegamol.TFGINEAPP"
     },
     "android": {
       "adaptiveIcon": {
         "foregroundImage": "./assets/images/adaptive-icon.png",
         "backgroundColor": "#ffffff"
-      }
+      },
+      "package": "com.cvegamol.TFGINEAPP"
     },
     "web": {
       "bundler": "metro",
