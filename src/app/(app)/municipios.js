@@ -72,12 +72,9 @@ const CifrasOficialesPoblacionMunicipios = () => {
                                                   activeOpacity={0.7}
                                              >
                                                   <Ionicons name="stats-chart" size={32} color="purple" />
-                                                  <ViewStyled className="ml-4">
-                                                       <TextStyled className="text-lg font-semibold text-gray-800">
+                                                  <ViewStyled className="ml-4 w-4/5">
+                                                       <TextStyled className="text-sm font-semibold text-gray-800 truncate">
                                                             {table.Nombre}
-                                                       </TextStyled>
-                                                       <TextStyled className="text-sm text-gray-600">
-                                                            ID: {table.Id} - {table.Anyo_Periodo_ini} - {table.FechaRef_fin}
                                                        </TextStyled>
                                                   </ViewStyled>
                                              </TouchableOpacityStyled>
@@ -92,6 +89,7 @@ const CifrasOficialesPoblacionMunicipios = () => {
                     </Animated.View>
                </ScrollViewStyled>
           </Plantilla>
+
      );
 };
 
