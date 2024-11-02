@@ -35,12 +35,12 @@ const PressableStyled = styled(Pressable);
 
 const SignUp = () => {
   const router = useRouter();
-  const { register } = useAuth()
+  const { register } = useAuth();
   const [loading, setLoading] = useState(false);
+  const [showPassword, setShowPassword] = useState(false); // Estado para mostrar/ocultar contraseña
   const [form, setForm] = useState({
     email: "",
     password: "",
-
     name: "",
     surname: "",
   });
@@ -68,16 +68,13 @@ const SignUp = () => {
     <ImageBackground
       source={require('../assets/images/login/back-registro.png')}
       resizeMode="cover"
-      style={{ flex: 1, justifyContent: 'center', paddingHorizontal: wp(5) }} 
+      style={{ flex: 1, justifyContent: 'center', paddingHorizontal: wp(5) }}
     >
       <ScrollView contentContainerStyle={{ flexGrow: 1 }}>
         <ViewStyled className="flex-1 justify-center items-center">
           <ViewStyled className="bg-white/40 rounded-2xl p-6 mx-auto w-full max-w-md backdrop-blur-xl border-2 border-white">
-
             <StatusBar style="dark" />
             <ViewStyled className="flex-1 justify-center space-y-6">
-
-
               <ViewStyled className="space-y-6 mx-auto w-full max-w-md">
                 <TextStyled
                   style={{ fontSize: hp(3.5) }}
@@ -87,11 +84,21 @@ const SignUp = () => {
                 </TextStyled>
 
                 {[
-
-                  { placeholder: "Nombre", icon: <FontAwesome6 name="circle-user" size={hp(2.5)} color="gray" />, name: "name" },
-                  { placeholder: "Apellidos", icon: <FontAwesome6 name="circle-user" size={hp(2.5)} color="gray" />, name: "surname" },
-                  { placeholder: "Correo Electrónico", icon: <Octicons name="mail" size={hp(2.5)} color="gray" />, name: "email" },
-                  { placeholder: "Contraseña", icon: <MaterialIcons name="password" size={hp(2.5)} color="gray" />, name: "password", secureTextEntry: true },
+                  {
+                    placeholder: "Nombre",
+                    icon: <FontAwesome6 name="circle-user" size={hp(2.5)} color="gray" />,
+                    name: "name",
+                  },
+                  {
+                    placeholder: "Apellidos",
+                    icon: <FontAwesome6 name="circle-user" size={hp(2.5)} color="gray" />,
+                    name: "surname",
+                  },
+                  {
+                    placeholder: "Correo Electrónico",
+                    icon: <Octicons name="mail" size={hp(2.5)} color="gray" />,
+                    name: "email",
+                  },
                 ].map((input, index) => (
                   <ViewStyled
                     key={index}
@@ -110,10 +117,37 @@ const SignUp = () => {
                       className="flex-1 font-medium text-neutral-800"
                       placeholder={input.placeholder}
                       placeholderTextColor="#172554"
-                      secureTextEntry={input.secureTextEntry}
                     />
                   </ViewStyled>
                 ))}
+
+                {/* Campo de Contraseña con botón de "ojo" */}
+                <ViewStyled
+                  style={{ height: hp(6), paddingVertical: hp(0.8) }}
+                  className="flex-row gap-3 px-4 bg-gray-200 items-center rounded-2xl mx-auto w-full max-w-md"
+                >
+                  <MaterialIcons name="password" size={hp(2.5)} color="gray" />
+                  <TextStyledInput
+                    onChangeText={(value) => handleChange("password", value)}
+                    style={{
+                      fontSize: hp(2),
+                      textAlignVertical: 'center',
+                      paddingVertical: 0,
+                      marginTop: hp(0.3),
+                    }}
+                    className="flex-1 font-medium text-neutral-800"
+                    placeholder="Contraseña"
+                    placeholderTextColor="#172554"
+                    secureTextEntry={!showPassword} // Mostrar/ocultar contraseña
+                  />
+                  <TouchableOpacity onPress={() => setShowPassword(!showPassword)}>
+                    <MaterialIcons
+                      name={showPassword ? "visibility-off" : "visibility"} // Alternar ícono
+                      size={hp(2.5)}
+                      color="gray"
+                    />
+                  </TouchableOpacity>
+                </ViewStyled>
 
                 <ViewStyled>
                   {loading ? (

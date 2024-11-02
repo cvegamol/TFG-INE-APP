@@ -37,7 +37,9 @@ const SignIn = () => {
     email: "",
     password: "",
   });
-  const { login } = useAuth()
+  const [showPassword, setShowPassword] = useState(false); // Estado para mostrar/ocultar contraseña
+  const { login } = useAuth();
+
   const handleChange = (name, value) => {
     setForm({ ...form, [name]: value });
   };
@@ -54,7 +56,6 @@ const SignIn = () => {
 
     setLoading(false);
     if (!response.success) {
-
       Alert.alert('Sign in', response.msg);
     }
   };
@@ -74,8 +75,6 @@ const SignIn = () => {
             <ViewStyled className="bg-white/30 rounded-2xl p-6 mx-auto w-full max-w-md backdrop-blur-xl border-2 border-white ">
               <StatusBar style="dark" />
               <ViewStyled className="flex-1 justify-center space-y-6">
-
-
                 <ViewStyled className="space-y-6 mx-auto w-full max-w-md">
                   <TextStyled
                     style={{ fontSize: hp(3.5) }}
@@ -107,11 +106,18 @@ const SignIn = () => {
                       <TextStyledInput
                         onChangeText={(value) => handleChange("password", value)}
                         style={{ fontSize: hp(2) }}
-                        className="flex-1 font-medium "
+                        className="flex-1 font-medium"
                         placeholder="Contraseña"
                         placeholderTextColor="#172554"
-                        secureTextEntry
+                        secureTextEntry={!showPassword} // Mostrar u ocultar contraseña
                       />
+                      <TouchableOpacity onPress={() => setShowPassword(!showPassword)}>
+                        <MaterialIcons
+                          name={showPassword ? "visibility-off" : "visibility"}
+                          size={hp(2.5)}
+                          color="gray"
+                        />
+                      </TouchableOpacity>
                     </ViewStyled>
                     <ViewStyled className="flex-row justify-end">
                       <TextStyled
@@ -129,7 +135,6 @@ const SignIn = () => {
                         </TextStyled>
                       </PressableStyled>
                     </ViewStyled>
-
                   </ViewStyled>
 
                   {/* Submit button Login */}
@@ -177,10 +182,8 @@ const SignIn = () => {
           </ViewStyled>
         </ScrollView>
       </ImageBackground>
-
     </KeyboardAvoidingView>
   );
 };
-
 
 export default withExpoSnack(SignIn);
