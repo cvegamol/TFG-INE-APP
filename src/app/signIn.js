@@ -49,11 +49,12 @@ const SignIn = () => {
       return;
     }
     setLoading(true);
-    
+
     const response = await login(email, password);
 
     setLoading(false);
     if (!response.success) {
+
       Alert.alert('Sign in', response.msg);
     }
   };
@@ -66,7 +67,7 @@ const SignIn = () => {
       <ImageBackground
         source={require('../assets/images/login/back-login.png')}
         resizeMode="cover"
-        style={{ flex: 1, justifyContent: 'center', paddingHorizontal: wp(5) }}  
+        style={{ flex: 1, justifyContent: 'center', paddingHorizontal: wp(5) }}
       >
         <ScrollView contentContainerStyle={{ flexGrow: 1 }}>
           <ViewStyled className="flex-1 justify-center items-center">
@@ -114,21 +115,21 @@ const SignIn = () => {
                     </ViewStyled>
                     <ViewStyled className="flex-row justify-end">
                       <TextStyled
-                      style={{ fontSize: hp(1.6) }}
-                      className="font-semibold text-right bg-darkBlue"
-                    >
-                      ¿Olvidaste tu contraseña?
-                    </TextStyled>
-                     <PressableStyled onPress={() => router.push("resetPassword")}>
-                      <TextStyled
                         style={{ fontSize: hp(1.6) }}
-                        className="font-semibold text-violet-950 ml-2"
+                        className="font-semibold text-right bg-darkBlue"
                       >
-                        Recuperala
+                        ¿Olvidaste tu contraseña?
                       </TextStyled>
-                    </PressableStyled>
+                      <PressableStyled onPress={() => router.push("resetPassword")}>
+                        <TextStyled
+                          style={{ fontSize: hp(1.6) }}
+                          className="font-semibold text-violet-950 ml-2"
+                        >
+                          Recuperala
+                        </TextStyled>
+                      </PressableStyled>
                     </ViewStyled>
-                    
+
                   </ViewStyled>
 
                   {/* Submit button Login */}

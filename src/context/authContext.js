@@ -11,6 +11,7 @@ import {
   EmailAuthProvider,
 } from "firebase/auth";
 import { doc, getDoc, updateDoc, setDoc } from "firebase/firestore";
+import AsyncStorage from "@react-native-async-storage/async-storage";
 
 // Crear el AuthContext
 export const AuthContext = createContext();
@@ -21,23 +22,34 @@ export const AuthContextProvider = ({ children }) => {
   const [rol, setRol] = useState(null); // Nueva variable para el rol
 
   useEffect(() => {
-    const unsub = onAuthStateChanged(auth, async (user) => {
-      if (user) {
-        setIsAuthenticated(true);
-        setUser(user);
+    const checkAuthStatus = async () => {
+      const isLoggedOut = await AsyncStorage.getItem("isLoggedOut");
 
-        // Obtener el rol del usuario desde Firestore
-        const userDoc = await getDoc(doc(db, "users", user.uid));
-        if (userDoc.exists()) {
-          setRol(userDoc.data().rol); // Guardar el rol en el estado
-        }
+      // Si el usuario no ha cerrado sesión, permitimos que Firebase gestione la autenticación
+      if (isLoggedOut !== "true") {
+        const unsub = onAuthStateChanged(auth, async (user) => {
+          if (user) {
+            setIsAuthenticated(true);
+            setUser(user);
+
+            // Obtener el rol del usuario desde Firestore
+            const userDoc = await getDoc(doc(db, "users", user.uid));
+            if (userDoc.exists()) {
+              setRol(userDoc.data().rol);
+            }
+          } else {
+            setIsAuthenticated(false);
+            setUser(null);
+            setRol(null);
+          }
+        });
+        return unsub;
       } else {
         setIsAuthenticated(false);
-        setUser(null);
-        setRol(null); // Limpiar el rol si no hay usuario
       }
-    });
-    return unsub;
+    };
+
+    checkAuthStatus();
   }, []);
 
   const updateUser = async (userId, updatedData) => {
@@ -108,18 +120,19 @@ export const AuthContextProvider = ({ children }) => {
   const login = async (email, password) => {
     try {
       const response = await signInWithEmailAndPassword(auth, email, password);
+      await AsyncStorage.removeItem("isLoggedOut"); // Remueve la marca de logout si el usuario inicia sesión
+
       const userDoc = await getDoc(doc(db, "users", response.user.uid));
-
       if (userDoc.exists()) {
-        setRol(userDoc.data().rol); // Guardar el rol cuando el usuario inicie sesión
+        setRol(userDoc.data().rol);
       }
-
       return { success: true };
     } catch (e) {
       let msg = e.message;
       if (msg.includes("(auth/invalid-email")) msg = "Correo inválido";
-      if (msg.includes("invalid-credential")) msg = "Credenciales inválidas";
-      return { success: false, msg: e.message };
+      if (msg.includes("auth/invalid-credential")) msg = "Correo electrónico o contraseña incorrectos";
+
+      return { success: false, msg: msg };
     }
   };
 
@@ -131,9 +144,9 @@ export const AuthContextProvider = ({ children }) => {
           lastActive: new Date(),
         });
       }
-
       await signOut(auth);
-      setRol(null); // Limpiar el rol cuando el usuario cierre sesión
+      await AsyncStorage.setItem("isLoggedOut", "true"); // Marca la sesión como cerrada
+      setRol(null);
       return { success: true };
     } catch (e) {
       return { success: false, msg: e.message, error: e };
@@ -164,8 +177,8 @@ export const AuthContextProvider = ({ children }) => {
       if (msg.includes("(auth/invalid-email")) msg = "Correo inválido";
       if (msg.includes("Password should be at least 6"))
         msg = "La contraseña debe tener al menos 6 caracteres";
-      if (msg.includes("email-already")) msg = "El correo ya está en uso";
-      return { success: false, msg: e.message };
+      if (msg.includes("auth/email-already")) msg = "El correo electrónico ya está en uso";
+      return { success: false, msg: msg };
     }
   };
 
