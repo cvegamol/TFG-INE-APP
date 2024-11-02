@@ -212,68 +212,6 @@ const Home = () => {
             </ViewStyled>
           </ViewStyled>
 
-          {/* Más separación con la tabla */}
-          <ViewStyled className="mt-6">
-            {estadisticaContinua && (
-              <TextStyled className="text-xl font-bold text-teal-800">
-                Últimos Datos: <TextStyled className='text-xl/4 text-teal-400'>
-                  {estadisticaContinua.Nombre}:
-                  {chartData && chartData.length > 0 && ` ${chartData[chartData.length - 1].label}`}
-                </TextStyled>
-              </TextStyled>
-            )}
-
-            <ResponsiveTable
-              headers={['', 'Valor', 'Varianza']}
-              data={tablaDatos}
-              selectedCell={selectedCell}
-              onCellPress={handleCellPress}
-            />
-          </ViewStyled>
-
-          <ScrollView horizontal>
-            {chartData.length > 0 && (
-              <LineChart
-                data={{
-                  labels: chartData.map(dato => dato.label),
-                  datasets: [
-                    {
-                      data: chartData.map(dato => dato.value),
-                    },
-                  ],
-                }}
-                width={chartWidth}
-                height={300}
-                yAxisLabel=""
-                yAxisSuffix=""
-                yAxisInterval={1}
-                formatYLabel={formatYAxisValue}
-                chartConfig={{
-                  backgroundColor: '#f0f0f0',
-                  backgroundGradientFrom: '#e0e0e0',
-                  backgroundGradientTo: '#c0c0c0',
-                  decimalPlaces: 2,
-                  color: (opacity = 1) => `rgba(0, 128, 128, ${opacity})`,
-                  labelColor: (opacity = 1) => `rgba(0, 77, 77, ${opacity})`,
-                  style: {
-                    borderRadius: 16,
-                  },
-                  propsForDots: {
-                    r: '6',
-                    strokeWidth: '2',
-                    stroke: '#004d4d',
-                  },
-                }}
-                style={{
-                  marginVertical: 8,
-                  borderRadius: 16,
-                }}
-                horizontalLabelRotation={0}
-                verticalLabelRotation={275}
-                xLabelsOffset={33}
-              />
-            )}
-          </ScrollView>
         </ViewStyled>
       </ScrollView>
     </Plantilla>
